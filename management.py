@@ -8,7 +8,7 @@ from flaxon.admin.services import AdminAuth, AdminStore
 from flaxon.database.adapters.sqlite import SQLiteAdapter
 from flaxon.database.manager import DatabaseManager
 from flaxon.database.migrations import MigrationRunner
-from settings import ROOT, DATA_DIR, DATABASE_PATH
+from settings import ROOT, DATA_DIR, DATABASE_PATH, ADMIN_DATABASE_PATH
 
 
 async def migrate(status=False):
@@ -19,7 +19,9 @@ async def migrate(status=False):
         runner = MigrationRunner(db, migration_dir=str(ROOT / "migrations"))
         if status:
             report = await runner.status()
-            print(f"{report['applied_count']} applied, {report['pending_count']} pending")
+            print(
+                f"{report['applied_count']} applied, {report['pending_count']} pending"
+            )
         else:
             applied = await runner.migrate()
             print(f"Applied {len(applied)} migration(s).")
@@ -29,12 +31,14 @@ async def migrate(status=False):
 
 def setup_admin(username=None):
     DATA_DIR.mkdir(parents=True, exist_ok=True)
-    store = AdminStore(str(DATABASE_PATH))
+    store = AdminStore(str(ADMIN_DATABASE_PATH))
     username = (username or input("Administrator username: ")).strip()
     if not username:
         raise ValueError("A username is required")
     if store.get("users", username) is not None:
-        raise ValueError("That administrator already exists; use the admin interface to manage it")
+        raise ValueError(
+            "That administrator already exists; use the admin interface to manage it"
+        )
     password = getpass.getpass("Password: ")
     if password != getpass.getpass("Confirm password: "):
         raise ValueError("Passwords do not match")
@@ -60,16 +64,28 @@ def setup_admin(username=None):
 def main(argv=None):
     parser = argparse.ArgumentParser(description="Manage your Flaxon application")
     commands = parser.add_subparsers(dest="command", required=True)
-    migration = commands.add_parser("migrate", help="Apply the project's database migrations")
+    migration = commands.add_parser(
+        "migrate", help="Apply the project's database migrations"
+    )
     migration.add_argument("--status", action="store_true")
     admin = commands.add_parser(
-        "setup-admin", aliases=["createsuperuser"], help="Create an administrator securely"
+        "setup-admin",
+        aliases=["createsuperuser"],
+        help="Create an administrator securely",
     )
     admin.add_argument("--username")
+    commands.add_parser(
+        "seed",
+        help="Create sample projects and published help content; requires a registered account",
+    )
     args = parser.parse_args(argv)
     try:
         if args.command == "migrate":
             asyncio.run(migrate(args.status))
+        elif args.command == "seed":
+            from seed import seed
+
+            asyncio.run(seed())
         else:
             setup_admin(args.username)
     except (ValueError, OSError) as error:

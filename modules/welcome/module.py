@@ -24,12 +24,18 @@ def welcome_project(console):
 
     console.success(f"Welcome to {PROJECT_NAME}.")
     console.info("Flaxon handles your Python routes, APIs, data, and administration.")
-    console.info("Build complete server-rendered apps with Jinax, or interactive apps with Teloce.")
-    console.info("Your UI is your choice. Start at https://flaxon-website.vercel.app/docs.html")
+    console.info(
+        "Build complete server-rendered apps with Jinax, or interactive apps with Teloce."
+    )
+    console.info(
+        "Your UI is your choice. Start at https://flaxon-website.vercel.app/docs.html"
+    )
     return 0
 
 
-@welcome.cli_command("welcome-status", help_text="Run the welcome module's async status helper")
+@welcome.cli_command(
+    "welcome-status", help_text="Run the welcome module's async status helper"
+)
 async def welcome_status(console):
     result = await status()
     console.success(result["message"])

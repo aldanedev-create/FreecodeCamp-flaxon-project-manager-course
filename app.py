@@ -1,66 +1,88 @@
-"""Application composition: mount modules, Jinax pages, Teloce UI, and protected admin."""
+"""Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
 
+import os
+from pathlib import Path
+from urllib.parse import urlsplit
+from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
+from argon2 import PasswordHasher
 from flaxon import Flaxon, Request
-from flaxon.admin import AdminConfig, AdminDashboard
-from flaxon.admin.services import AdminStore
-from flaxon.jinax import Jinax
-from flaxon.database.adapters.sqlite import SQLiteAdapter
-from flaxon.database.manager import DatabaseManager
-
+from flaxon.http import JSONResponse
+from flaxon.exceptions import BadRequest
+from database import Database
+from backoffice import configure_backoffice
+from modules.auth.module import auth
+from modules.projects.module import projects
+from modules.tasks.module import tasks
+from modules.content.module import content
 from modules.welcome.module import welcome
-from settings import ROOT, DATA_DIR, DATABASE_PATH, PROJECT_NAME, DEBUG
+from settings import (
+    ROOT,
+    DATA_DIR,
+    DATABASE_PATH,
+    ADMIN_DATABASE_PATH,
+    DEBUG,
+    PUBLIC_ORIGIN,
+)
 
 
-def create_app():
-    DATA_DIR.mkdir(parents=True, exist_ok=True)
-    app = Flaxon(PROJECT_NAME, debug=DEBUG, openapi=True)
-
-# openapi=True
-#This registers:
-#| URL | Purpose |
-#|---|---|
-#| `/openapi.json` | Generated OpenAPI 3.1 document |
-#| `/docs` | Interactive Swagger UI with Try it out |
-#| `/redoc` | ReDoc reference browser |
-
-
-    database = DatabaseManager(SQLiteAdapter(database=str(DATABASE_PATH)))
-    app.container.register_instance("db", database)
-    app.on_startup(database.initialize)
-    app.on_shutdown(database.close)
-    app.mount_module(welcome, prefix="/api/welcome")
-    app.mount_static("/assets", str(ROOT / "public"))
-
-    # Jinax can power your entire website, or coexist with a Teloce interface.
-    app.use_templates(Jinax(str(ROOT / "templates"), auto_reload=DEBUG))
-
-    # The admin has its own server-rendered interface and persistent accounts.
-    AdminDashboard(
-        app,
-        config=AdminConfig(site_title=f"{PROJECT_NAME} admin", index_title="Welcome to your Flaxon admin"),
-        store=AdminStore(str(DATABASE_PATH)),
-        users=[],
-        upload_dir=str(DATA_DIR / "uploads"),
-        strict_permissions=True,
-        microservices=False,
+def create_app(database_path=None, admin_path=None, debug=None):
+    debug = DEBUG if debug is None else debug
+    secret_key = os.getenv("FLAXON_SECRET_KEY", "")
+    if not debug and len(secret_key) < 32:
+        raise ValueError(
+            "Set FLAXON_SECRET_KEY to at least 32 random characters in production."
+        )
+    app = Flaxon(
+        "project-manager",
+        debug=debug,
+        openapi=True,
+        config={"SECRET_KEY": secret_key or None},
     )
+    app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
+    if not debug:
+        app.add_middleware(
+            TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
+        )
+    app.course_db = Database(database_path or DATABASE_PATH)
+    app.public_origin = PUBLIC_ORIGIN
+    app.hasher = PasswordHasher()
+    app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")
+    for module, prefix in [
+        (auth, "/api/auth"),
+        (projects, "/api/projects"),
+        (tasks, "/api/tasks"),
+        (content, "/api/content"),
+        (welcome, "/api/welcome"),
+    ]:
+        app.mount_module(module, prefix=prefix)
+    configure_backoffice(
+        app,
+        admin_path or ADMIN_DATABASE_PATH,
+        Path(admin_path or ADMIN_DATABASE_PATH).parent / "uploads",
+    )
+    app.mount_static("/assets", str(ROOT / "public"))
     app.use_teloce(
         project_root=ROOT,
         ui_dir="ui",
-        title=f"Welcome to {PROJECT_NAME}",
-        favicon="https://flaxon-website.vercel.app/assets/images/logo/flaxon.png",
-        description="Your Python and Teloce full-stack application is ready.",
+        title="Project Manager",
         stylesheets=["/assets/app.css"],
         options={"minifier": "minifyjs"},
     )
 
-    @app.get("/")
-    async def home(request: Request):
-        return await request.compile("app.html", {"project_name": PROJECT_NAME})
+    @app.get("/health/course")
+    async def health():
+        await app.course_db.one("SELECT 1 FROM users LIMIT 1")
+        return {"data": {"status": "ok"}}
 
-    @app.get("/server-page")
-    async def server_page(request: Request):
-        return await app.jinax.render_response("welcome.html", {"project_name": PROJECT_NAME})
+    # Explicit shell routes preserve real 404 responses for unknown API paths.
+    @app.get("/")
+    @app.get("/login")
+    @app.get("/projects")
+    @app.get("/projects/<int:project_id>")
+    @app.get("/help")
+    @app.get("/help/<slug>")
+    async def spa(request: Request, project_id=None, slug=None):
+        return await request.compile("app.html", {})
 
     return app
 
