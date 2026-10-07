@@ -56,5 +56,8 @@ pasting large files or making viewers watch installation waits.
 
 Record a 10–15-minute pilot: show the finished feature, one project route, an
 ownership test, and its Teloce screen. Use your own voice, readable code, clear
-audio, and 1080p capture. Rehearse clean installation before recording. The PDF
-companion is a later deliverable; the Markdown guides here are its source outline.
+audio, and 1080p capture. Rehearse clean installation before recording. The Markdown companion and PDF are in `book/` and `output/pdf/`; the sample
+lesson script is in `course/sample-lesson.md`.
+
+See [the checkpoint guide](../course/checkpoints.md) for the runnable chapter-04
+authentication backend and tag publication instructions.

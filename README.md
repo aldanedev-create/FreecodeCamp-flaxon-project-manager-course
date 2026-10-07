@@ -9,7 +9,7 @@ This repository begins with the actual CLI command:
 flaxon new project-manager --no-venv
 ```
 
-The generated starter is preserved in the `chapter-01-setup` Git tag. `main`
+The generated starter is preserved in the `chapter-01-setup` checkpoint branch. `main`
 contains the finished application. Read [the recording plan](docs/course-outline.md)
 for the backend-first teaching sequence.
 
@@ -99,6 +99,13 @@ not yet published upstream. The original patch and wheel checksums are in
 Teloce-Py is built from the exact source revision recorded there. MinifyJS is
 pinned to `0.1.3`. Use the provided install commands rather than installing an
 unpatched framework version over this environment.
+
+## Companion book and recording
+
+- [Read the 15-chapter Markdown book](book/companion.md)
+- [Download the illustrated PDF](output/pdf/flaxon-project-manager-book.pdf)
+- [Starter and chapter checkpoints](course/checkpoints.md)
+- [Sample lesson recording script](course/sample-lesson.md)
 
 ## Read next
 
