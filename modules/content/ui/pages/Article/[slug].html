@@ -1,2 +1,15 @@
-<template><section><h1>Backend ready</h1><p>Build this screen in the frontend chapters.</p></section></template>
-<script>export default {};</script>
+<template><article><a href="/help" data-teloce-link>← Help centre</a>
+  <p v-if="loading" role="status">Loading article…</p><p v-if="message" role="alert">{{ message }}</p>
+  <div v-if="article"><h1>{{ article.title }}</h1><p>{{ article.summary }}</p><div v-html="article.body"></div></div>
+</article></template>
+<script lang="ts">
+import { api } from '../../../../../ui/api.ts';
+export default {
+  props: ['slug'], data() { return { article: null, loading: true, message: '' }; },
+  async mounted() {
+    try { this.article = await api('/api/content/articles/' + encodeURIComponent(this.slug)); }
+    catch (error) { this.message = error.message; }
+    finally { this.loading = false; }
+  },
+};
+</script>

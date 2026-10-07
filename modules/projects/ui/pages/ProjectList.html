@@ -1,2 +1,38 @@
-<template><section><h1>Backend ready</h1><p>Build this screen in the frontend chapters.</p></section></template>
-<script>export default {};</script>
+<template><section>
+  <h1>Your projects</h1><p>Choose a project to manage its tasks.</p>
+  <p v-if="message" role="alert">{{ message }} <a href="/login" data-teloce-link>Account</a></p>
+  <p v-if="loading" role="status">Loading projects…</p>
+  <form @submit.prevent="createProject" class="card">
+    <h2>Create a project</h2>
+    <label>Name<input name="project-name" v-model="name" required maxlength="120" /></label>
+    <label>Description<textarea v-model="description" maxlength="1000"></textarea></label>
+    <button :disabled="busy">{{ busy ? 'Saving…' : 'Create project' }}</button>
+  </form>
+  <p v-if="!loading && projects.length === 0">No projects yet. Create your first one above.</p>
+  <div class="cards"><a v-for="project in projects" :key="project.id" :href="'/projects/' + project.id" data-teloce-link class="card">
+    <h2>{{ project.name }}</h2><p>{{ project.description }}</p>
+  </a></div>
+</section></template>
+<script lang="ts">
+import { api } from '../../../../ui/api.ts';
+import type { Project } from '../../../../ui/types.ts';
+export default {
+  data() { return { projects: [], name: '', description: '', message: '', loading: true, busy: false }; },
+  async mounted() {
+    try { this.projects = await api<Project[]>('/api/projects/'); }
+    catch (error) { this.message = error.message; }
+    finally { this.loading = false; }
+  },
+  methods: {
+    async createProject() {
+      if (this.busy) return;
+      this.busy = true; this.message = '';
+      try {
+        const project = await api<Project>('/api/projects/', 'POST', { name: this.name, description: this.description });
+        this.projects = [project, ...this.projects]; this.name = ''; this.description = '';
+      } catch (error) { this.message = error.message; }
+      finally { this.busy = false; }
+    },
+  },
+};
+</script>

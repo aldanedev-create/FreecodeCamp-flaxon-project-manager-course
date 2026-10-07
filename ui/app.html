@@ -1,2 +1,14 @@
-<template><main id="router-view" data-teloce-router-view></main></template>
-<script>export default {};</script>
+<template>
+  <div>
+    <header><a href="/" data-teloce-link class="brand">Project Manager</a>
+      <nav aria-label="Main navigation">
+        <a href="/projects" data-teloce-link>Projects</a>
+        <a href="/help" data-teloce-link>Help</a>
+        <a href="/login" data-teloce-link>Account</a>
+      </nav>
+    </header>
+    <main id="router-view" data-teloce-router-view></main>
+    <footer>Built with Flaxon and Teloce. <a href="/admin/">Staff Admin</a></footer>
+  </div>
+</template>
+<script lang="ts">export default {};</script>

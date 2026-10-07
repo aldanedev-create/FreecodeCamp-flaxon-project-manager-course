@@ -1,55 +1,116 @@
-# project-manager
+# Python Full-Stack Course: Project Manager
 
-Your modular Python web application, with both Teloce and Jinax examples.
+Build a project manager with **Flaxon modules**, a **Teloce HTML SPA**, **signals**,
+**staff Admin**, **CMS help articles**, and **MinifyJS production builds**.
 
-Flaxon handles routes, APIs, validation, data, WebSockets, and administration. Build a complete server-rendered application with Flaxon + Jinax, an interactive full-stack application with Flaxon + Teloce, or use both. Your interface is your choice.
+This repository begins with the actual CLI command:
 
 ```bash
-python -m pip install -e .
-flaxon welcome
-flaxon welcome-status
+flaxon new project-manager --no-venv
+```
+
+The generated starter is preserved in the `chapter-01-setup` Git tag. `main`
+contains the finished application. Read [the recording plan](docs/course-outline.md)
+for the backend-first teaching sequence.
+
+## Run the finished application
+
+Use Python 3.12 (the verified environment), Git, and a terminal. Python 3.11 or
+newer is supported by the source packages, but other interpreters have not been
+verified for this course. Node.js is not needed for this application's build.
+
+From this repository's root:
+
+```bash
+python -m venv .venv
+```
+
+Activate on Windows PowerShell:
+
+```powershell
+.\.venv\Scripts\Activate.ps1
+```
+
+Or on macOS/Linux:
+
+```bash
+source .venv/bin/activate
+```
+
+Then:
+
+```bash
+python scripts/verify_vendor.py
+python -m pip install -r requirements-dev.txt
 python management.py migrate
+python -m flaxon run app:app --reload
+```
+
+Open http://127.0.0.1:8000/login and create your own account. Passwords must be
+12–128 characters. Create a project, add tasks, and change their status.
+
+Optional settings: copy `.env.example` to `.env`. Never commit `.env`.
+`requirements.lock.txt` pins the resolved dependencies. Runtime-only installs
+use `python -m pip install -r requirements.txt`.
+
+## Sample data and staff access
+
+After registering a user, stop the server and run:
+
+```bash
+python management.py seed
 python management.py setup-admin
-flaxon run app:app --reload
+python -m flaxon run app:app --reload
 ```
 
-Open http://127.0.0.1:8000 for the welcome SPA and http://127.0.0.1:8000/admin/login for your protected admin. The welcome page works immediately; admin setup asks for your own username and password. Use at least eight characters with upper- and lowercase letters, a number, and a special character. No credentials are generated or committed.
+The seed is idempotent and creates three sample tasks and one published help
+article. Restart after seeding because CMS content is loaded into each process.
+The Admin command prompts securely for a username and password; no default
+staff password exists. Open `/admin/login`, then `/admin/` and `/admin/cms/`.
+Public application accounts and staff Admin accounts are separate.
 
-- `app.py`: app factory, module mounting, Jinax, Teloce, database lifecycle and admin.
-- `templates/welcome.html`: complete server-rendered example at `/server-page`.
-- `flaxon_cli.py`: exposes module-owned commands to the CLI.
-- `modules/welcome/module.py`: the module's Python status API.
-- `modules/welcome/ui/Welcome.html`: its component with scoped CSS and TypeScript.
-- `modules/welcome/ui/api.ts`: typed browser API helper.
-- `ui/app.html`: SPA entry that composes feature components.
-- `management.py`: `migrate`, `migrate --status`, `setup-admin`, and `createsuperuser`.
-- `migrations/`: ordered JSON migrations using Flaxon's MigrationRunner.
-- `data/app.sqlite3`: persistent application and admin storage, ignored by Git.
+## Tests and production build
 
-Run management commands from any directory using the script's path; database and migration paths are anchored to this project. Stop/restart the server after creating an administrator so its account list reloads. `FLAXON_DEBUG=0` disables framework debug mode; configure production security and deployment before exposing your app publicly. The included admin store is a single-node starter configuration.
-
-Use source/editable deployment so `ui/`, `templates/`, `public/`, and `migrations/` remain beside the application. Teloce compiles the components and TypeScript; MinifyJS optimizes the JavaScript. Add a new module for each feature, then mount it in `create_app()`.
-
-## Your module's custom commands
-
-Run `flaxon welcome` or `flaxon welcome-status` from the project directory. These examples use the real synchronous and asynchronous module command APIs. They do not start the server or require a database.
-
-Add a command beside the routes in `modules/welcome/module.py`:
-
-```python
-@welcome.cli_command("my-task", help_text="Run my project task")
-def my_task(console):
-    console.info("Your Python task goes here.")
-    return 0
+```bash
+python -m pytest -q
+python -m playwright install chromium
+python scripts/browser_smoke.py
+python scripts/browser_smoke.py --production
+python scripts/build_ui.py
+python -m pip check
 ```
 
-`flaxon_cli.py` calls `welcome.install_cli_commands(globals())` so the CLI discovers the command. For another feature module, import it there and install its commands too. Custom names must be unique and must not reuse built-in command names.
+The production browser smoke test uses loopback HTTP, which Chromium treats as
+a trustworthy local context. It verifies the minified application and cookie
+behavior locally; Render deployment must use HTTPS.
 
-## Your interface choices
+The code tests ownership, authentication, validation, session expiry, CSRF,
+publishing permissions, persistence, and SQL parameterization. The browser
+script uses disposable databases and verifies desktop/mobile SPA navigation,
+registration, task progress, refresh, and logout.
 
-- **Jinax:** open `/server-page` and edit `templates/welcome.html`. For an entirely server-rendered app, remove `app.use_teloce()` and make `/` return `app.jinax.render_response(...)` instead of `request.compile(...)`. Keep your Python routes, modules, database, and admin.
-- **Teloce:** edit the welcome HTML component and its TypeScript helper. Teloce compiles the browser interface and MinifyJS optimizes the JavaScript.
+## Framework versions and security fixes
 
-The welcome page uses the logo and documentation links from Flaxon's website. Those external resources need an internet connection; the local example routes and custom commands work offline.
+The bundled `flaxon==0.2.6+course.1` wheel is an explicitly labelled course build,
+**not an official PyPI release**. It includes CMS authorization fixes that are
+not yet published upstream. The original patch and wheel checksums are in
+`vendor/`; see [dependency provenance](vendor/README.md).
 
-[Documentation](https://flaxon-website.vercel.app/docs.html) · [Examples](https://flaxon-website.vercel.app/examples.html)
+Teloce-Py is built from the exact source revision recorded there. MinifyJS is
+pinned to `0.1.3`. Use the provided install commands rather than installing an
+unpatched framework version over this environment.
+
+## Read next
+
+- [Backend architecture and API examples](docs/backend.md)
+- [Admin/CMS security and role setup](docs/security.md)
+- [Render deployment](docs/render.md)
+- [Course outline and recording checkpoints](docs/course-outline.md)
+- [Publishing this repository to GitHub](docs/github.md)
+
+This is a tested teaching application for a single server process. The Render
+configuration has not been deployed from this environment. Before inviting
+real users, configure backups, monitoring, recovery, and the infrastructure
+appropriate to your deployment.
+
+Released under the [MIT License](LICENSE).

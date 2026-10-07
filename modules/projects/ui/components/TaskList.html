@@ -1,2 +1,11 @@
-<template><section><h1>Backend ready</h1><p>Build this screen in the frontend chapters.</p></section></template>
-<script>export default {};</script>
+<template><div>
+  <p v-if="tasks.length === 0">No tasks match this filter.</p>
+  <ul class="task-list"><li v-for="task in tasks" :key="task.id" class="card">
+    <strong>{{ task.title }}</strong><span>{{ task.due_date ? 'Due ' + task.due_date : 'No due date' }}</span>
+    <label>Status<select aria-label="Task status" :value="task.status" @change="$emit('status', { id: task.id, status: $event.target.value })" :disabled="busy">
+      <option value="todo">To do</option><option value="doing">Doing</option><option value="done">Done</option>
+    </select></label>
+    <button class="danger" type="button" @click="$emit('remove', task.id)" :disabled="busy">Delete task</button>
+  </li></ul>
+</div></template>
+<script lang="ts">export default { props: ['tasks', 'busy'], emits: ['status', 'remove'] };</script>

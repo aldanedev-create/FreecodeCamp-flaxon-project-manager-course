@@ -1,2 +1,48 @@
-<template><section><h1>Backend ready</h1><p>Build this screen in the frontend chapters.</p></section></template>
-<script>export default {};</script>
+<template>
+  <section class="narrow"><h1>Your account</h1>
+    <p v-if="busy" role="status">Please wait…</p>
+    <p v-if="message" role="alert">{{ message }}</p>
+    <div v-if="user"><p>Signed in as {{ user.name }}.</p>
+      <a href="/projects" data-teloce-link>Open projects</a>
+      <button type="button" @click="logout" :disabled="busy">Sign out</button>
+    </div>
+    <form v-show="!user" @submit.prevent="submit">
+      <label v-show="registering">Name<input name="name" v-model="name" maxlength="80" :required="registering" autocomplete="name" /></label>
+      <label>Email<input name="email" type="email" v-model="email" required autocomplete="username" /></label>
+      <label>Password<input name="password" type="password" v-model="password" minlength="12" maxlength="128" required autocomplete="current-password" /></label>
+      <button :disabled="busy">{{ registering ? 'Create account' : 'Sign in' }}</button>
+      <button type="button" class="secondary" @click="registering = !registering" :disabled="busy">{{ registering ? 'Use an existing account' : 'Register instead' }}</button>
+    </form>
+  </section>
+</template>
+<script lang="ts">
+import { api, loadSession } from '../../../../ui/api.ts';
+import type { Session } from '../../../../ui/types.ts';
+export default {
+  data() { return { user: null, registering: false, name: '', email: '', password: '', busy: false, message: '' }; },
+  async mounted() {
+    try { this.user = (await loadSession()).user; }
+    catch (error) { this.message = error.message; }
+  },
+  methods: {
+    async submit() {
+      if (this.busy) return;
+      this.busy = true; this.message = '';
+      try {
+        const path = this.registering ? '/api/auth/register' : '/api/auth/login';
+        const result = await api<Session>(path, 'POST', { name: this.name, email: this.email, password: this.password });
+        this.user = result.user;
+        this.password = '';
+        window.__TELOCE_ROUTER__.navigate('/projects');
+      } catch (error) { this.message = error.message; }
+      finally { this.busy = false; }
+    },
+    async logout() {
+      this.busy = true;
+      try { await api('/api/auth/logout', 'POST', {}); this.user = null; this.message = 'Signed out.'; }
+      catch (error) { this.message = error.message; }
+      finally { this.busy = false; }
+    },
+  },
+};
+</script>
