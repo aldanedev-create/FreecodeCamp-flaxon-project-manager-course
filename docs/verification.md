@@ -16,3 +16,13 @@ The production browser test uses a disposable SQLite database and loopback HTTP.
 Live HTTPS, Render infrastructure, Windows installation, mail, media scanning,
 and multi-process deployments were not verified. The upstream framework patch is included in `vendor/`; it has not been
 published or merged into the framework repository.
+
+## Scoped CSS and instructor-guide revision
+
+- The SPA no longer loads a shared app.css stylesheet; nine screen/shell/child
+  components own their scoped styles, alongside the existing welcome component.
+- Production browser checks verify Login/TaskForm styling, scoped rule isolation,
+  absence of an app.css resource, and desktop/mobile workflows.
+- The adapted welcome starter was checked at desktop and mobile widths, including
+  its Python API button, scoped styles, and absence of horizontal overflow.
+- The PDF is an instructor recording guide; no tutorial video was recorded here.

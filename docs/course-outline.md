@@ -44,13 +44,15 @@ later chapters. Do not accidentally generate into an existing project directory.
 The generated welcome project is a starting exercise, not the finished course.
 The source comparison is preserved in `chapter-01-setup`; `backend-ready` records
 the domain APIs and tests; `course-v1` records the completed application.
-These are three actual checkpoints, not a claim that all fifteen chapter tags
-have been authored. Add finer checkpoints as the recording script is rehearsed.
+The auth-only checkpoint adds a fourth runnable state. The prepared scoped-CSS
+starter is `starter-scoped-css`; the original generated snapshot is historical.
+This is not a claim that all fifteen chapter tags have been authored. Add finer checkpoints as the recording script is rehearsed.
 
 ## Recording approach
 
 Type routes, authorization, validation, signals, components, and tests while
-explaining them. Provide decorative CSS and assets as starter files. After each
+explaining them. Teach a few CSS rules inside each component's `<style scoped>` block, and supply
+the rest of that block with the component. There is no external app.css file. After each
 feature, show a successful request and one relevant failure. Avoid silently
 pasting large files or making viewers watch installation waits.
 

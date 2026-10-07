@@ -1,5 +1,5 @@
 <template>
-  <div>
+  <div class="app-shell">
     <header><a href="/" data-teloce-link class="brand">Project Manager</a>
       <nav aria-label="Main navigation">
         <a href="/projects" data-teloce-link>Projects</a>
@@ -12,3 +12,64 @@
   </div>
 </template>
 <script lang="ts">export default {};</script>
+<style scoped>
+/* Only the document reset is global: body is outside this component. */
+:global(body) {
+  margin: 0;
+}
+.app-shell {
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+  color: #17243a;
+  background: #f3f6fc;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.2rem max(1rem, calc((100vw - 1080px) / 2));
+  background: #17243a;
+  color: white;
+}
+header a {
+  color: white;
+  text-decoration: none;
+}
+.brand {
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+nav {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+main {
+  max-width: 1080px;
+  margin: auto;
+  min-height: 75vh;
+  padding: 2rem 1rem;
+}
+footer {
+  padding: 1.5rem;
+  text-align: center;
+  color: #526079;
+}
+footer a {
+  color: #1d4ed8;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+@media (max-width: 520px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  main {
+    padding: 1rem;
+  }
+}
+</style>

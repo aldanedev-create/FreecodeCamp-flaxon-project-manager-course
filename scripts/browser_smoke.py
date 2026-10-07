@@ -23,17 +23,19 @@ def main():
             "FLAXON_DEBUG": "0" if production else "1",
             "PUBLIC_ORIGIN": BASE,
             "FLAXON_SECRET_KEY": secrets.token_urlsafe(48),
+            "COURSE_SMOKE_STAFF_PASSWORD": secrets.token_urlsafe(24),
         }
         subprocess.run(
             [sys.executable, "management.py", "migrate"], cwd=ROOT, env=env, check=True
         )
         # Bootstrap a staff account in the disposable Admin store before startup.
         bootstrap = """
+import os
 from flaxon.admin.services import AdminAuth, AdminStore
 from settings import ADMIN_DATABASE_PATH
 store = AdminStore(str(ADMIN_DATABASE_PATH))
 auth = AdminAuth(users=[], store=store, strict_permissions=True)
-record = auth.add_user({'username': 'course-admin', 'password': 'CourseStaffPassword123!', 'roles': ['administrator']})
+record = auth.add_user({'username': 'course-admin', 'password': os.environ['COURSE_SMOKE_STAFF_PASSWORD'], 'roles': ['administrator']})
 store.set('users', 'course-admin', record)
 """
         subprocess.run([sys.executable, "-c", bootstrap], cwd=ROOT, env=env, check=True)
@@ -61,7 +63,7 @@ store.set('users', 'course-admin', record)
                 staff_page.goto(BASE + "/admin/login")
                 staff_page.get_by_label("Username", exact=True).fill("course-admin")
                 staff_page.get_by_label("Password", exact=True).fill(
-                    "CourseStaffPassword123!"
+                    env["COURSE_SMOKE_STAFF_PASSWORD"]
                 )
                 staff_page.get_by_role("button", name="Sign in", exact=True).click()
                 staff_page.wait_for_url("**/admin/")
@@ -96,12 +98,19 @@ store.set('users', 'course-admin', record)
                     errors = []
                     page.on("pageerror", lambda error: errors.append(str(error)))
                     page.goto(BASE + "/login")
-                    page.get_by_role("button", name="Register instead").click()
+                    register_button = page.get_by_role("button", name="Register instead")
+                    assert register_button.evaluate(
+                        "element => getComputedStyle(element).backgroundColor"
+                    ) == "rgb(228, 234, 245)", "Login scoped secondary button style missing"
+                    assert page.evaluate(
+                        "getComputedStyle(document.body).margin === '0px'"
+                    ), "Shell document reset missing"
+                    register_button.click()
                     page.get_by_label("Name", exact=True).fill("Course Learner")
                     page.get_by_label("Email", exact=True).fill(
                         f"learner{width}@example.test"
                     )
-                    page.get_by_label("Password", exact=True).fill("LearningPython123!")
+                    page.get_by_label("Password", exact=True).fill(secrets.token_urlsafe(24))
                     page.get_by_role(
                         "button", name="Create account", exact=True
                     ).click()
@@ -123,11 +132,30 @@ store.set('users', 'course-admin', record)
                     page.get_by_role(
                         "heading", name="Browser project", exact=True
                     ).wait_for()
+                    add_task_button = page.get_by_role("button", name="Add task", exact=True)
+                    assert add_task_button.evaluate(
+                        "element => getComputedStyle(element).backgroundColor"
+                    ) == "rgb(37, 99, 235)", "TaskForm must own its scoped button style"
+                    assert page.evaluate("""() => {
+                        const probe = document.createElement('button');
+                        probe.textContent = 'Unscoped probe';
+                        document.body.appendChild(probe);
+                        const colour = getComputedStyle(probe).backgroundColor;
+                        probe.remove();
+                        return colour !== 'rgb(37, 99, 235)';
+                    }"""), "Component button styles leaked outside their scope"
+                    assert not any('/assets/app.css' in entry['name'] for entry in
+                        page.evaluate("performance.getEntriesByType('resource').map(entry => ({name: entry.name}))")
+                    ), "The SPA must not load a shared app.css stylesheet"
                     page.get_by_label("Task title").fill("Record the lesson")
                     page.get_by_role("button", name="Add task", exact=True).click()
                     page.get_by_text("Record the lesson", exact=True).wait_for()
                     page.get_by_label("Task status", exact=True).select_option("done")
                     page.get_by_text("100% complete", exact=True).wait_for()
+                    screenshot_dir = os.getenv("COURSE_SCREENSHOT_DIR")
+                    if screenshot_dir:
+                        Path(screenshot_dir).mkdir(parents=True, exist_ok=True)
+                        page.screenshot(path=str(Path(screenshot_dir) / f"project-{width}.png"), full_page=True)
                     page.get_by_label("Filter tasks").select_option("todo")
                     page.get_by_text(
                         "No tasks match this filter.", exact=True

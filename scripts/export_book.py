@@ -81,7 +81,7 @@ bookmarks = {title: 'section-'+str(i) for i,title in enumerate(headings)}
 story = [Spacer(1,25)]
 logo = ROOT/'book/assets/flaxon.png'
 w,h = ImageReader(str(logo)).getSize()
-story += [Image(str(logo), width=150, height=150*h/w, hAlign='LEFT'), Spacer(1,24), Paragraph('Build a Full-Stack<br/>Project Manager', styles['CoverTitle']), Paragraph('Flaxon + Teloce HTML SPA<br/>Signals, Admin/CMS, and MinifyJS', styles['CoverSub']), Spacer(1,20), Paragraph('Aldane Hutchinson', styles['SectionBook']), Paragraph('Companion book | First course edition | October 2026', styles['SmallBook']), Spacer(1,25), Paragraph('Build protected APIs first. Connect the interface to working data. Verify the whole application before deployment.',styles['BodyBook']), Paragraph('Independent teaching project. Includes a complete source appendix and a sample recording script.', styles['SmallBook']), PageBreak()]
+story += [Image(str(logo), width=150, height=150*h/w, hAlign='LEFT'), Spacer(1,24), Paragraph('Teach a Full-Stack<br/>Project Manager', styles['CoverTitle']), Paragraph('Flaxon + Teloce HTML SPA<br/>Signals, Admin/CMS, and MinifyJS', styles['CoverSub']), Spacer(1,20), Paragraph('Aldane Hutchinson', styles['SectionBook']), Paragraph('Instructor recording guide | Revision 2 | October 2026', styles['SmallBook']), Spacer(1,25), Paragraph('Build protected APIs first. Connect the interface to working data. Verify the whole application before deployment.',styles['BodyBook']), Paragraph('Say, type, show: narration prompts, live-coding steps, demonstrations, editing notes, and the complete scoped-CSS source.', styles['SmallBook']), PageBreak()]
 story.append(Paragraph('Contents',styles['ChapterBook']))
 for title in headings:
     story.append(Paragraph(f'<link href="#{bookmarks[title]}" color="#1464AA">{inline(title)}</link>',styles['BodyBook']))
@@ -124,6 +124,6 @@ while i<len(lines):
     while i<len(lines) and lines[i].strip() and not lines[i].startswith(('#','```','- ')):
         paragraph.append(lines[i]);i+=1
     story.append(Paragraph(inline(' '.join(paragraph)),styles['BodyBook']))
-doc=BookDoc(str(OUT),pagesize=(612,792),rightMargin=54,leftMargin=54,topMargin=52,bottomMargin=56,title='Build a Full-Stack Project Manager',author='Aldane Hutchinson')
+doc=BookDoc(str(OUT),pagesize=(612,792),rightMargin=54,leftMargin=54,topMargin=52,bottomMargin=56,title='Instructor Recording Guide: Full-Stack Project Manager',author='Aldane Hutchinson')
 doc.build(story,onFirstPage=footer,onLaterPages=footer)
 print(OUT)

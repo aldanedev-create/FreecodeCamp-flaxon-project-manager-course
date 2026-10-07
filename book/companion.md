@@ -1,31 +1,43 @@
-# Build a Full-Stack Project Manager
+# Instructor Recording Guide: Full-Stack Project Manager
 
 Flaxon + Teloce HTML SPA + signals + Admin/CMS + MinifyJS
 
 Author: Aldane Hutchinson
 
-Companion book - first course edition - October 2026
+Instructor edition - revision 2 - October 2026
 
 ![Flaxon logo](assets/flaxon.png)
 
 ## Read this first
 
-This book follows the actual course repository. Code blocks marked with a file path are copied from the application, not invented framework APIs. Study the small excerpt in a chapter, then open that file or use the complete source appendix. Type the important behavior while recording; use supplied CSS and assets to keep the lesson focused.
+This PDF is your working recording guide. Keep it beside your editor while you rehearse and record. Each chapter gives a lesson outcome, preparation, narration prompts, code to type, demonstrations, editing notes, commands, expected results, common errors, and an exercise. Read the Say prompts aloud during rehearsal, then use your own wording on camera.
+
+The guide follows the actual course repository. Code blocks marked with a file path are copied from the application, not invented framework APIs. Study the small excerpt in a chapter, then open that file or use the complete source appendix. Type the important behavior while recording. Teach a few CSS rules in each component and provide the remainder of that component's scoped block. The completed app uses no external app.css stylesheet.
 
 Repository: https://github.com/aldanedev-create/FreecodeCamp-flaxon-project-manager-course
 
-Use `main` for the completed application, `chapter-01-setup` for the generated welcome starter, `chapter-04-auth` for the authentication backend, and `backend-ready` for the complete API checkpoint. See course/checkpoints.md for the exact checkpoint scope and tag publication instructions. The source appendix belongs to the completed app; do not paste every final file into the first lesson at once.
+Use `main` for the completed application, `starter-scoped-css` for the prepared welcome starter, `chapter-04-auth` for the authentication backend, and `backend-ready` for the complete API checkpoint. See course/checkpoints.md for the exact checkpoint scope and tag publication instructions. The source appendix belongs to the completed app; do not paste every final file into the first lesson at once.
 
 This is an independent teaching project. Publication of a video by freeCodeCamp is not guaranteed. Flaxon's course-only security build is described in vendor/README.md. Real HTTPS/Render deployment, mail, media scanning, and multi-process operation were not verified in this environment.
 
+## Prepare your recording workspace
+
+- Open a separate teaching checkout and the completed reference. Do not delete working production code to stage a lesson.
+- Show the finished feature at the beginning of each chapter, then return to the lesson's starting state. Four recovery checkpoints exist; not every chapter has a separate snapshot.
+- Rehearse each take once. When adapting the generated starter, use the pinned dependency files and vendor wheels from the completed repository.
+- Record a short microphone test, enlarge code, close personal tabs, and hide credentials. Capture 1080p if your equipment supports it.
+- Keep the editor, terminal, browser, and this PDF ready. Pause while switching views so edits are easy to follow.
+- If you make a typing mistake, state the problem and correction. Cut long waits, but show the command and verified result.
+- Record the 12-15-minute sample lesson first, ask learners for specific feedback, then revise the full-course takes.
+
 ## Learning route
 
-1. Run and understand the starter.
-2. Build persistent, protected APIs and test them.
-3. Compile HTML components and connect them to those APIs.
-4. Add task reactivity and SPA navigation.
-5. Configure staff Admin and published help content.
-6. Verify the complete workflow and prepare deployment.
+- Run and understand the starter.
+- Build persistent, protected APIs and test them.
+- Compile HTML components and connect them to those APIs.
+- Add task reactivity and SPA navigation.
+- Configure staff Admin and published help content.
+- Verify the complete workflow and prepare deployment.
 
 ## Contents
 
@@ -48,9 +60,46 @@ This is an independent teaching project. Publication of a video by freeCodeCamp 
 - Appendix B | Recording your sample lesson
 # 01 | Preview and setup
 
-## Goal
+## Lesson outcome
 
 Run the finished application once, then generate the welcome starter in a separate folder.
+
+## Recording preparation
+
+Target edited length: 15-20 minutes. This is a planning range, not a recording already made.
+
+Before the take: Keep the finished app ready for the opening preview, an empty folder for CLI generation, and starter-scoped-css as the prepared reference. Install the pinned course wheels in the activated environment before generating.
+
+## Take 1 | Say, type, show
+
+Say: By the end, a signed-in user can create projects, manage tasks, and see progress. Staff have a separate Admin, and help content comes from the CMS. We will build the backend first, then connect the browser to APIs we have already tested.
+
+Type or explain on screen: The README clone, virtual-environment and dependency commands. Explain which activation command belongs to Windows and which to macOS/Linux.
+
+Show and verify: Preview registration, one project, a completed task, and the Help page. Show staff Admin briefly without exposing passwords.
+
+## Take 2 | Say, type, show
+
+Say: Flaxon owns the Python server. Teloce compiles our HTML components into JavaScript. MinifyJS optimizes the compiled JavaScript for production; we do not need a Node build for this project.
+
+Type or explain on screen: In a separate folder: flaxon new project-manager --no-venv, then cd project-manager and python management.py migrate.
+
+Show and verify: Run flaxon welcome and flaxon welcome-status. Open the generated welcome page and show its module folder.
+
+## Take 3 | Say, type, show
+
+Say: The starter is our beginning, and the completed repository is our reference. The course uses pinned dependencies, including an explicitly labelled Flaxon build with CMS fixes.
+
+Type or explain on screen: After CLI generation, remove the app.css stylesheet reference in app.py; move Welcome link/button rules into its existing style scoped block and add the shell typography/reset block. The prepared starter-scoped-css branch already contains these edits and pinned dependencies.
+
+Show and verify: Point viewers to the checkpoint guide and briefly show the welcome component's existing style scoped block.
+
+## Editing and chapter handoff
+
+Editing note: Cut package download waits, not the commands or their successful completion. Record a clean ten-second microphone test before this take.
+
+End the chapter: State that the welcome project runs, then introduce modules as the next step.
+
 
 ## How it works
 
@@ -58,7 +107,7 @@ The finished app has customer accounts, owned projects, tasks, progress, a staff
 
 Use Python 3.12, Git, and a terminal. Basic Python, HTML, CSS, and JavaScript are prerequisites. This book introduces the small amount of TypeScript used here. The dependencies include a labelled course-only Flaxon build containing CMS fixes; it is not an official PyPI release. Install the supplied dependency files, not an unrelated latest version.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `requirements-dev.txt`
 
@@ -86,21 +135,52 @@ python -m flaxon run app:app --reload
 
 ## Expected result
 
-Open http://127.0.0.1:8000/login, register, and create a project. To reproduce the original generation lesson, stop the server, move to a new parent folder, activate the installed environment, and run `flaxon new project-manager --no-venv`. Enter that generated directory, run `python management.py migrate`, then `flaxon welcome`, `flaxon welcome-status`, and `python -m flaxon run app:app --reload`. Its welcome screen and module commands are the starter, not the completed task manager.
+Open http://127.0.0.1:8000/login, register, and create a project. To reproduce the original generation lesson, stop the server, move to a new parent folder, activate the installed environment, and run `flaxon new project-manager --no-venv`. Enter that generated directory, run `python management.py migrate`, then `flaxon welcome`, `flaxon welcome-status`, and `python -m flaxon run app:app --reload`. The raw generator still includes app.css; adapt it as shown in Take 3, or recover from the starter-scoped-css branch. Its welcome screen and module commands are the starter, not the completed task manager.
 
 ## Common errors
 
 A missing `flaxon` command usually means the virtual environment is inactive. Use `python -m flaxon`. If PowerShell blocks activation, run the environment Python directly (`.venv\Scripts\python.exe`). A missing wheel usually means you ran installation outside the repository root. Do not generate over the completed repository.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Generate the starter under a new directory name. Find the welcome module and its custom command before changing any code.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 02 | Application factories and modules
 
-## Goal
+## Lesson outcome
 
 Understand how one application composes independent features.
+
+## Recording preparation
+
+Target edited length: 15-20 minutes. This is a planning range, not a recording already made.
+
+Before the take: Open the generated starter and keep the final app.py available in a separate reference window. Do not mount a feature before its imports and module exist.
+
+## Take 1 | Say, type, show
+
+Say: A feature can keep its Python routes, browser screens, and commands together. The application factory decides which features are mounted and where their APIs begin.
+
+Type or explain on screen: create_app() and the welcome module mount in app.py. Introduce settings.py and the module directory structure.
+
+Show and verify: Trace GET /api/welcome/status from the application mount to the module decorator.
+
+## Take 2 | Say, type, show
+
+Say: A prefix is added once. A slash inside a project module will become /api/projects/ when we mount that module. Tests can create a fresh app against a temporary database.
+
+Type or explain on screen: The FlaxonModule declaration in modules/projects/module.py as a preview; save its UI mapping for the frontend chapter.
+
+Show and verify: Contrast a Python route parameter with a browser :id pattern. Show the module-owned files rather than inventing a new routing API.
+
+## Editing and chapter handoff
+
+Editing note: Keep the architecture explanation short. Zoom in on one mount and one route; do not tour every framework file.
+
+End the chapter: Ask the learner to find the welcome API and its module command.
+
 
 ## How it works
 
@@ -108,7 +188,7 @@ A module collects routes and, when needed, its interface files. An API prefix is
 
 Start with the welcome module, then add auth, projects, tasks, and content as the chapters introduce them. The complete factory in the source appendix is the final composition, so it naturally contains features taught later.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `modules/projects/module.py`
 
@@ -140,15 +220,46 @@ The welcome route responds and module routes receive their mounted prefixes. The
 
 Do not repeat `/api/projects` inside module decorators: the mount adds it. A wrong relative import can stop startup. Keep feature-specific pages in their module UI folder and shared helpers in root `ui/`.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Explain which file you would edit to change a project route, its screen, and its API prefix.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 03 | Database and migrations
 
-## Goal
+## Lesson outcome
 
 Persist users, projects, tasks, sessions, and authentication attempts.
+
+## Recording preparation
+
+Target edited length: 20-25 minutes. This is a planning range, not a recording already made.
+
+Before the take: Use a disposable development data directory. Open migrations/0001_initial.json, database.py, and management.py.
+
+## Take 1 | Say, type, show
+
+Say: A user owns projects, and each project owns tasks. We store those relationships in the database, so they survive a server restart.
+
+Type or explain on screen: The users, projects, and tasks definitions in the migration; then the session and auth-attempt tables. Explain foreign keys, cascades, and indexes.
+
+Show and verify: Run migrate and migrate --status. Run migrate again and show that no duplicate migration is applied.
+
+## Take 2 | Say, type, show
+
+Say: SQLite calls are synchronous. Our small repository runs them in a worker thread and opens a connection for each operation. Values use placeholders rather than being joined into SQL.
+
+Type or explain on screen: Database.connection(), all(), one(), and execute() in that order.
+
+Show and verify: Point to PRAGMA foreign_keys and the transaction context. Show that the database path comes from DATA_DIR, not a hardcoded cloud path.
+
+## Editing and chapter handoff
+
+Editing note: Print or enlarge the migration SQL when explaining relationships; the JSON string is difficult to read at normal editor size.
+
+End the chapter: Recap persistence, parameterized values, and why migrations precede API writes.
+
 
 ## How it works
 
@@ -156,7 +267,7 @@ The migration establishes relationships before endpoints write records. Each pro
 
 The Database helper opens a connection for each operation, enables foreign keys, and executes blocking SQLite work in `asyncio.to_thread`. A connection context commits a successful operation and rolls it back on failure. SQL placeholders separate values from SQL structure. The default database files live under `data/`; deployment moves them to a persistent directory. Never delete a real database just to rerun a migration.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `database.py`
 
@@ -223,15 +334,54 @@ The first run applies the initial migration; a second run applies zero new migra
 
 `no such table` means migrations have not run against the database selected by `DATA_DIR`. Foreign keys must be enabled on each connection. Do not concatenate a project name into SQL. Migration SQL is application code; request values are parameters.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Use a temporary database to verify that deleting a project removes its tasks. Write down which foreign key implements that behavior.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 04 | Authentication and cookie sessions
 
-## Goal
+## Lesson outcome
 
 Register, sign in, sign out, and protect API requests before building forms.
+
+## Recording preparation
+
+Target edited length: 30-40 minutes. This is a planning range, not a recording already made.
+
+Before the take: The schema and Database helper must run. Use chapter-04-auth as a recovery point; customer UI and staff Admin are deliberately not enabled in that checkpoint.
+
+## Take 1 | Say, type, show
+
+Say: We never store a plain password. Argon2 hashes the password, while a random opaque session token identifies an authenticated session. Only a digest of that token is stored.
+
+Type or explain on screen: security.py: digest(), read_session(), require_user(), and session_response(); then the auth module register and login handlers.
+
+Show and verify: Show GET /api/auth/session before login, the registration response, and the public user fields without printing password hashes.
+
+## Take 2 | Say, type, show
+
+Say: Cookies alone are not enough for these mutations. A session-bound CSRF token is required, and login rotates both the session and that token.
+
+Type or explain on screen: check_csrf(), then the logout handler. Explain HttpOnly, SameSite, production Secure, and expiry while pointing to the actual code.
+
+Show and verify: In the HTTP client, deliberately use the old CSRF token after registration and show rejection; then use the new token successfully.
+
+## Take 3 | Say, type, show
+
+Say: Logging out must revoke the old server session. A cookie copied before logout should stop working too.
+
+Type or explain on screen: The logout/revocation test in the auth checkpoint, or explain the completed login/logout test.
+
+Show and verify: Run authentication tests and show a wrong-password response. Never use a staff credential in the public registration example.
+
+## Editing and chapter handoff
+
+Editing note: Pause after session rotation. This is a concept learners need to reproduce, not a place to speed up typing.
+
+End the chapter: Ask viewers to replay an old cookie after logout and predict the status.
+
 
 ## How it works
 
@@ -239,7 +389,7 @@ Passwords are hashed with Argon2. The browser receives a random session cookie; 
 
 First request `/api/auth/session` to establish an anonymous session. JSON mutations require `X-CSRF-Token`; browser requests also undergo an Origin check when that header is supplied. Authentication answers who the caller is. Ownership checks later answer which records that person may use. Public registration never creates staff Admin access.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `security.py`
 
@@ -288,15 +438,46 @@ The session response is `{"data":{"user":null,"csrf":"..."}}` before sign-in. Fo
 
 A 403 usually indicates a stale/missing token, wrong JSON Content-Type, or Origin mismatch. Use exactly `http://127.0.0.1:8000` locally if that is PUBLIC_ORIGIN. A 401 means the endpoint requires a signed-in user. Passwords must be 12-128 characters. Do not commit cookie jars.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Sign out, then replay a request with the old session. Explain why server-side revocation matters even if the browser has deleted its cookie.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 05 | Project APIs and ownership
 
-## Goal
+## Lesson outcome
 
 Create, list, read, update, and delete only the signed-in user's projects.
+
+## Recording preparation
+
+Target edited length: 20-25 minutes. This is a planning range, not a recording already made.
+
+Before the take: Start from the authenticated backend. Open the project module, the HTTP demonstration, and the ownership test. Use two separate learner accounts.
+
+## Take 1 | Say, type, show
+
+Say: The owner comes from the signed-in user. It is not a field the browser gets to choose.
+
+Type or explain on screen: owned_project(), list_projects(), and create_project(), including imports, validation, SQL placeholders, and the 201 response.
+
+Show and verify: Create a project through HTTP, list it, and show the consistent data envelope.
+
+## Take 2 | Say, type, show
+
+Say: Authentication tells us who you are. Ownership tells us which record you may use. A private record returns 404 to someone else.
+
+Type or explain on screen: get_project(), update_project(), and delete_project(). Explain the CSRF and ownership checks before mutations.
+
+Show and verify: Run scripts/course_api_demo.py, then the ownership test. Show a blank name returning 400 and another account getting 404.
+
+## Editing and chapter handoff
+
+Editing note: This is the backend half of the pilot. Keep one successful request and one denied request visible long enough to read.
+
+End the chapter: Transition to tasks: tasks will inherit permission through their parent project.
+
 
 ## How it works
 
@@ -304,7 +485,7 @@ A project name is required and limited to 120 characters; an optional descriptio
 
 `owned_project()` combines the record ID with the current user ID. Missing and other users' projects both return 404. This avoids revealing whether a private record exists. GET lists only owned rows. PUT and DELETE check CSRF and ownership. Success responses consistently place records under `data`; creation returns HTTP 201.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `modules/projects/module.py`
 
@@ -360,15 +541,46 @@ The demo registers a temporary learner, creates a project through HTTP, and read
 
 Hiding a button does not enforce authorization. Never trust owner_id from JSON. Trailing slash matters for the collection URL: use `/api/projects/`. Empty or oversized names are rejected on the server even if HTML validation is bypassed.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Add a test for a name containing only spaces. Predict the status before running it. Then describe why a project owned by another user returns 404.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 06 | Tasks, status, dates, and filtering
 
-## Goal
+## Lesson outcome
 
 Build the task workflow on top of project ownership.
+
+## Recording preparation
+
+Target edited length: 20-25 minutes. This is a planning range, not a recording already made.
+
+Before the take: Project creation and ownership must be working. Prepare one owned project and a second account.
+
+## Take 1 | Say, type, show
+
+Say: A task belongs to a project. Every operation checks that the current user may access the parent project, even when the request only contains a task ID.
+
+Type or explain on screen: owned_task(), list_tasks(), and create_task() in modules/tasks/module.py.
+
+Show and verify: Create a task with a due date and demonstrate that another user cannot add a task to your project.
+
+## Take 2 | Say, type, show
+
+Say: PATCH changes only supplied fields. Status is one of three values, and a date uses YYYY-MM-DD. These rules belong on the server as well as the form.
+
+Type or explain on screen: task_fields(), update_task(), and delete_task(); type the optional list status filter.
+
+Show and verify: Update a task to done, filter to done, reject an impossible date, and show the cascade test for project deletion.
+
+## Editing and chapter handoff
+
+Editing note: Do not spend the take typing repetitive SQL punctuation silently. Explain the changed values and ownership decision.
+
+End the chapter: Ask the learner to add an invalid-date regression case.
+
 
 ## How it works
 
@@ -376,7 +588,7 @@ Tasks use `todo`, `doing`, and `done`. Creating a task checks its project first.
 
 A list request may filter by status, but SQL still includes the project ID. The API rejects unknown statuses before querying. Parameterized SQL safely handles titles containing quotation marks. Task deletion is explicit; project deletion cascades through the database.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `validation.py`
 
@@ -420,15 +632,46 @@ You can create a task, change its status, clear its due date, filter the project
 
 Do not filter all tasks first and authorize later. Passing an empty PATCH body is an error. Do not confuse a date-only field with an instant in a timezone. Client-side filtering improves presentation; API authorization remains mandatory.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Add a task with February 30 as its due date. Verify the rejection and add a regression assertion.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 07 | Test the backend before the frontend
 
-## Goal
+## Lesson outcome
 
 Verify successful requests and denied requests using disposable databases.
+
+## Recording preparation
+
+Target edited length: 15-20 minutes. This is a planning range, not a recording already made.
+
+Before the take: Keep the API layer working before showing any customer interface code. Use disposable tests, never the recording database.
+
+## Take 1 | Say, type, show
+
+Say: These tests make requests through the ASGI application. A temporary database gives each test an isolated place to create records.
+
+Type or explain on screen: The application fixture and Account helper in tests/conftest.py. Explain how the helper carries the cookie and CSRF token.
+
+Show and verify: Show the migration fixture and create_app() receiving temporary paths.
+
+## Take 2 | Say, type, show
+
+Say: The ownership test registers a second user and calls the API directly. Hiding an Edit button would not pass this test if the backend were wrong.
+
+Type or explain on screen: test_project_crud_and_ownership(), then one invalid task case.
+
+Show and verify: Run focused tests first, then the suite appropriate to your current teaching checkout. The completed reference has additional Admin/CMS tests taught later.
+
+## Editing and chapter handoff
+
+Editing note: Show failures intentionally only in a throwaway rehearsal checkout; restore the code and end the take with passing checks.
+
+End the chapter: Point to backend-ready and explain that the frontend will consume these same endpoints.
+
 
 ## How it works
 
@@ -436,7 +679,7 @@ The tests create the schema in a temporary directory and call `create_app()` wit
 
 Study one test line by line: arrange two accounts, create a project, exercise another user's access, and assert the response. Assertions should protect behavior that could break or leak information, not merely repeat implementation details.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `tests/test_api.py`
 
@@ -479,29 +722,68 @@ The verified full course suite has 43 passing cases, including parameterized inp
 
 Do not point tests at your development database. A shared cookie between two Account objects invalidates the ownership scenario. A test that asserts only 200 misses whether the returned records belong to the correct user.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Write one denied-request test of your own. Explain which user, input, or permission makes the request invalid.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 08 | First Teloce HTML screen
 
-## Goal
+## Lesson outcome
 
 Connect the server to a browser SPA shell.
+
+## Recording preparation
+
+Target edited length: 25-30 minutes. This is a planning range, not a recording already made.
+
+Before the take: The backend must already work. Open ui/app.html, ui/pages/Home.html, app.py, and the module UI route declarations.
+
+## Take 1 | Say, type, show
+
+Say: Our HTML component has a template, a TypeScript script, and a scoped style block. Flaxon serves the compiled shell; Teloce mounts pages inside the router view.
+
+Type or explain on screen: The shell template and script, app.use_teloce(), and the explicit Python shell routes.
+
+Show and verify: Open the compiled page and trace the router-view marker and module UI mapping.
+
+## Take 2 | Say, type, show
+
+Say: We keep page styles inside the page. The compiler adds a component scope attribute so a header or button rule does not unexpectedly change another component.
+
+Type or explain on screen: The shell style scoped block, then the Home component's .hero, .eyebrow, and .button rules. Explain the single :global(body) margin reset because body is outside the component.
+
+Show and verify: Change the Home button colour, navigate away, and confirm another component's button is unchanged. Restore the final colour.
+
+## Take 3 | Say, type, show
+
+Say: A parent owns its layout, and a child owns its form. Inherited font and colour can flow through the shell, but scoped selector rules do not become a global stylesheet.
+
+Type or explain on screen: Show local style blocks in Login, ProjectList, TaskForm, and TaskList. Remove the old app.css reference when following an older checkout.
+
+Show and verify: Confirm there is no /assets/app.css request. At mobile width, show that the shell navigation wraps and the forms fit.
+
+## Editing and chapter handoff
+
+Editing note: Teach a few meaningful CSS rules live, then supply the rest of each scoped block in that component. Do not paste one giant global CSS file.
+
+End the chapter: Ask viewers to explain the difference between inheritance and scoped selector matching.
+
 
 ## How it works
 
 Flaxon calls `app.use_teloce()` with the project root, UI directory, and MinifyJS option. The compiler builds `.html` components and serves the runtime and assets. `request.compile("app.html", {})` returns the compiled shell for known browser paths. The shell provides a router view; route pages mount inside it.
 
-A component contains a template, a TypeScript script, and optional scoped style. This course uses `.html`, not `.vel`. Module UI routes map the compiled page names to URL patterns. Flaxon can also render whole applications with Jinax; this project chooses Teloce for customer screens and server-rendered Admin for staff.
+A component contains a template, a TypeScript script, and scoped style. Each page and child component owns its own CSS. The compiler adds a component attribute to elements and rewrites selectors to match that attribute, so parent selectors do not automatically style child internals. Font and colour may still inherit normally. The shell uses only a deliberate :global(body) margin reset because body is outside the component. There is no public/app.css or stylesheets argument in the completed factory. This course uses `.html`, not `.vel`. Module UI routes map the compiled page names to URL patterns. Flaxon can also render whole applications with Jinax; this project chooses Teloce for customer screens and server-rendered Admin for staff.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `ui/app.html`
 
 ```html
 <template>
-  <div>
+  <div class="app-shell">
     <header><a href="/" data-teloce-link class="brand">Project Manager</a>
       <nav aria-label="Main navigation">
         <a href="/projects" data-teloce-link>Projects</a>
@@ -514,6 +796,67 @@ File: `ui/app.html`
   </div>
 </template>
 <script lang="ts">export default {};</script>
+<style scoped>
+/* Only the document reset is global: body is outside this component. */
+:global(body) {
+  margin: 0;
+}
+.app-shell {
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+  color: #17243a;
+  background: #f3f6fc;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.2rem max(1rem, calc((100vw - 1080px) / 2));
+  background: #17243a;
+  color: white;
+}
+header a {
+  color: white;
+  text-decoration: none;
+}
+.brand {
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+nav {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+main {
+  max-width: 1080px;
+  margin: auto;
+  min-height: 75vh;
+  padding: 2rem 1rem;
+}
+footer {
+  padding: 1.5rem;
+  text-align: center;
+  color: #526079;
+}
+footer a {
+  color: #1d4ed8;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+@media (max-width: 520px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  main {
+    padding: 1rem;
+  }
+}
+</style>
 ```
 
 
@@ -532,15 +875,46 @@ Navigation and the page mount appear. Before sign-in the project screen shows an
 
 A blank router view may mean a missing module UI route, compiler error, or wrong compiled name. Do not write a catch-all server route that replaces every API error with HTML. Check the terminal and browser console first.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Identify the shell, one module page, and one child component. Explain which part Flaxon executes and which part runs in the browser.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 09 | Authentication UI and typed API helper
 
-## Goal
+## Lesson outcome
 
 Submit account forms and share consistent request handling.
+
+## Recording preparation
+
+Target edited length: 25-30 minutes. This is a planning range, not a recording already made.
+
+Before the take: The auth API and SPA shell must run. Keep ui/types.ts, ui/api.ts, and Login.html open.
+
+## Take 1 | Say, type, show
+
+Say: The interface knows the shape of a Session, but the server still validates the real request. Our helper loads the session, sends cookies and CSRF, and unwraps data.
+
+Type or explain on screen: User and Session interfaces, loadSession(), then api(). Explain response.ok and token replacement on auth responses.
+
+Show and verify: Show one successful response and one error without exposing a real session cookie on camera.
+
+## Take 2 | Say, type, show
+
+Say: The account form tracks loading and errors, disables repeated submissions, and clears the password after success. Switching modes keeps the form DOM with v-show.
+
+Type or explain on screen: Login.html template, data(), mounted(), submit(), logout(), and its scoped form styles.
+
+Show and verify: Register in the browser, sign out, try a wrong password, then sign in. Show the status/alert messages and the keyboard labels.
+
+## Editing and chapter handoff
+
+Editing note: Slow down when the helper cache changes after authentication. An old CSRF token is a common error worth explaining.
+
+End the chapter: Have learners add explanatory form text without weakening backend validation.
+
 
 ## How it works
 
@@ -548,7 +922,7 @@ TypeScript interfaces describe the JSON contract for users, projects, tasks, ses
 
 The Login component uses `v-model`, guarded submission, loading/error state, and `v-show` when switching form mode. Keeping the form DOM intact avoids listener loss found during this project's browser testing. Never store the HttpOnly session token in localStorage. TypeScript transpilation removes types; this build is not a full static type checker.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `ui/api.ts`
 
@@ -598,15 +972,54 @@ Submitting disables duplicate actions, validation errors are visible, and valid 
 
 A wrong relative import can prevent compilation. A 403 immediately after registration suggests cached old CSRF state. Fetch resolves even for HTTP errors: inspect response.ok rather than assuming every resolved promise succeeded.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Attempt an incorrect password and inspect the message. Add a short explanation next to the password field without weakening server validation.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 10 | Components, signals, and progress
 
-## Goal
+## Lesson outcome
 
 Make project tasks reactive and reuse the task form and list.
+
+## Recording preparation
+
+Target edited length: 30-35 minutes. This is a planning range, not a recording already made.
+
+Before the take: An authenticated learner can create a project. Open the detail page, TaskForm.html, and TaskList.html.
+
+## Take 1 | Say, type, show
+
+Say: The form emits an event; the parent decides how to save it. We keep requests in the page so the child components stay easy to understand.
+
+Type or explain on screen: TaskForm and TaskList templates, props and emits, then the parent createTask(), changeStatus(), and removeTask() methods.
+
+Show and verify: Create a task, change its status, and delete it. Show the child's scoped .card and button rules.
+
+## Take 2 | Say, type, show
+
+Say: The task signal holds the complete collection. Computed progress reads that signal. The filtered list changes what we show, not the total we use for completion.
+
+Type or explain on screen: signal([]), computed completion, setTasks(), and the mounted effect in ProjectDetails. Do not add signal imports to this compiled HTML component.
+
+Show and verify: Create two tasks and complete one: progress is 50%. Filter to done and confirm it stays 50%.
+
+## Take 3 | Say, type, show
+
+Say: An effect is work that belongs to the mounted screen. Stop it before unmount so an old screen does not keep reacting.
+
+Type or explain on screen: beforeUnmount() and the mutation busy/error guard; type the local progress style.
+
+Show and verify: Navigate away and back, then test an empty project at 0%. Run the task and browser checks.
+
+## Editing and chapter handoff
+
+Editing note: Explain signal reads with parentheses and writes with .set(). Do not imply ordinary TypeScript helper files receive the compiler's automatic imports.
+
+End the chapter: Ask learners to compute a remaining-task count from the full collection.
+
 
 ## How it works
 
@@ -614,7 +1027,7 @@ ProjectDetails loads a project and its tasks in parallel. TaskForm emits a creat
 
 The task signal holds the collection. Computed completion returns zero for an empty collection and rounds the percentage of done tasks. An effect copies that value into component data for display and is stopped before unmount. The `.html` compiler automatically imports detected signal helpers; do not add redundant signal imports here. Ordinary `.ts` files do not receive the same automatic imports.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `modules/projects/ui/pages/ProjectDetails/[id].html`
 
@@ -643,15 +1056,46 @@ Changing one task from todo to done updates progress. Filtering hides or shows t
 
 Calling a signal reads it; `.set()` replaces its value. Updating only the component array without calling setTasks would leave the separate signal stale. An effect that survives unmount can keep obsolete component state alive.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Add two tasks, complete one, and expect 50%. Filter to done and explain why project progress should still use the full task collection.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 11 | SPA routing with data-teloce-link
 
-## Goal
+## Lesson outcome
 
 Support internal navigation, Back/Forward, and direct refresh.
+
+## Recording preparation
+
+Target edited length: 15-20 minutes. This is a planning range, not a recording already made.
+
+Before the take: At least one project and its detail screen must be working. Keep browser Network and a separate console ready.
+
+## Take 1 | Say, type, show
+
+Say: data-teloce-link tells the browser router to handle an internal anchor. The page mounts in the shell rather than reloading the document.
+
+Type or explain on screen: Internal anchors in app.html and ProjectList.html; show the module's /projects/:id mapping and the id prop.
+
+Show and verify: Set window.courseNavigationMarker = 42, click a project, and read the marker again. Back and Forward should preserve the document.
+
+## Take 2 | Say, type, show
+
+Say: A refresh starts at the server. Flaxon must return the shell for the browser URL before Teloce can mount the component and fetch its data.
+
+Type or explain on screen: The explicit /projects/<int:project_id> shell route, then the Help shell routes. Explain why Admin links are ordinary anchors.
+
+Show and verify: Refresh a nested project URL and request an unknown /api path to show that API 404 responses are preserved.
+
+## Editing and chapter handoff
+
+Editing note: Do not hide the refresh check; it is the difference between click-only routing and a usable SPA deployment.
+
+End the chapter: Ask learners to add a Help link and verify click, Back, and refresh.
+
 
 ## How it works
 
@@ -659,7 +1103,7 @@ Three parts cooperate. First, module ui_routes register `/projects` and `/projec
 
 Python shell routes are still necessary for a direct visit or refresh at `/projects/42`. The server returns the shell, then Teloce mounts the page and requests its authorized JSON data. Staff Admin is a separate interface; its anchor intentionally navigates normally. After deleting a project, the component uses the existing router's navigate method.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `app.py`
 
@@ -692,15 +1136,46 @@ Internal links keep the current document. Back/Forward mounts the corresponding 
 
 A working click but failed refresh indicates missing Python shell routes. A full reload on an internal link indicates a missing data-teloce-link marker. Do not add the marker to unrelated Admin or external URLs. Route patterns and component props must agree.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Add a Help navigation link using the marker. Test click, Back, and direct refresh, then describe the server and browser work in each case.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 12 | Staff Admin and model adapters
 
-## Goal
+## Lesson outcome
 
 Manage customer projects and tasks through separate staff accounts.
+
+## Recording preparation
+
+Target edited length: 20-25 minutes. This is a planning range, not a recording already made.
+
+Before the take: Customer APIs work. Open backoffice.py and management.py. Use only disposable staff credentials during the recording.
+
+## Take 1 | Say, type, show
+
+Say: Customers and staff are separate account systems. Registering a customer never creates an administrator. We bootstrap staff interactively, with no default password.
+
+Type or explain on screen: AdminDashboard configuration with strict_permissions, then the setup-admin command.
+
+Show and verify: Run setup-admin with the password entry off-screen. Sign into /admin/login and show the model list.
+
+## Take 2 | Say, type, show
+
+Say: The Admin adapter reuses the same database as the customer API. Staff capabilities decide who can read or change all registered records; this is not a customer tenant portal.
+
+Type or explain on screen: ProjectAdmin get_instances(), get_instance(), update_instance(), and registration fields. Explain why create is disabled here.
+
+Show and verify: Edit a project as authorized staff and read it through its owner account. Create a read-only staff role and show that changes are denied.
+
+## Editing and chapter handoff
+
+Editing note: Hide passwords and sensitive account data. Show exact permission keys from docs/security.md rather than implying a role name grants everything.
+
+End the chapter: Recap the account boundary and introduce editorial permissions.
+
 
 ## How it works
 
@@ -708,7 +1183,7 @@ AdminDashboard registers a persistent staff store with strict_permissions enable
 
 The ProjectAdmin and TaskAdmin adapters reuse the same domain database as the APIs. Staff can view and change permitted records; creating records is deliberately left to the customer workflow so ownership is established correctly. Permissioned staff may access all registered records, so these adapters are not a tenant-restricted customer portal. Grant narrow capabilities and reserve superuser for trusted administrators.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `backoffice.py`
 
@@ -742,15 +1217,54 @@ A public account cannot sign into staff Admin. A staff administrator can see pro
 
 Role names alone do not grant every custom model capability. Use project.view_project and task.view_task for readers, then specific change keys for operators. The standalone bootstrap command creates staff data but the server must still configure AdminDashboard.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Create a read-only staff group and verify an attempted edit is denied. Explain why hiding the Edit button alone is insufficient.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 13 | CMS help content and publishing
 
-## Goal
+## Lesson outcome
 
 Publish sanitized help articles while preserving editorial boundaries.
+
+## Recording preparation
+
+Target edited length: 20-25 minutes. This is a planning range, not a recording already made.
+
+Before the take: Staff Admin runs with the patched course build. Open the help content type, public content module, Help.html, and Article/[slug].html.
+
+## Take 1 | Say, type, show
+
+Say: The CMS stores editorial records. Public readers receive only published articles and a small whitelist of fields; they never use the staff editing API.
+
+Type or explain on screen: The help_article ContentType, published_articles(), the list endpoint, and the slug endpoint.
+
+Show and verify: Create a draft and show that it is absent from the Help page. Publish with a permitted account and load it in the SPA.
+
+## Take 2 | Say, type, show
+
+Say: Rendering HTML is different from displaying a string. This field is sanitized rich text; we do not render arbitrary user input as HTML.
+
+Type or explain on screen: Help and Article templates, v-html on the sanitized body, and each page's scoped styles.
+
+Show and verify: Show the rendered article and the browser-safe body. Explain that injected HTML does not automatically receive component scope attributes.
+
+## Take 3 | Say, type, show
+
+Say: Draft editors and publishers have different rights. Editing already published content or restoring a protected revision also needs the required publication permissions.
+
+Type or explain on screen: Show the CMS security patch notes and one permission regression test; do not rewrite the entire framework patch during the lesson.
+
+Show and verify: Run the CMS tests and demonstrate that a draft-only editor cannot publish.
+
+## Editing and chapter handoff
+
+Editing note: If demonstrating seed, run it only after creating a customer account and restart the process. Do not seed production on every deployment.
+
+End the chapter: Ask learners to prove that a draft is not exposed publicly.
+
 
 ## How it works
 
@@ -758,7 +1272,7 @@ The CMS receives the Admin authentication backend. help_article has title, summa
 
 The bundled framework patch makes CMS without auth deny access by default. Creating, editing, importing, restoring, and acting on protected publication states require publishing rights. Editing a published article also requires publication permission; a draft-only editor must not silently change live content. These are targeted fixes, not a complete security audit.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `backoffice.py`
 
@@ -798,15 +1312,46 @@ Only published help content appears publicly. Draft edits and publication rights
 
 Do not expose the authenticated CMS editing API as a public content feed. Do not trust raw HTML from an arbitrary field. Seed only after a domain account exists and restart afterward because the CMS keeps in-process content state.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Create a draft and verify it is absent from /help. Have an authorized publisher publish it, then verify the article appears.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 14 | Full-stack verification and accessibility
 
-## Goal
+## Lesson outcome
 
 Check real browser behavior in development and production modes.
+
+## Recording preparation
+
+Target edited length: 15-20 minutes. This is a planning range, not a recording already made.
+
+Before the take: The completed app and Playwright Chromium must be installed. Rehearse the browser script before recording its terminal output.
+
+## Take 1 | Say, type, show
+
+Say: API tests cannot prove that a real form listener, SPA link, or mobile layout works. Our browser checks use fresh data and exercise the actual compiled interface.
+
+Type or explain on screen: Explain the server setup and desktop/mobile loop in scripts/browser_smoke.py; add one behavioral assertion as a teaching example.
+
+Show and verify: Run API checks and the development browser smoke test. Show the scoped form controls and a 390-pixel viewport.
+
+## Take 2 | Say, type, show
+
+Say: We also test the production build, because minified code should preserve the same behavior. Accessibility is part of the working interface, not a final decoration.
+
+Type or explain on screen: Point to the production switch, status/alert roles, form labels, focus-visible styles, and busy guards.
+
+Show and verify: Run the production browser smoke test. Complete a short keyboard-only workflow and show a visible focus ring.
+
+## Editing and chapter handoff
+
+Editing note: Cut repetitive automated interactions if they are too fast to teach; keep the purpose, command, and passing result.
+
+End the chapter: List the checks that must pass before the deployment take.
+
 
 ## How it works
 
@@ -814,7 +1359,7 @@ API tests cannot prove that a compiled form listener works, a route preserves th
 
 Loading messages use status semantics; errors use alerts; labels name form controls. Busy state is visible and buttons are disabled during work. Verify keyboard focus and contrast as you change visual styles. Production smoke checks the minified interface locally, not the actual Render infrastructure.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `scripts/build_ui.py`
 
@@ -858,15 +1403,54 @@ The full suite and both browser modes pass. Browser tests create their own datab
 
 Install Chromium before running Playwright. A port already in use can prevent the test server starting. Local Chromium treats loopback as trustworthy; an actual deployed site must use HTTPS. Do not treat passing local smoke tests as proof of cloud deployment.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Complete the workflow using only the keyboard. Record one accessibility improvement and retest it at mobile width.
 
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
+
 # 15 | Production build and Render deployment
 
-## Goal
+## Lesson outcome
 
 Prepare one persistent instance with secrets, HTTPS, and verified data survival.
+
+## Recording preparation
+
+Target edited length: 20-30 minutes. This is a planning range, not a recording already made.
+
+Before the take: Keep the local production tests green. A real deployment take requires your own Render service access; do not say deployment succeeded until you verify it there.
+
+## Take 1 | Say, type, show
+
+Say: The compiled interface uses MinifyJS. Component CSS is bundled from style scoped blocks; there is no separate app.css file to copy to a server.
+
+Type or explain on screen: Explain scripts/build_ui.py and the build command in render.yaml.
+
+Show and verify: Run the production build and show the component count and browser verification result.
+
+## Take 2 | Say, type, show
+
+Say: SQLite needs a persistent disk. This course uses one instance and one worker, with both application and Admin databases under /var/data.
+
+Type or explain on screen: Render disk, DATA_DIR, runtime migration/start command, PUBLIC_ORIGIN, DEBUG, and generated secret settings.
+
+Show and verify: In your Render account, configure the actual HTTPS origin and bootstrap staff with the Shell. Keep secrets off-camera.
+
+## Take 3 | Say, type, show
+
+Say: A successful service screen is not enough. We need a real workflow, denied requests, and data that survives a restart.
+
+Type or explain on screen: Use the verification list in docs/render.md and write down a backup/restore procedure for both SQLite files.
+
+Show and verify: Create a project/task, publish help, refresh a nested route, sign out, confirm API denial, restart, and verify persistence. If you have not deployed, explicitly present this as preparation.
+
+## Editing and chapter handoff
+
+Editing note: Record the cloud verification after it actually works; do not splice a local test into a claim of live HTTPS verification.
+
+End the chapter: End with the completed application, source/checkpoint links, and one extension exercise. Thank viewers in your own voice.
+
 
 ## How it works
 
@@ -874,7 +1458,7 @@ MinifyJS runs through the Teloce production build. Runtime dependencies are pinn
 
 Set FLAXON_DEBUG=0, a random secret of at least 32 characters, and the exact HTTPS PUBLIC_ORIGIN. Production Host checks and browser Origin checks depend on that URL. Create staff interactively in the service Shell. This book describes the repository's prepared configuration; it has not been deployed to your Render account. Verify current service settings with the official references listed in docs/render.md.
 
-## Code to study and type
+## Exact code reference for this take
 
 File: `render.yaml`
 
@@ -921,9 +1505,11 @@ After configuring the service, check /health/course, register, create a project/
 
 An ephemeral filesystem loses SQLite data. More workers or instances need shared storage and coordination; do not increase them with this design. A changed domain requires PUBLIC_ORIGIN to change too. Do not seed automatically at every deployment.
 
-## Exercise
+## Viewer exercise and wrap-up
 
 Write a recovery checklist and back up both databases using SQLite's online backup API or a quiesced copy. Restore into a test environment and verify one project and one help article.
+
+Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
 # Appendix A | Complete application source
 
 These files are printed in full so you can follow the lesson without reconstructing missing handlers. The repository additionally contains the pinned transitive lock, vendored wheels, welcome starter reference, test fixtures, regression suites, and browser smoke script. Clone it to obtain binary dependencies and all tests. PDF code lines may wrap for print; copy exact code from Markdown or repository files.
@@ -1016,12 +1602,10 @@ def create_app(database_path=None, admin_path=None, debug=None):
         admin_path or ADMIN_DATABASE_PATH,
         Path(admin_path or ADMIN_DATABASE_PATH).parent / "uploads",
     )
-    app.mount_static("/assets", str(ROOT / "public"))
     app.use_teloce(
         project_root=ROOT,
         ui_dir="ui",
         title="Project Manager",
-        stylesheets=["/assets/app.css"],
         options={"minifier": "minifyjs"},
     )
 
@@ -1955,7 +2539,7 @@ File: `ui/app.html`
 
 ```html
 <template>
-  <div>
+  <div class="app-shell">
     <header><a href="/" data-teloce-link class="brand">Project Manager</a>
       <nav aria-label="Main navigation">
         <a href="/projects" data-teloce-link>Projects</a>
@@ -1968,6 +2552,67 @@ File: `ui/app.html`
   </div>
 </template>
 <script lang="ts">export default {};</script>
+<style scoped>
+/* Only the document reset is global: body is outside this component. */
+:global(body) {
+  margin: 0;
+}
+.app-shell {
+  min-height: 100vh;
+  font-family: system-ui, sans-serif;
+  color: #17243a;
+  background: #f3f6fc;
+}
+header {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  align-items: center;
+  padding: 1.2rem max(1rem, calc((100vw - 1080px) / 2));
+  background: #17243a;
+  color: white;
+}
+header a {
+  color: white;
+  text-decoration: none;
+}
+.brand {
+  font-weight: 800;
+  font-size: 1.3rem;
+}
+nav {
+  display: flex;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+main {
+  max-width: 1080px;
+  margin: auto;
+  min-height: 75vh;
+  padding: 2rem 1rem;
+}
+footer {
+  padding: 1.5rem;
+  text-align: center;
+  color: #526079;
+}
+footer a {
+  color: #1d4ed8;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+@media (max-width: 520px) {
+  header {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  main {
+    padding: 1rem;
+  }
+}
+</style>
 ```
 
 ## ui/pages/Home.html
@@ -1983,6 +2628,52 @@ File: `ui/pages/Home.html`
   <a href="/login" data-teloce-link>Create an account</a>
 </section></template>
 <script lang="ts">export default {};</script>
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+a {
+  color: #1d4ed8;
+}
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.15;
+}
+h2 {
+  font-size: 1.2rem;
+}
+p {
+  line-height: 1.6;
+}
+[role="alert"] {
+  color: #a21c2b;
+  padding: 0.8rem;
+  border-left: 4px solid;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+.hero {
+  max-width: 700px;
+  padding: 3rem 0;
+}
+.eyebrow {
+  text-transform: uppercase;
+  font-size: 0.8rem;
+  letter-spacing: 0.1em;
+}
+.button {
+  display: inline-block;
+  border-radius: 7px;
+  min-height: 44px;
+  background: #2563eb;
+  color: white;
+  padding: 0.7rem 1rem;
+  text-decoration: none;
+  margin-right: 0.5rem;
+}
+</style>
 ```
 
 ## modules/auth/ui/pages/Login.html
@@ -2038,6 +2729,75 @@ export default {
   },
 };
 </script>
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+a {
+  color: #1d4ed8;
+}
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.15;
+}
+h2 {
+  font-size: 1.2rem;
+}
+p {
+  line-height: 1.6;
+}
+[role="alert"] {
+  color: #a21c2b;
+  padding: 0.8rem;
+  border-left: 4px solid;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+label {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.9rem 0;
+  font-weight: 600;
+}
+input, select, textarea, button {
+  font: inherit;
+  border-radius: 7px;
+  padding: 0.7rem;
+  min-height: 44px;
+}
+input, select, textarea {
+  width: 100%;
+  border: 1px solid #abb9cf;
+  background: white;
+  color: #17243a;
+}
+button {
+  display: inline-block;
+  border: 0;
+  background: #2563eb;
+  color: white;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  margin: 0.3rem 0.5rem 0.3rem 0;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.secondary {
+  background: #e4eaf5;
+  color: #17243a;
+}
+.danger {
+  background: #b42332;
+}
+.narrow {
+  max-width: 480px;
+  margin: auto;
+}
+</style>
 ```
 
 ## modules/projects/ui/pages/ProjectList.html
@@ -2083,6 +2843,86 @@ export default {
   },
 };
 </script>
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+a {
+  color: #1d4ed8;
+}
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.15;
+}
+h2 {
+  font-size: 1.2rem;
+}
+p {
+  line-height: 1.6;
+}
+[role="alert"] {
+  color: #a21c2b;
+  padding: 0.8rem;
+  border-left: 4px solid;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+.card {
+  display: block;
+  background: white;
+  border: 1px solid #d8e0ed;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  color: inherit;
+  text-decoration: none;
+}
+label {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.9rem 0;
+  font-weight: 600;
+}
+input, select, textarea, button {
+  font: inherit;
+  border-radius: 7px;
+  padding: 0.7rem;
+  min-height: 44px;
+}
+input, select, textarea {
+  width: 100%;
+  border: 1px solid #abb9cf;
+  background: white;
+  color: #17243a;
+}
+button {
+  display: inline-block;
+  border: 0;
+  background: #2563eb;
+  color: white;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  margin: 0.3rem 0.5rem 0.3rem 0;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.secondary {
+  background: #e4eaf5;
+  color: #17243a;
+}
+.danger {
+  background: #b42332;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+}
+</style>
 ```
 
 ## modules/projects/ui/pages/ProjectDetails/[id].html
@@ -2164,7 +3004,86 @@ export default {
   },
 };
 </script>
-<style scoped>progress { width: 100%; height: 1.2rem; accent-color: #2563eb; }</style>
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+a {
+  color: #1d4ed8;
+}
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.15;
+}
+h2 {
+  font-size: 1.2rem;
+}
+p {
+  line-height: 1.6;
+}
+[role="alert"] {
+  color: #a21c2b;
+  padding: 0.8rem;
+  border-left: 4px solid;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+.card {
+  display: block;
+  background: white;
+  border: 1px solid #d8e0ed;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  color: inherit;
+  text-decoration: none;
+}
+label {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.9rem 0;
+  font-weight: 600;
+}
+input, select, textarea, button {
+  font: inherit;
+  border-radius: 7px;
+  padding: 0.7rem;
+  min-height: 44px;
+}
+input, select, textarea {
+  width: 100%;
+  border: 1px solid #abb9cf;
+  background: white;
+  color: #17243a;
+}
+button {
+  display: inline-block;
+  border: 0;
+  background: #2563eb;
+  color: white;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  margin: 0.3rem 0.5rem 0.3rem 0;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.secondary {
+  background: #e4eaf5;
+  color: #17243a;
+}
+.danger {
+  background: #b42332;
+}
+progress {
+  width: 100%;
+  height: 1.2rem;
+  accent-color: #2563eb;
+}
+</style>
 ```
 
 ## modules/projects/ui/components/TaskForm.html
@@ -2190,6 +3109,81 @@ export default {
   },
 };
 </script>
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+a {
+  color: #1d4ed8;
+}
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.15;
+}
+h2 {
+  font-size: 1.2rem;
+}
+p {
+  line-height: 1.6;
+}
+[role="alert"] {
+  color: #a21c2b;
+  padding: 0.8rem;
+  border-left: 4px solid;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+.card {
+  display: block;
+  background: white;
+  border: 1px solid #d8e0ed;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  color: inherit;
+  text-decoration: none;
+}
+label {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.9rem 0;
+  font-weight: 600;
+}
+input, select, textarea, button {
+  font: inherit;
+  border-radius: 7px;
+  padding: 0.7rem;
+  min-height: 44px;
+}
+input, select, textarea {
+  width: 100%;
+  border: 1px solid #abb9cf;
+  background: white;
+  color: #17243a;
+}
+button {
+  display: inline-block;
+  border: 0;
+  background: #2563eb;
+  color: white;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  margin: 0.3rem 0.5rem 0.3rem 0;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.secondary {
+  background: #e4eaf5;
+  color: #17243a;
+}
+.danger {
+  background: #b42332;
+}
+</style>
 ```
 
 ## modules/projects/ui/components/TaskList.html
@@ -2208,6 +3202,90 @@ File: `modules/projects/ui/components/TaskList.html`
   </li></ul>
 </div></template>
 <script lang="ts">export default { props: ['tasks', 'busy'], emits: ['status', 'remove'] };</script>
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+a {
+  color: #1d4ed8;
+}
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.15;
+}
+h2 {
+  font-size: 1.2rem;
+}
+p {
+  line-height: 1.6;
+}
+[role="alert"] {
+  color: #a21c2b;
+  padding: 0.8rem;
+  border-left: 4px solid;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+.card {
+  display: block;
+  background: white;
+  border: 1px solid #d8e0ed;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  color: inherit;
+  text-decoration: none;
+}
+label {
+  display: grid;
+  gap: 0.4rem;
+  margin: 0.9rem 0;
+  font-weight: 600;
+}
+input, select, textarea, button {
+  font: inherit;
+  border-radius: 7px;
+  padding: 0.7rem;
+  min-height: 44px;
+}
+input, select, textarea {
+  width: 100%;
+  border: 1px solid #abb9cf;
+  background: white;
+  color: #17243a;
+}
+button {
+  display: inline-block;
+  border: 0;
+  background: #2563eb;
+  color: white;
+  padding: 0.7rem 1rem;
+  cursor: pointer;
+  margin: 0.3rem 0.5rem 0.3rem 0;
+}
+button:disabled {
+  opacity: 0.55;
+  cursor: wait;
+}
+.secondary {
+  background: #e4eaf5;
+  color: #17243a;
+}
+.danger {
+  background: #b42332;
+}
+.task-list {
+  list-style: none;
+  padding: 0;
+}
+.task-list span {
+  display: block;
+  color: #526079;
+  margin-top: 0.5rem;
+}
+</style>
 ```
 
 ## modules/content/ui/pages/Help.html
@@ -2231,6 +3309,48 @@ export default {
   },
 };
 </script>
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+a {
+  color: #1d4ed8;
+}
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.15;
+}
+h2 {
+  font-size: 1.2rem;
+}
+p {
+  line-height: 1.6;
+}
+[role="alert"] {
+  color: #a21c2b;
+  padding: 0.8rem;
+  border-left: 4px solid;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+.card {
+  display: block;
+  background: white;
+  border: 1px solid #d8e0ed;
+  border-radius: 12px;
+  padding: 1.2rem;
+  margin: 1rem 0;
+  color: inherit;
+  text-decoration: none;
+}
+.cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
+  gap: 1rem;
+}
+</style>
 ```
 
 ## modules/content/ui/pages/Article/[slug].html
@@ -2240,7 +3360,7 @@ File: `modules/content/ui/pages/Article/[slug].html`
 ```html
 <template><article><a href="/help" data-teloce-link>← Help centre</a>
   <p v-if="loading" role="status">Loading article…</p><p v-if="message" role="alert">{{ message }}</p>
-  <div v-if="article"><h1>{{ article.title }}</h1><p>{{ article.summary }}</p><div v-html="article.body"></div></div>
+  <div v-if="article"><h1>{{ article.title }}</h1><p>{{ article.summary }}</p><div class="article-body" v-html="article.body"></div></div>
 </article></template>
 <script lang="ts">
 import { api } from '../../../../../ui/api.ts';
@@ -2253,43 +3373,37 @@ export default {
   },
 };
 </script>
-```
-
-## public/app.css
-
-File: `public/app.css`
-
-```css
-:root { color-scheme: light; font-family: system-ui, sans-serif; color: #17243a; background: #f3f6fc; }
-* { box-sizing: border-box; }
-body { margin: 0; }
-header { display: flex; justify-content: space-between; gap: 1rem; align-items: center; padding: 1.2rem max(1rem, calc((100vw - 1080px) / 2)); background: #17243a; color: white; }
-header a { color: white; text-decoration: none; }
-.brand { font-weight: 800; font-size: 1.3rem; }
-nav { display: flex; gap: 1rem; }
-main { max-width: 1080px; margin: auto; min-height: 75vh; padding: 2rem 1rem; }
-footer { padding: 1.5rem; text-align: center; color: #526079; }
-a { color: #1d4ed8; }
-h1 { font-size: clamp(1.8rem, 5vw, 3rem); line-height: 1.15; }
-h2 { font-size: 1.2rem; }
-p { line-height: 1.6; }
-.hero { max-width: 700px; padding: 3rem 0; }
-.eyebrow { text-transform: uppercase; font-size: .8rem; letter-spacing: .1em; }
-.narrow { max-width: 480px; margin: auto; }
-.card { display: block; background: white; border: 1px solid #d8e0ed; border-radius: 12px; padding: 1.2rem; margin: 1rem 0; color: inherit; text-decoration: none; }
-.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1rem; }
-label { display: grid; gap: .4rem; margin: .9rem 0; font-weight: 600; }
-input, select, textarea, button { font: inherit; border-radius: 7px; padding: .7rem; min-height: 44px; }
-input, select, textarea { width: 100%; border: 1px solid #abb9cf; background: white; color: #17243a; }
-button, .button { display: inline-block; border: 0; background: #2563eb; color: white; padding: .7rem 1rem; cursor: pointer; text-decoration: none; margin: .3rem .5rem .3rem 0; }
-button:disabled { opacity: .55; cursor: wait; }
-.secondary { background: #e4eaf5; color: #17243a; }
-.danger { background: #b42332; }
-[role=alert] { color: #a21c2b; padding: .8rem; border-left: 4px solid; }
-.task-list { list-style: none; padding: 0; }
-.task-list span { display: block; color: #526079; margin-top: .5rem; }
-:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
-@media (max-width: 520px) { header { flex-direction: column; align-items: flex-start; } main { padding: 1rem; } }
+<style scoped>
+* {
+  box-sizing: border-box;
+}
+a {
+  color: #1d4ed8;
+}
+h1 {
+  font-size: clamp(1.8rem, 5vw, 3rem);
+  line-height: 1.15;
+}
+h2 {
+  font-size: 1.2rem;
+}
+p {
+  line-height: 1.6;
+}
+[role="alert"] {
+  color: #a21c2b;
+  padding: 0.8rem;
+  border-left: 4px solid;
+}
+:focus-visible {
+  outline: 3px solid #f59e0b;
+  outline-offset: 3px;
+}
+.article-body {
+  line-height: 1.6;
+  overflow-wrap: anywhere;
+}
+</style>
 ```
 
 ## .env.example
@@ -2400,7 +3514,7 @@ throwaway teaching checkout when removing code to type it again.
 Install using the README, migrate, and run the development server. Register a
 browser account. Close personal tabs, hide credentials, set the editor to a
 readable font, and test your microphone. Capture 1080p if your equipment supports
-it; prioritize legible code and clean audio. Keep decorative CSS already supplied.
+it; prioritize legible code and clean audio. Keep the existing scoped component blocks supplied. Teach a few local rules as part of the interface take; there is no shared app.css file.
 Run `python scripts/course_api_demo.py` and the ownership test before the take.
 The demo deliberately creates a new sample account and project on each run.
 
@@ -2446,11 +3560,13 @@ another user. The server must deny it."
 
 Open modules/projects/ui/pages/ProjectList.html. Explain the api import, mounted
 GET request, projects array, loading/error messages, and v-for cards. Type the
-createProject method and form submit binding. The helper unwraps data and sends
+createProject method, form submit binding, and a few rules in the page's style scoped block. The helper unwraps data and sends
 cookies plus CSRF. On success prepend the returned project and clear the fields.
 Show the busy guard and finally block so failure does not leave the button stuck.
 
-Explain `data-teloce-link`: an anchor to /projects/ID mounts the module page
+Show ProjectList.html's scoped .card styles and TaskForm.html's own button styles.
+Explain that inheritance still works, while page selectors do not style child
+component internals automatically. Then explain `data-teloce-link`: an anchor to /projects/ID mounts the module page
 inside the SPA shell. A direct refresh also needs the Python shell route.
 Create a project in your browser, then use Back and refresh its detail page.
 

@@ -9,7 +9,7 @@ throwaway teaching checkout when removing code to type it again.
 Install using the README, migrate, and run the development server. Register a
 browser account. Close personal tabs, hide credentials, set the editor to a
 readable font, and test your microphone. Capture 1080p if your equipment supports
-it; prioritize legible code and clean audio. Keep decorative CSS already supplied.
+it; prioritize legible code and clean audio. Keep the existing scoped component blocks supplied. Teach a few local rules as part of the interface take; there is no shared app.css file.
 Run `python scripts/course_api_demo.py` and the ownership test before the take.
 The demo deliberately creates a new sample account and project on each run.
 
@@ -55,11 +55,13 @@ another user. The server must deny it."
 
 Open modules/projects/ui/pages/ProjectList.html. Explain the api import, mounted
 GET request, projects array, loading/error messages, and v-for cards. Type the
-createProject method and form submit binding. The helper unwraps data and sends
+createProject method, form submit binding, and a few rules in the page's style scoped block. The helper unwraps data and sends
 cookies plus CSRF. On success prepend the returned project and clear the fields.
 Show the busy guard and finally block so failure does not leave the button stuck.
 
-Explain `data-teloce-link`: an anchor to /projects/ID mounts the module page
+Show ProjectList.html's scoped .card styles and TaskForm.html's own button styles.
+Explain that inheritance still works, while page selectors do not style child
+component internals automatically. Then explain `data-teloce-link`: an anchor to /projects/ID mounts the module page
 inside the SPA shell. A direct refresh also needs the Python shell route.
 Create a project in your browser, then use Back and refresh its detail page.
 

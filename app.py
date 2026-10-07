@@ -60,12 +60,10 @@ def create_app(database_path=None, admin_path=None, debug=None):
         admin_path or ADMIN_DATABASE_PATH,
         Path(admin_path or ADMIN_DATABASE_PATH).parent / "uploads",
     )
-    app.mount_static("/assets", str(ROOT / "public"))
     app.use_teloce(
         project_root=ROOT,
         ui_dir="ui",
         title="Project Manager",
-        stylesheets=["/assets/app.css"],
         options={"minifier": "minifyjs"},
     )
 

@@ -1,9 +1,13 @@
-# Companion book
+# Instructor recording guide
 
 Read [companion.md](companion.md) or [the PDF](../output/pdf/flaxon-project-manager-book.pdf).
 The cover uses the existing Flaxon logo, copied from the framework assets.
 
 The teaching text and automatic source excerpts live in `scripts/write_book.py`.
+The editable narration and live-coding plan is `course/recording-plan.json`.
+Each chapter includes preparation, Say/Type/Show takes, demonstrations, editing
+notes, commands, troubleshooting, and an exercise. All UI source uses component
+scoped CSS.
 After changing course code or chapter explanations, regenerate Markdown and PDF:
 
 ```bash

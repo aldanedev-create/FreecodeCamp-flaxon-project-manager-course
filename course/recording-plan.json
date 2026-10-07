@@ -1,0 +1,302 @@
+[
+  {
+    "minutes": "15-20",
+    "before": "Keep the finished app ready for the opening preview, an empty folder for CLI generation, and starter-scoped-css as the prepared reference. Install the pinned course wheels in the activated environment before generating.",
+    "scenes": [
+      {
+        "say": "By the end, a signed-in user can create projects, manage tasks, and see progress. Staff have a separate Admin, and help content comes from the CMS. We will build the backend first, then connect the browser to APIs we have already tested.",
+        "type": "The README clone, virtual-environment and dependency commands. Explain which activation command belongs to Windows and which to macOS/Linux.",
+        "show": "Preview registration, one project, a completed task, and the Help page. Show staff Admin briefly without exposing passwords."
+      },
+      {
+        "say": "Flaxon owns the Python server. Teloce compiles our HTML components into JavaScript. MinifyJS optimizes the compiled JavaScript for production; we do not need a Node build for this project.",
+        "type": "In a separate folder: flaxon new project-manager --no-venv, then cd project-manager and python management.py migrate.",
+        "show": "Run flaxon welcome and flaxon welcome-status. Open the generated welcome page and show its module folder."
+      },
+      {
+        "say": "The starter is our beginning, and the completed repository is our reference. The course uses pinned dependencies, including an explicitly labelled Flaxon build with CMS fixes.",
+        "type": "After CLI generation, remove the app.css stylesheet reference in app.py; move Welcome link/button rules into its existing style scoped block and add the shell typography/reset block. The prepared starter-scoped-css branch already contains these edits and pinned dependencies.",
+        "show": "Point viewers to the checkpoint guide and briefly show the welcome component's existing style scoped block."
+      }
+    ],
+    "cut": "Cut package download waits, not the commands or their successful completion. Record a clean ten-second microphone test before this take.",
+    "finish": "State that the welcome project runs, then introduce modules as the next step."
+  },
+  {
+    "minutes": "15-20",
+    "before": "Open the generated starter and keep the final app.py available in a separate reference window. Do not mount a feature before its imports and module exist.",
+    "scenes": [
+      {
+        "say": "A feature can keep its Python routes, browser screens, and commands together. The application factory decides which features are mounted and where their APIs begin.",
+        "type": "create_app() and the welcome module mount in app.py. Introduce settings.py and the module directory structure.",
+        "show": "Trace GET /api/welcome/status from the application mount to the module decorator."
+      },
+      {
+        "say": "A prefix is added once. A slash inside a project module will become /api/projects/ when we mount that module. Tests can create a fresh app against a temporary database.",
+        "type": "The FlaxonModule declaration in modules/projects/module.py as a preview; save its UI mapping for the frontend chapter.",
+        "show": "Contrast a Python route parameter with a browser :id pattern. Show the module-owned files rather than inventing a new routing API."
+      }
+    ],
+    "cut": "Keep the architecture explanation short. Zoom in on one mount and one route; do not tour every framework file.",
+    "finish": "Ask the learner to find the welcome API and its module command."
+  },
+  {
+    "minutes": "20-25",
+    "before": "Use a disposable development data directory. Open migrations/0001_initial.json, database.py, and management.py.",
+    "scenes": [
+      {
+        "say": "A user owns projects, and each project owns tasks. We store those relationships in the database, so they survive a server restart.",
+        "type": "The users, projects, and tasks definitions in the migration; then the session and auth-attempt tables. Explain foreign keys, cascades, and indexes.",
+        "show": "Run migrate and migrate --status. Run migrate again and show that no duplicate migration is applied."
+      },
+      {
+        "say": "SQLite calls are synchronous. Our small repository runs them in a worker thread and opens a connection for each operation. Values use placeholders rather than being joined into SQL.",
+        "type": "Database.connection(), all(), one(), and execute() in that order.",
+        "show": "Point to PRAGMA foreign_keys and the transaction context. Show that the database path comes from DATA_DIR, not a hardcoded cloud path."
+      }
+    ],
+    "cut": "Print or enlarge the migration SQL when explaining relationships; the JSON string is difficult to read at normal editor size.",
+    "finish": "Recap persistence, parameterized values, and why migrations precede API writes."
+  },
+  {
+    "minutes": "30-40",
+    "before": "The schema and Database helper must run. Use chapter-04-auth as a recovery point; customer UI and staff Admin are deliberately not enabled in that checkpoint.",
+    "scenes": [
+      {
+        "say": "We never store a plain password. Argon2 hashes the password, while a random opaque session token identifies an authenticated session. Only a digest of that token is stored.",
+        "type": "security.py: digest(), read_session(), require_user(), and session_response(); then the auth module register and login handlers.",
+        "show": "Show GET /api/auth/session before login, the registration response, and the public user fields without printing password hashes."
+      },
+      {
+        "say": "Cookies alone are not enough for these mutations. A session-bound CSRF token is required, and login rotates both the session and that token.",
+        "type": "check_csrf(), then the logout handler. Explain HttpOnly, SameSite, production Secure, and expiry while pointing to the actual code.",
+        "show": "In the HTTP client, deliberately use the old CSRF token after registration and show rejection; then use the new token successfully."
+      },
+      {
+        "say": "Logging out must revoke the old server session. A cookie copied before logout should stop working too.",
+        "type": "The logout/revocation test in the auth checkpoint, or explain the completed login/logout test.",
+        "show": "Run authentication tests and show a wrong-password response. Never use a staff credential in the public registration example."
+      }
+    ],
+    "cut": "Pause after session rotation. This is a concept learners need to reproduce, not a place to speed up typing.",
+    "finish": "Ask viewers to replay an old cookie after logout and predict the status."
+  },
+  {
+    "minutes": "20-25",
+    "before": "Start from the authenticated backend. Open the project module, the HTTP demonstration, and the ownership test. Use two separate learner accounts.",
+    "scenes": [
+      {
+        "say": "The owner comes from the signed-in user. It is not a field the browser gets to choose.",
+        "type": "owned_project(), list_projects(), and create_project(), including imports, validation, SQL placeholders, and the 201 response.",
+        "show": "Create a project through HTTP, list it, and show the consistent data envelope."
+      },
+      {
+        "say": "Authentication tells us who you are. Ownership tells us which record you may use. A private record returns 404 to someone else.",
+        "type": "get_project(), update_project(), and delete_project(). Explain the CSRF and ownership checks before mutations.",
+        "show": "Run scripts/course_api_demo.py, then the ownership test. Show a blank name returning 400 and another account getting 404."
+      }
+    ],
+    "cut": "This is the backend half of the pilot. Keep one successful request and one denied request visible long enough to read.",
+    "finish": "Transition to tasks: tasks will inherit permission through their parent project."
+  },
+  {
+    "minutes": "20-25",
+    "before": "Project creation and ownership must be working. Prepare one owned project and a second account.",
+    "scenes": [
+      {
+        "say": "A task belongs to a project. Every operation checks that the current user may access the parent project, even when the request only contains a task ID.",
+        "type": "owned_task(), list_tasks(), and create_task() in modules/tasks/module.py.",
+        "show": "Create a task with a due date and demonstrate that another user cannot add a task to your project."
+      },
+      {
+        "say": "PATCH changes only supplied fields. Status is one of three values, and a date uses YYYY-MM-DD. These rules belong on the server as well as the form.",
+        "type": "task_fields(), update_task(), and delete_task(); type the optional list status filter.",
+        "show": "Update a task to done, filter to done, reject an impossible date, and show the cascade test for project deletion."
+      }
+    ],
+    "cut": "Do not spend the take typing repetitive SQL punctuation silently. Explain the changed values and ownership decision.",
+    "finish": "Ask the learner to add an invalid-date regression case."
+  },
+  {
+    "minutes": "15-20",
+    "before": "Keep the API layer working before showing any customer interface code. Use disposable tests, never the recording database.",
+    "scenes": [
+      {
+        "say": "These tests make requests through the ASGI application. A temporary database gives each test an isolated place to create records.",
+        "type": "The application fixture and Account helper in tests/conftest.py. Explain how the helper carries the cookie and CSRF token.",
+        "show": "Show the migration fixture and create_app() receiving temporary paths."
+      },
+      {
+        "say": "The ownership test registers a second user and calls the API directly. Hiding an Edit button would not pass this test if the backend were wrong.",
+        "type": "test_project_crud_and_ownership(), then one invalid task case.",
+        "show": "Run focused tests first, then the suite appropriate to your current teaching checkout. The completed reference has additional Admin/CMS tests taught later."
+      }
+    ],
+    "cut": "Show failures intentionally only in a throwaway rehearsal checkout; restore the code and end the take with passing checks.",
+    "finish": "Point to backend-ready and explain that the frontend will consume these same endpoints."
+  },
+  {
+    "minutes": "25-30",
+    "before": "The backend must already work. Open ui/app.html, ui/pages/Home.html, app.py, and the module UI route declarations.",
+    "scenes": [
+      {
+        "say": "Our HTML component has a template, a TypeScript script, and a scoped style block. Flaxon serves the compiled shell; Teloce mounts pages inside the router view.",
+        "type": "The shell template and script, app.use_teloce(), and the explicit Python shell routes.",
+        "show": "Open the compiled page and trace the router-view marker and module UI mapping."
+      },
+      {
+        "say": "We keep page styles inside the page. The compiler adds a component scope attribute so a header or button rule does not unexpectedly change another component.",
+        "type": "The shell style scoped block, then the Home component's .hero, .eyebrow, and .button rules. Explain the single :global(body) margin reset because body is outside the component.",
+        "show": "Change the Home button colour, navigate away, and confirm another component's button is unchanged. Restore the final colour."
+      },
+      {
+        "say": "A parent owns its layout, and a child owns its form. Inherited font and colour can flow through the shell, but scoped selector rules do not become a global stylesheet.",
+        "type": "Show local style blocks in Login, ProjectList, TaskForm, and TaskList. Remove the old app.css reference when following an older checkout.",
+        "show": "Confirm there is no /assets/app.css request. At mobile width, show that the shell navigation wraps and the forms fit."
+      }
+    ],
+    "cut": "Teach a few meaningful CSS rules live, then supply the rest of each scoped block in that component. Do not paste one giant global CSS file.",
+    "finish": "Ask viewers to explain the difference between inheritance and scoped selector matching."
+  },
+  {
+    "minutes": "25-30",
+    "before": "The auth API and SPA shell must run. Keep ui/types.ts, ui/api.ts, and Login.html open.",
+    "scenes": [
+      {
+        "say": "The interface knows the shape of a Session, but the server still validates the real request. Our helper loads the session, sends cookies and CSRF, and unwraps data.",
+        "type": "User and Session interfaces, loadSession(), then api(). Explain response.ok and token replacement on auth responses.",
+        "show": "Show one successful response and one error without exposing a real session cookie on camera."
+      },
+      {
+        "say": "The account form tracks loading and errors, disables repeated submissions, and clears the password after success. Switching modes keeps the form DOM with v-show.",
+        "type": "Login.html template, data(), mounted(), submit(), logout(), and its scoped form styles.",
+        "show": "Register in the browser, sign out, try a wrong password, then sign in. Show the status/alert messages and the keyboard labels."
+      }
+    ],
+    "cut": "Slow down when the helper cache changes after authentication. An old CSRF token is a common error worth explaining.",
+    "finish": "Have learners add explanatory form text without weakening backend validation."
+  },
+  {
+    "minutes": "30-35",
+    "before": "An authenticated learner can create a project. Open the detail page, TaskForm.html, and TaskList.html.",
+    "scenes": [
+      {
+        "say": "The form emits an event; the parent decides how to save it. We keep requests in the page so the child components stay easy to understand.",
+        "type": "TaskForm and TaskList templates, props and emits, then the parent createTask(), changeStatus(), and removeTask() methods.",
+        "show": "Create a task, change its status, and delete it. Show the child's scoped .card and button rules."
+      },
+      {
+        "say": "The task signal holds the complete collection. Computed progress reads that signal. The filtered list changes what we show, not the total we use for completion.",
+        "type": "signal([]), computed completion, setTasks(), and the mounted effect in ProjectDetails. Do not add signal imports to this compiled HTML component.",
+        "show": "Create two tasks and complete one: progress is 50%. Filter to done and confirm it stays 50%."
+      },
+      {
+        "say": "An effect is work that belongs to the mounted screen. Stop it before unmount so an old screen does not keep reacting.",
+        "type": "beforeUnmount() and the mutation busy/error guard; type the local progress style.",
+        "show": "Navigate away and back, then test an empty project at 0%. Run the task and browser checks."
+      }
+    ],
+    "cut": "Explain signal reads with parentheses and writes with .set(). Do not imply ordinary TypeScript helper files receive the compiler's automatic imports.",
+    "finish": "Ask learners to compute a remaining-task count from the full collection."
+  },
+  {
+    "minutes": "15-20",
+    "before": "At least one project and its detail screen must be working. Keep browser Network and a separate console ready.",
+    "scenes": [
+      {
+        "say": "data-teloce-link tells the browser router to handle an internal anchor. The page mounts in the shell rather than reloading the document.",
+        "type": "Internal anchors in app.html and ProjectList.html; show the module's /projects/:id mapping and the id prop.",
+        "show": "Set window.courseNavigationMarker = 42, click a project, and read the marker again. Back and Forward should preserve the document."
+      },
+      {
+        "say": "A refresh starts at the server. Flaxon must return the shell for the browser URL before Teloce can mount the component and fetch its data.",
+        "type": "The explicit /projects/<int:project_id> shell route, then the Help shell routes. Explain why Admin links are ordinary anchors.",
+        "show": "Refresh a nested project URL and request an unknown /api path to show that API 404 responses are preserved."
+      }
+    ],
+    "cut": "Do not hide the refresh check; it is the difference between click-only routing and a usable SPA deployment.",
+    "finish": "Ask learners to add a Help link and verify click, Back, and refresh."
+  },
+  {
+    "minutes": "20-25",
+    "before": "Customer APIs work. Open backoffice.py and management.py. Use only disposable staff credentials during the recording.",
+    "scenes": [
+      {
+        "say": "Customers and staff are separate account systems. Registering a customer never creates an administrator. We bootstrap staff interactively, with no default password.",
+        "type": "AdminDashboard configuration with strict_permissions, then the setup-admin command.",
+        "show": "Run setup-admin with the password entry off-screen. Sign into /admin/login and show the model list."
+      },
+      {
+        "say": "The Admin adapter reuses the same database as the customer API. Staff capabilities decide who can read or change all registered records; this is not a customer tenant portal.",
+        "type": "ProjectAdmin get_instances(), get_instance(), update_instance(), and registration fields. Explain why create is disabled here.",
+        "show": "Edit a project as authorized staff and read it through its owner account. Create a read-only staff role and show that changes are denied."
+      }
+    ],
+    "cut": "Hide passwords and sensitive account data. Show exact permission keys from docs/security.md rather than implying a role name grants everything.",
+    "finish": "Recap the account boundary and introduce editorial permissions."
+  },
+  {
+    "minutes": "20-25",
+    "before": "Staff Admin runs with the patched course build. Open the help content type, public content module, Help.html, and Article/[slug].html.",
+    "scenes": [
+      {
+        "say": "The CMS stores editorial records. Public readers receive only published articles and a small whitelist of fields; they never use the staff editing API.",
+        "type": "The help_article ContentType, published_articles(), the list endpoint, and the slug endpoint.",
+        "show": "Create a draft and show that it is absent from the Help page. Publish with a permitted account and load it in the SPA."
+      },
+      {
+        "say": "Rendering HTML is different from displaying a string. This field is sanitized rich text; we do not render arbitrary user input as HTML.",
+        "type": "Help and Article templates, v-html on the sanitized body, and each page's scoped styles.",
+        "show": "Show the rendered article and the browser-safe body. Explain that injected HTML does not automatically receive component scope attributes."
+      },
+      {
+        "say": "Draft editors and publishers have different rights. Editing already published content or restoring a protected revision also needs the required publication permissions.",
+        "type": "Show the CMS security patch notes and one permission regression test; do not rewrite the entire framework patch during the lesson.",
+        "show": "Run the CMS tests and demonstrate that a draft-only editor cannot publish."
+      }
+    ],
+    "cut": "If demonstrating seed, run it only after creating a customer account and restart the process. Do not seed production on every deployment.",
+    "finish": "Ask learners to prove that a draft is not exposed publicly."
+  },
+  {
+    "minutes": "15-20",
+    "before": "The completed app and Playwright Chromium must be installed. Rehearse the browser script before recording its terminal output.",
+    "scenes": [
+      {
+        "say": "API tests cannot prove that a real form listener, SPA link, or mobile layout works. Our browser checks use fresh data and exercise the actual compiled interface.",
+        "type": "Explain the server setup and desktop/mobile loop in scripts/browser_smoke.py; add one behavioral assertion as a teaching example.",
+        "show": "Run API checks and the development browser smoke test. Show the scoped form controls and a 390-pixel viewport."
+      },
+      {
+        "say": "We also test the production build, because minified code should preserve the same behavior. Accessibility is part of the working interface, not a final decoration.",
+        "type": "Point to the production switch, status/alert roles, form labels, focus-visible styles, and busy guards.",
+        "show": "Run the production browser smoke test. Complete a short keyboard-only workflow and show a visible focus ring."
+      }
+    ],
+    "cut": "Cut repetitive automated interactions if they are too fast to teach; keep the purpose, command, and passing result.",
+    "finish": "List the checks that must pass before the deployment take."
+  },
+  {
+    "minutes": "20-30",
+    "before": "Keep the local production tests green. A real deployment take requires your own Render service access; do not say deployment succeeded until you verify it there.",
+    "scenes": [
+      {
+        "say": "The compiled interface uses MinifyJS. Component CSS is bundled from style scoped blocks; there is no separate app.css file to copy to a server.",
+        "type": "Explain scripts/build_ui.py and the build command in render.yaml.",
+        "show": "Run the production build and show the component count and browser verification result."
+      },
+      {
+        "say": "SQLite needs a persistent disk. This course uses one instance and one worker, with both application and Admin databases under /var/data.",
+        "type": "Render disk, DATA_DIR, runtime migration/start command, PUBLIC_ORIGIN, DEBUG, and generated secret settings.",
+        "show": "In your Render account, configure the actual HTTPS origin and bootstrap staff with the Shell. Keep secrets off-camera."
+      },
+      {
+        "say": "A successful service screen is not enough. We need a real workflow, denied requests, and data that survives a restart.",
+        "type": "Use the verification list in docs/render.md and write down a backup/restore procedure for both SQLite files.",
+        "show": "Create a project/task, publish help, refresh a nested route, sign out, confirm API denial, restart, and verify persistence. If you have not deployed, explicitly present this as preparation."
+      }
+    ],
+    "cut": "Record the cloud verification after it actually works; do not splice a local test into a claim of live HTTPS verification.",
+    "finish": "End with the completed application, source/checkpoint links, and one extension exercise. Thank viewers in your own voice."
+  }
+]

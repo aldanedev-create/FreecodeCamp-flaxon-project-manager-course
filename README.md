@@ -9,7 +9,9 @@ This repository begins with the actual CLI command:
 flaxon new project-manager --no-venv
 ```
 
-The generated starter is preserved in the `chapter-01-setup` checkpoint branch. `main`
+The original generated starter is preserved in `chapter-01-setup`. Use
+`starter-scoped-css` for the prepared course starter with pinned dependencies
+and component-owned styles. `main`
 contains the finished application. Read [the recording plan](docs/course-outline.md)
 for the backend-first teaching sequence.
 
@@ -69,6 +71,13 @@ The Admin command prompts securely for a username and password; no default
 staff password exists. Open `/admin/login`, then `/admin/` and `/admin/cms/`.
 Public application accounts and staff Admin accounts are separate.
 
+## Component-owned styles
+
+Customer screens and child components use `<style scoped>` in their `.html`
+files. The shell owns layout and inherited typography; each child owns its form
+and controls. Only the shell's deliberate `:global(body)` margin reset escapes
+scope. The SPA has no shared app.css stylesheet.
+
 ## Tests and production build
 
 ```bash
@@ -100,10 +109,10 @@ Teloce-Py is built from the exact source revision recorded there. MinifyJS is
 pinned to `0.1.3`. Use the provided install commands rather than installing an
 unpatched framework version over this environment.
 
-## Companion book and recording
+## Instructor recording guide
 
-- [Read the 15-chapter Markdown book](book/companion.md)
-- [Download the illustrated PDF](output/pdf/flaxon-project-manager-book.pdf)
+- [Read the chapter-by-chapter recording guide](book/companion.md)
+- [Download the instructor PDF](output/pdf/flaxon-project-manager-book.pdf)
 - [Starter and chapter checkpoints](course/checkpoints.md)
 - [Sample lesson recording script](course/sample-lesson.md)
 
