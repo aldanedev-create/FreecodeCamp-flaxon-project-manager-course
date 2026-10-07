@@ -1,7 +1,21 @@
 <template>
-  <Welcome :project-name="project_name" />
+  <div class="starter-shell">
+    <Welcome :project-name="project_name" />
+  </div>
 </template>
 <script lang="ts">
 import Welcome from "../modules/welcome/ui/Welcome.html";
 export default { components: { Welcome }, props: ["project_name"] };
 </script>
+
+<style scoped>
+:global(body) {
+  margin: 0;
+}
+.starter-shell {
+  font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+  background: #ffffff;
+  color: #233f32;
+  min-height: 100vh;
+}
+</style>

@@ -29,7 +29,6 @@ def create_app():
     app.on_startup(database.initialize)
     app.on_shutdown(database.close)
     app.mount_module(welcome, prefix="/api/welcome")
-    app.mount_static("/assets", str(ROOT / "public"))
 
     # Jinax can power your entire website, or coexist with a Teloce interface.
     app.use_templates(Jinax(str(ROOT / "templates"), auto_reload=DEBUG))
@@ -50,7 +49,6 @@ def create_app():
         title=f"Welcome to {PROJECT_NAME}",
         favicon="https://flaxon-website.vercel.app/assets/images/logo/flaxon.png",
         description="Your Python and Teloce full-stack application is ready.",
-        stylesheets=["/assets/app.css"],
         options={"minifier": "minifyjs"},
     )
 

@@ -1,55 +1,23 @@
-# project-manager
+# Chapter 01: scoped-CSS welcome starter
 
-Your modular Python web application, with both Teloce and Jinax examples.
-
-Flaxon handles routes, APIs, validation, data, WebSockets, and administration. Build a complete server-rendered application with Flaxon + Jinax, an interactive full-stack application with Flaxon + Teloce, or use both. Your interface is your choice.
+This is the generated Flaxon welcome project adapted for the course. All Teloce
+styles live in style scoped blocks. The shell owns inherited typography, with a
+single deliberate global body margin reset. Welcome owns links and buttons.
+The optional Jinax example keeps its styles inside its server-rendered HTML.
+There is no external app.css file.
 
 ```bash
-python -m pip install -e .
-flaxon welcome
-flaxon welcome-status
+python -m venv .venv
+# Activate the environment for your operating system.
+python scripts/verify_vendor.py
+python -m pip install -r requirements-dev.txt
 python management.py migrate
-python management.py setup-admin
-flaxon run app:app --reload
+python -m flaxon welcome
+python -m flaxon welcome-status
+python -m flaxon run app:app --reload
 ```
 
-Open http://127.0.0.1:8000 for the welcome SPA and http://127.0.0.1:8000/admin/login for your protected admin. The welcome page works immediately; admin setup asks for your own username and password. Use at least eight characters with upper- and lowercase letters, a number, and a special character. No credentials are generated or committed.
-
-- `app.py`: app factory, module mounting, Jinax, Teloce, database lifecycle and admin.
-- `templates/welcome.html`: complete server-rendered example at `/server-page`.
-- `flaxon_cli.py`: exposes module-owned commands to the CLI.
-- `modules/welcome/module.py`: the module's Python status API.
-- `modules/welcome/ui/Welcome.html`: its component with scoped CSS and TypeScript.
-- `modules/welcome/ui/api.ts`: typed browser API helper.
-- `ui/app.html`: SPA entry that composes feature components.
-- `management.py`: `migrate`, `migrate --status`, `setup-admin`, and `createsuperuser`.
-- `migrations/`: ordered JSON migrations using Flaxon's MigrationRunner.
-- `data/app.sqlite3`: persistent application and admin storage, ignored by Git.
-
-Run management commands from any directory using the script's path; database and migration paths are anchored to this project. Stop/restart the server after creating an administrator so its account list reloads. `FLAXON_DEBUG=0` disables framework debug mode; configure production security and deployment before exposing your app publicly. The included admin store is a single-node starter configuration.
-
-Use source/editable deployment so `ui/`, `templates/`, `public/`, and `migrations/` remain beside the application. Teloce compiles the components and TypeScript; MinifyJS optimizes the JavaScript. Add a new module for each feature, then mount it in `create_app()`.
-
-## Your module's custom commands
-
-Run `flaxon welcome` or `flaxon welcome-status` from the project directory. These examples use the real synchronous and asynchronous module command APIs. They do not start the server or require a database.
-
-Add a command beside the routes in `modules/welcome/module.py`:
-
-```python
-@welcome.cli_command("my-task", help_text="Run my project task")
-def my_task(console):
-    console.info("Your Python task goes here.")
-    return 0
-```
-
-`flaxon_cli.py` calls `welcome.install_cli_commands(globals())` so the CLI discovers the command. For another feature module, import it there and install its commands too. Custom names must be unique and must not reuse built-in command names.
-
-## Your interface choices
-
-- **Jinax:** open `/server-page` and edit `templates/welcome.html`. For an entirely server-rendered app, remove `app.use_teloce()` and make `/` return `app.jinax.render_response(...)` instead of `request.compile(...)`. Keep your Python routes, modules, database, and admin.
-- **Teloce:** edit the welcome HTML component and its TypeScript helper. Teloce compiles the browser interface and MinifyJS optimizes the JavaScript.
-
-The welcome page uses the logo and documentation links from Flaxon's website. Those external resources need an internet connection; the local example routes and custom commands work offline.
-
-[Documentation](https://flaxon-website.vercel.app/docs.html) · [Examples](https://flaxon-website.vercel.app/examples.html)
+Open http://127.0.0.1:8000/. The completed application and instructor PDF are on
+main. The pinned course wheels are included; this starter is not a different
+framework release. The original generated starter remains in chapter-01-setup
+as a historical reference.

@@ -1,0 +1,274 @@
+From f25954b64a9fda0405d02ab221d6165a53c02e9d Mon Sep 17 00:00:00 2001
+From: Aldane Hutchinson <aldanedev-create@users.noreply.github.com>
+Date: Wed, 7 Oct 2026 16:15:50 -0400
+Subject: [PATCH] Require CMS authentication and enforce publication rights on
+ every write path
+
+---
+ docs/guides/admin-cms.md                      | 13 +++
+ src/flaxon/admin/cms.py                       | 54 ++++++++++---
+ tests/integration/test_cms_course_security.py | 81 +++++++++++++++++++
+ 3 files changed, 135 insertions(+), 13 deletions(-)
+ create mode 100644 tests/integration/test_cms_course_security.py
+
+diff --git a/docs/guides/admin-cms.md b/docs/guides/admin-cms.md
+index b52fa6d..34dbdb0 100644
+--- a/docs/guides/admin-cms.md
++++ b/docs/guides/admin-cms.md
+@@ -441,3 +441,16 @@ authorization and privileged operations on the server; components call those
+ endpoints and present their results. Follow the [full-stack lessons](../fullstack/index.md)
+ and [Teloce integration reference](../api/teloce.md) to connect this capability
+ to pages, components and application modules.
++
++## CMS authorization boundary
++
++CMS denies requests when no authentication backend is configured. Mount it
++with `CMS(app, auth=admin.auth)`. The explicit `allow_unauthenticated=True`
++option is only for isolated demonstrations.
++
++Use `strict_permissions=True` for new Admin installations. Creating or changing
++content into `approved`, `scheduled`, or `published`, editing already protected
++content, scheduling it, importing protected records, publishing/unpublishing,
++and executing custom CMS actions require `cms.publish_content`. Restoring a
++revision additionally requires `cms.restore_revision` and the model change
++permission. Configure exact model permissions for editor/publisher roles.
+diff --git a/src/flaxon/admin/cms.py b/src/flaxon/admin/cms.py
+index 04b646d..6b1d40c 100644
+--- a/src/flaxon/admin/cms.py
++++ b/src/flaxon/admin/cms.py
+@@ -3,7 +3,7 @@
+ 
+     from flaxon.admin.cms import CMS, ContentType, CMSField
+ 
+-    cms = CMS(app, url_prefix="/admin/cms", title="My Site CMS")
++    cms = CMS(app, url_prefix="/admin/cms", title="My Site CMS", auth=admin.auth)
+ 
+     cms.register(ContentType(
+         name="post",
+@@ -19,13 +19,10 @@
+         search_fields=["title", "content"],
+     ))
+ 
+-Using the CMS is entirely optional and independent of AdminDashboard — it
+-does not require or modify the model-based admin at all. It's a single
+-extra panel with its own JSON API and its own single-page UI (cms.html).
+-
+-Everything is in-memory by default. Swap `ContentType.store` (a plain
+-dict) for your own persistence by subclassing CMS and overriding
+-`_get_store`/`_save_store`, or by pre-populating `content_type.items`.
++CMS is optional and has its own JSON API and browser UI. Authentication is
++required by default. An explicit allow_unauthenticated=True opt-in exists for
++isolated local demonstrations; never enable it on a public deployment.
++AdminStore or the configured database persists content and revision records.
+ """
+ 
+ from __future__ import annotations
+@@ -380,12 +377,14 @@ class CMS:
+         redis_protocol: int = 2,
+         redis_max_connections: int = 100,
+         publisher_lock_ttl: int = 60,
++        allow_unauthenticated: bool = False,
+     ) -> None:
+         self.app = app
+         self.url_prefix = url_prefix.rstrip("/")
+         self.title = title
+         self.template_path = Path(template_path) if template_path else _DEFAULT_TEMPLATE_PATH
+         self.auth = auth or getattr(app, "_flaxon_admin_auth", None)
++        self.allow_unauthenticated = allow_unauthenticated
+         self.store = getattr(app, "_flaxon_admin_store", None)
+         self.database = database or getattr(app, "database", None) or getattr(app, "db", None)
+         self.publish_interval = max(1.0, publish_interval)
+@@ -835,6 +834,7 @@ class CMS:
+         if isinstance(data, dict):
+             data = await self._prepare_uploads(request, data, ct)
+         record = self.run_hook("before_create", data or {})
++        await self._authorize_publication(request, record)
+         record = ct.create(record)
+         record = self.run_hook("after_create", record)
+         self._save(ct)
+@@ -852,7 +852,9 @@ class CMS:
+         data = await self._body_data(request)
+         if isinstance(data, dict):
+             data = await self._prepare_uploads(request, data, ct)
+-        record = ct.update(item_id, self.run_hook("before_update", data or {}))
++        data = self.run_hook("before_update", data or {})
++        await self._authorize_publication(request, data, ct.get(item_id))
++        record = ct.update(item_id, data)
+         record = self.run_hook("after_update", record)
+         self._save(ct)
+         await self._save_content(ct)
+@@ -870,12 +872,15 @@ class CMS:
+         return JSONResponse({"deleted": True})
+ 
+     async def api_action(self, request: Request, type_name: str, action_name: str) -> Response:
+-        await self._require_content_user(request, type_name, "publish" if action_name == "publish" else "update")
++        await self._require_content_user(request, type_name, "publish" if action_name in {"publish", "unpublish"} else "update")
+         ct = self._get_type(type_name)
+         body = await request.json() or {}
+         ids = body.get("ids", [])
+         if not isinstance(ids, list):
+             raise BadRequest("'ids' must be a list.")
++        # Custom actions may change publication state; require publisher rights.
++        if action_name not in {"publish", "unpublish"}:
++            await self._require_content_user(request, type_name, "publish")
+         ct.run_action(action_name, ids)
+         self._save(ct)
+         await self._save_content(ct)
+@@ -883,8 +888,14 @@ class CMS:
+ 
+     async def api_restore(self, request: Request, type_name: str, item_id: str, revision: str) -> Response:
+         await self._require_content_user(request, type_name, "update")
++        await self._require_content_user(request, type_name, "restore")
+         ct = self._get_type(type_name)
+-        record = ct.restore(item_id, int(revision))
++        snapshots = [r for r in ct.revisions if r["item_id"] == item_id]
++        index = int(revision)
++        if index < 0 or index >= len(snapshots):
++            raise NotFound("Revision not found.")
++        await self._authorize_publication(request, snapshots[index]["record"], ct.get(item_id) if item_id in ct.items else None)
++        record = ct.restore(item_id, index)
+         self._save(ct)
+         await self._save_content(ct)
+         return JSONResponse(record)
+@@ -911,6 +922,10 @@ class CMS:
+             data = await request.json()
+         if not isinstance(data, list):
+             raise BadRequest("Import body must be a JSON list of records.")
++        # Authorize the entire batch before mutating any in-memory records.
++        for record in data:
++            if isinstance(record, dict):
++                await self._authorize_publication(request, record)
+         created: list[dict[str, Any]] = []
+         errors: list[dict[str, Any]] = []
+         for row_number, record in enumerate(data, 1):
+@@ -918,6 +933,7 @@ class CMS:
+                 errors.append({"row": row_number, "error": "Record must be an object."})
+                 continue
+             try:
++                await self._authorize_publication(request, record)
+                 created.append(ct.create(record))
+             except (BadRequest, ValueError, TypeError) as exc:
+                 errors.append({"row": row_number, "error": str(exc)})
+@@ -1076,10 +1092,20 @@ class CMS:
+         ct = self._get_type(type_name)
+         return JSONResponse({"items": ct.compare_revisions(item_id)})
+ 
++    async def _authorize_publication(self, request: Request, data: dict[str, Any], existing: dict[str, Any] | None = None) -> None:
++        """Enforce publication rights on every write path, not only bulk actions."""
++        protected = {"approved", "scheduled", "published"}
++        current = (existing or {}).get("status")
++        requested = data.get("status", current)
++        if current in protected or requested in protected or data.get("publish_at"):
++            await self._require_user(request, "cms.publish_content")
++
+     async def _require_user(self, request: Request, permission: str) -> Any:
+         await self._load_database()
+         if self.auth is None:
+-            return None
++            if self.allow_unauthenticated:
++                return None
++            raise Forbidden("CMS authentication must be configured.")
+         user = await self.auth.current_user(request)
+         self.auth.authorize(user, permission)
+         if request.method not in {"GET", "HEAD", "OPTIONS"}:
+@@ -1092,7 +1118,9 @@ class CMS:
+         """Authorize a content action while preserving admin-wide roles."""
+         await self._load_database()
+         if self.auth is None:
+-            return None
++            if self.allow_unauthenticated:
++                return None
++            raise Forbidden("CMS authentication must be configured.")
+         user = await self.auth.current_user(request)
+         permission = canonical_model_permission(type_name, action)
+         if action == "publish":
+diff --git a/tests/integration/test_cms_course_security.py b/tests/integration/test_cms_course_security.py
+new file mode 100644
+index 0000000..0fe5f3f
+--- /dev/null
++++ b/tests/integration/test_cms_course_security.py
+@@ -0,0 +1,81 @@
++import asyncio
++
++import pytest
++from flaxon import Flaxon
++from flaxon.admin import AdminDashboard
++from flaxon.admin.cms import CMS, CMSField, ContentType
++from flaxon.testing import TestClient
++
++
++def setup_editor():
++    app = Flaxon('cms-security', debug=True)
++    admin = AdminDashboard(app, strict_permissions=True, users=[{
++        'username': 'editor', 'password': 'Editor123!', 'roles': [],
++        'permissions': ['article.view_article', 'article.add_article', 'article.change_article', 'cms.restore_revision'],
++    }])
++    cms = CMS(app, auth=admin.auth)
++    content = cms.register(ContentType('article', fields=[CMSField('title', required=True)]))
++    token = asyncio.run(admin.auth.login('editor', 'Editor123!'))
++    headers = {'cookie': f'session_id={token}', 'x-csrf-token': admin.csrf_token()}
++    return TestClient(app), cms, content, headers
++
++
++def test_standalone_cms_denies_anonymous_requests_by_default():
++    app = Flaxon('closed-cms')
++    cms = CMS(app)
++    cms.register(ContentType('article', fields=[CMSField('title')]))
++    client = TestClient(app)
++    assert client.get('/admin/cms/api/article/items').status_code == 403
++    assert client.post('/admin/cms/api/article/items', json_data={'title': 'Anonymous'}).status_code == 403
++
++
++@pytest.mark.parametrize('status', ['approved', 'scheduled', 'published'])
++@pytest.mark.parametrize('method', ['create', 'update', 'import'])
++def test_editor_cannot_publish_through_generic_write_paths(status, method):
++    client, cms, content, headers = setup_editor()
++    data = {'title': 'Blocked', 'status': status}
++    if method == 'create':
++        response = client.post('/admin/cms/api/article/items', json_data=data, headers=headers)
++    elif method == 'update':
++        item = content.create({'title': 'Draft'})
++        response = client.put(f"/admin/cms/api/article/items/{item['id']}", json_data=data, headers=headers)
++        assert item['status'] == 'draft'
++    else:
++        response = client.post('/admin/cms/api/import/article', json_data=[data], headers=headers)
++    assert response.status_code == 403
++    assert not any(item['status'] == status for item in content.items.values())
++
++
++def test_editor_cannot_restore_published_revision_or_edit_published_content():
++    client, cms, content, headers = setup_editor()
++    item = content.create({'title': 'Published', 'status': 'published'})
++    assert client.put(f"/admin/cms/api/article/items/{item['id']}", json_data={'title': 'Changed'}, headers=headers).status_code == 403
++    content.update(item['id'], {'status': 'draft'})
++    assert client.post(f"/admin/cms/api/article/items/{item['id']}/restore/0", headers=headers).status_code == 403
++    assert item['status'] == 'draft'
++
++
++def test_draft_editing_and_publisher_creation_work_with_csrf():
++    client, cms, content, headers = setup_editor()
++    assert client.post('/admin/cms/api/article/items', json_data={'title': 'Draft'}, headers=headers).status_code == 201
++    cms.auth.users['editor']['permissions'].append('cms.publish_content')
++    assert client.post('/admin/cms/api/article/items', json_data={'title': 'Published', 'status': 'published'}, headers=headers).status_code == 201
++    assert client.post('/admin/cms/api/article/items', json_data={'title': 'No CSRF'}, headers={'cookie': headers['cookie']}).status_code == 400
++
++
++def test_import_authorization_is_checked_before_any_row_is_created():
++    client, cms, content, headers = setup_editor()
++    response = client.post('/admin/cms/api/import/article', json_data=[
++        {'title': 'Draft'}, {'title': 'Forbidden', 'status': 'published'},
++    ], headers=headers)
++    assert response.status_code == 403
++    assert content.items == {}
++
++
++@pytest.mark.parametrize('action', ['publish', 'unpublish', 'custom'])
++def test_actions_require_publisher_permission(action):
++    client, cms, content, headers = setup_editor()
++    item = content.create({'title': 'Draft'})
++    content.register_action('custom', 'Custom', lambda content_type, ids: None)
++    response = client.post(f'/admin/cms/api/article/actions/{action}', json_data={'ids': [item['id']]}, headers=headers)
++    assert response.status_code == 403
+-- 
+2.51.1
+
