@@ -9,14 +9,32 @@ def source(path,start=None,end=None):
  lang=Path(path).suffix.lstrip('.')
  lang={'py':'python','ts':'typescript'}.get(lang,lang)
  return f'File: `{path}`\n\n```{lang}\n{s.rstrip()}\n```\n'
+build_steps={item["chapter"]:item for item in json.loads((ROOT/"course/build-steps.json").read_text())}
 recording_plan=json.loads((ROOT/"course/recording-plan.json").read_text())
 chapters=[]
 def chapter(title,goal,explain,code,commands,result,errors,exercise):
+ number=len(chapters)+1
  plan=recording_plan[len(chapters)]
  scenes=[]
  for i,scene in enumerate(plan['scenes'],1):
   scenes.append(f"## Take {i} | Say, type, show\n\nSay: {scene['say']}\n\nType or explain on screen: {scene['type']}\n\nShow and verify: {scene['show']}\n")
  recording=f"## Recording preparation\n\nTarget edited length: {plan['minutes']} minutes. This is a planning range, not a recording already made.\n\nBefore the take: {plan['before']}\n\n"+'\n'.join(scenes)+f"\n## Editing and chapter handoff\n\nEditing note: {plan['cut']}\n\nEnd the chapter: {plan['finish']}\n"
+ exact=''
+ if number==1:
+  exact=(ROOT/'course/lesson-01-setup.md').read_text()
+ else:
+  step=build_steps[number]
+  exact='## Files to create or edit, in this order\n\nStop the development server before replacing files. Work inside `project_manager/`. Each block below is the complete file for this chapter. Replace the whole file when marked EDIT; do not append a second handler or factory. Create any missing parent folders.\n\n'
+  for path in step.get('delete',[]):
+   exact+=f'## DELETE: {path}\n\nRemove this generated starter migration before adding the course migration. Both use version 0001; keeping both causes a duplicate migration version error. The course uses a separate fresh database.\n\n'
+  for entry in step['files']:
+   lang={'py':'python','ts':'typescript'}.get(Path(entry['path']).suffix.lstrip('.'),Path(entry['path']).suffix.lstrip('.'))
+   exact+=f"## {entry['action']}: {entry['path']}\n\n```{lang}\n{entry['content'].rstrip()}\n```\n\n"
+  if number==3:
+   exact+='## Start the course database cleanly\n\nCreate `.env` with `DATA_DIR=data/course_recording` before the first migration. This selects a fresh course database and leaves any generated-starter database alone. Do not delete a real database. Do not apply the generated migration before replacing it with the course migration above.\n\n'
+  if number==8:
+   exact+='## Remove the unused generated stylesheet\n\nDelete `public/app.css`. The new factory has no stylesheets argument or assets mount, and each new HTML component owns its style scoped block. The optional old Jinax starter page is no longer mounted by this course factory.\n\n'
+  exact+='## Run these commands now\n\n```bash\n'+step['commands']+'\n```\n\n'
  chapters.append(f'''# {title}
 
 ## Lesson outcome
@@ -29,15 +47,11 @@ def chapter(title,goal,explain,code,commands,result,errors,exercise):
 
 {explain}
 
-## Exact code reference for this take
+{exact}
 
-{code}
+## Demonstration notes
 
-## Commands and demonstration
-
-```bash
-{commands}
-```
+Use the chapter commands above; the complete-reference tests and screens mentioned in the narration become available as their files are introduced. Do not run later-chapter tests against an earlier stage.
 
 ## Expected result
 
@@ -53,7 +67,7 @@ def chapter(title,goal,explain,code,commands,result,errors,exercise):
 
 Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
 ''')
-chapter('01 | Preview and setup','Run the finished application once, then generate the welcome starter in a separate folder.','The finished app has customer accounts, owned projects, tasks, progress, a staff Admin, and published help content. Flaxon handles HTTP, validation, authorization, persistence, and server composition. Teloce compiles HTML components into browser JavaScript; MinifyJS optimizes that JavaScript for production. Admin remains a separate server-rendered interface.\n\nUse Python 3.12, Git, and a terminal. Basic Python, HTML, CSS, and JavaScript are prerequisites. This book introduces the small amount of TypeScript used here. The dependencies include a labelled course-only Flaxon build containing CMS fixes; it is not an official PyPI release. Install the supplied dependency files, not an unrelated latest version.',source('requirements-dev.txt'),'git clone https://github.com/aldanedev-create/FreecodeCamp-flaxon-project-manager-course.git\ncd FreecodeCamp-flaxon-project-manager-course\npython -m venv .venv\n# Windows PowerShell: .\\.venv\\Scripts\\Activate.ps1\n# macOS/Linux: source .venv/bin/activate\npython scripts/verify_vendor.py\npython -m pip install -r requirements-dev.txt\npython management.py migrate\npython -m flaxon run app:app --reload','Open http://127.0.0.1:8000/login, register, and create a project. To reproduce the original generation lesson, stop the server, move to a new parent folder, activate the installed environment, and run `flaxon new project-manager --no-venv`. Enter that generated directory, run `python management.py migrate`, then `flaxon welcome`, `flaxon welcome-status`, and `python -m flaxon run app:app --reload`. The raw generator still includes app.css; adapt it as shown in Take 3, or recover from the starter-scoped-css branch. Its welcome screen and module commands are the starter, not the completed task manager.','A missing `flaxon` command usually means the virtual environment is inactive. Use `python -m flaxon`. If PowerShell blocks activation, run the environment Python directly (`.venv\\Scripts\\python.exe`). A missing wheel usually means you ran installation outside the repository root. Do not generate over the completed repository.','Generate the starter under a new directory name. Find the welcome module and its custom command before changing any code.')
+chapter('01 | Preview and setup','Run the finished application once, then generate the welcome starter in a separate folder.','The finished app has customer accounts, owned projects, tasks, progress, a staff Admin, and published help content. Flaxon handles HTTP, validation, authorization, persistence, and server composition. Teloce compiles HTML components into browser JavaScript; MinifyJS optimizes that JavaScript for production. Admin remains a separate server-rendered interface.\n\nUse Python 3.12, Git, and a terminal. Basic Python, HTML, CSS, and JavaScript are prerequisites. This book introduces the small amount of TypeScript used here. The dependencies include a labelled course-only Flaxon build containing CMS fixes; it is not an official PyPI release. Install the supplied dependency files, not an unrelated latest version.',source('requirements-dev.txt'),'git clone https://github.com/aldanedev-create/FreecodeCamp-flaxon-project-manager-course.git\ncd FreecodeCamp-flaxon-project-manager-course\npython -m venv .venv\n# Windows PowerShell: .\\.venv\\Scripts\\Activate.ps1\n# macOS/Linux: source .venv/bin/activate\npython scripts/verify_vendor.py\npython -m pip install -r requirements-dev.txt\npython management.py migrate\npython -m flaxon run app:app --reload','Open http://127.0.0.1:8000/ and show the generated welcome screen and its working Python API button. The starter environment uses the pinned course dependencies. Stop the server before chapter 2. Do not run the generated migration: chapter 3 replaces it and selects a fresh database directory.','A missing `flaxon` command usually means the virtual environment is inactive. Use `python -m flaxon`. If PowerShell blocks activation, run the environment Python directly (`.venv\\Scripts\\python.exe`). A missing wheel usually means you ran installation outside the repository root. Do not generate over the completed repository.','Generate the starter under a new directory name. Find the welcome module and its custom command before changing any code.')
 chapter('02 | Application factories and modules','Understand how one application composes independent features.','A module collects routes and, when needed, its interface files. An API prefix is mounted by the application factory. The project module can own both `/api/projects/` and its browser pages without mixing browser authorization with server authorization. `create_app()` allows tests to use disposable databases. Configuration comes from settings and environment variables; production startup rejects a missing secret.\n\nStart with the welcome module, then add auth, projects, tasks, and content as the chapters introduce them. The complete factory in the source appendix is the final composition, so it naturally contains features taught later.',source('modules/projects/module.py',start='projects = FlaxonModule(',end='async def owned_project'),'python -m flaxon run app:app --reload\n# In a second terminal:\ncurl http://127.0.0.1:8000/api/welcome/status','The welcome route responds and module routes receive their mounted prefixes. The completed project API is protected. Teloce UI route patterns use `:id`; Python routes use `<int:project_id>`.','Do not repeat `/api/projects` inside module decorators: the mount adds it. A wrong relative import can stop startup. Keep feature-specific pages in their module UI folder and shared helpers in root `ui/`.','Explain which file you would edit to change a project route, its screen, and its API prefix.')
 chapter('03 | Database and migrations','Persist users, projects, tasks, sessions, and authentication attempts.','The migration establishes relationships before endpoints write records. Each project belongs to a user; each task belongs to a project. Foreign keys cascade task deletion when a project is removed. Indexes support common ownership and project queries.\n\nThe Database helper opens a connection for each operation, enables foreign keys, and executes blocking SQLite work in `asyncio.to_thread`. A connection context commits a successful operation and rolls it back on failure. SQL placeholders separate values from SQL structure. The default database files live under `data/`; deployment moves them to a persistent directory. Never delete a real database just to rerun a migration.',source('database.py'),'python management.py migrate\npython management.py migrate --status','The first run applies the initial migration; a second run applies zero new migrations. Status reports applied and pending counts. Restarting the application preserves records. The full migration JSON is included in the source appendix.','`no such table` means migrations have not run against the database selected by `DATA_DIR`. Foreign keys must be enabled on each connection. Do not concatenate a project name into SQL. Migration SQL is application code; request values are parameters.','Use a temporary database to verify that deleting a project removes its tasks. Write down which foreign key implements that behavior.')
 chapter('04 | Authentication and cookie sessions','Register, sign in, sign out, and protect API requests before building forms.','Passwords are hashed with Argon2. The browser receives a random session cookie; the database stores a digest of its token. Server-side expiry is eight hours. Registration, login, and logout revoke the previous session and issue a new session and CSRF token.\n\nFirst request `/api/auth/session` to establish an anonymous session. JSON mutations require `X-CSRF-Token`; browser requests also undergo an Origin check when that header is supplied. Authentication answers who the caller is. Ownership checks later answer which records that person may use. Public registration never creates staff Admin access.',source('security.py',start='async def require_user(',end='async def session_response('),'python -m pytest -q tests/test_api.py -k "registration or login_logout or wrong_password or rate_limit"\ncurl -c cookies.txt http://127.0.0.1:8000/api/auth/session','The session response is `{"data":{"user":null,"csrf":"..."}}` before sign-in. Follow `docs/backend.md` or `scripts/course_api_demo.py` to register without guessing cookie behavior. After registration, use the new cookie and new token. `chapter-04-auth` is a runnable backend-only checkpoint.','A 403 usually indicates a stale/missing token, wrong JSON Content-Type, or Origin mismatch. Use exactly `http://127.0.0.1:8000` locally if that is PUBLIC_ORIGIN. A 401 means the endpoint requires a signed-in user. Passwords must be 12-128 characters. Do not commit cookie jars.','Sign out, then replay a request with the old session. Explain why server-side revocation matters even if the browser has deleted its cookie.')
@@ -74,15 +88,15 @@ Flaxon + Teloce HTML SPA + signals + Admin/CMS + MinifyJS
 
 Author: Aldane Hutchinson
 
-Instructor edition - revision 2 - October 2026
+Instructor edition - revision 3 - October 2026
 
 ![Flaxon logo](assets/flaxon.png)
 
 ## Read this first
 
-This PDF is your working recording guide. Keep it beside your editor while you rehearse and record. Each chapter gives a lesson outcome, preparation, narration prompts, code to type, demonstrations, editing notes, commands, expected results, common errors, and an exercise. Read the Say prompts aloud during rehearsal, then use your own wording on camera.
+Start with `flaxon new project_manager`, then build in the generated directory. This PDF is your working recording guide. Keep it beside your editor while you rehearse and record. Each chapter gives a lesson outcome, preparation, narration prompts, code to type, demonstrations, editing notes, commands, expected results, common errors, and an exercise. Read the Say prompts aloud during rehearsal, then use your own wording on camera.
 
-The guide follows the actual course repository. Code blocks marked with a file path are copied from the application, not invented framework APIs. Study the small excerpt in a chapter, then open that file or use the complete source appendix. Type the important behavior while recording. Teach a few CSS rules in each component and provide the remainder of that component's scoped block. The completed app uses no external app.css stylesheet.
+The guide follows the actual course repository. Every chapter now prints the complete files to create or replace, in order. Intermediate factories mount only features already taught. Early UI pages are deliberately labelled placeholders and are replaced later. The complete source appendix is a reference, while the chapter file blocks are the build sequence. Type the important behavior while recording. Teach a few CSS rules in each component and provide the remainder of that component's scoped block. The completed app uses no external app.css stylesheet.
 
 Repository: https://github.com/aldanedev-create/FreecodeCamp-flaxon-project-manager-course
 

@@ -1,7 +1,7 @@
 [
   {
     "minutes": "15-20",
-    "before": "Keep the finished app ready for the opening preview, an empty folder for CLI generation, and starter-scoped-css as the prepared reference. Install the pinned course wheels in the activated environment before generating.",
+    "before": "Use an empty parent folder, Python 3.12, and the chapter 1 bootstrap commands. Generate project_manager yourself and activate the generated project environment.",
     "scenes": [
       {
         "say": "By the end, a signed-in user can create projects, manage tasks, and see progress. Staff have a separate Admin, and help content comes from the CMS. We will build the backend first, then connect the browser to APIs we have already tested.",
@@ -15,8 +15,8 @@
       },
       {
         "say": "The starter is our beginning, and the completed repository is our reference. The course uses pinned dependencies, including an explicitly labelled Flaxon build with CMS fixes.",
-        "type": "After CLI generation, remove the app.css stylesheet reference in app.py; move Welcome link/button rules into its existing style scoped block and add the shell typography/reset block. The prepared starter-scoped-css branch already contains these edits and pinned dependencies.",
-        "show": "Point viewers to the checkpoint guide and briefly show the welcome component's existing style scoped block."
+        "type": "Create prepare_course.py exactly as printed in this chapter, run it, and install the copied pinned dependencies. Do not copy finished application code. The CSS adaptation happens in chapter 8.",
+        "show": "Point to the generated welcome module, flaxon_cli.py, management.py, and ui/app.html. The raw starter still has its generated stylesheet until chapter 8."
       }
     ],
     "cut": "Cut package download waits, not the commands or their successful completion. Record a clean ten-second microphone test before this take.",
@@ -42,7 +42,7 @@
   },
   {
     "minutes": "20-25",
-    "before": "Use a disposable development data directory. Open migrations/0001_initial.json, database.py, and management.py.",
+    "before": "Open the generated teaching project and the chapter file blocks. Select DATA_DIR=data/course_recording before applying the course migration. Leave any starter database alone.",
     "scenes": [
       {
         "say": "A user owns projects, and each project owns tasks. We store those relationships in the database, so they survive a server restart.",
@@ -146,12 +146,12 @@
       },
       {
         "say": "We keep page styles inside the page. The compiler adds a component scope attribute so a header or button rule does not unexpectedly change another component.",
-        "type": "The shell style scoped block, then the Home component's .hero, .eyebrow, and .button rules. Explain the single :global(body) margin reset because body is outside the component.",
+        "type": "Type the shell style scoped block and Home styles exactly as printed. Explain the deliberate body margin reset. Delete public/app.css at the end of this chapter.",
         "show": "Change the Home button colour, navigate away, and confirm another component's button is unchanged. Restore the final colour."
       },
       {
         "say": "A parent owns its layout, and a child owns its form. Inherited font and colour can flow through the shell, but scoped selector rules do not become a global stylesheet.",
-        "type": "Show local style blocks in Login, ProjectList, TaskForm, and TaskList. Remove the old app.css reference when following an older checkout.",
+        "type": "Show the temporary Login, ProjectList, and ProjectDetails placeholders from this chapter; their real forms and local controls are added in chapters 9-10.",
         "show": "Confirm there is no /assets/app.css request. At mobile width, show that the shell navigation wraps and the forms fit."
       }
     ],
@@ -193,7 +193,7 @@
       {
         "say": "An effect is work that belongs to the mounted screen. Stop it before unmount so an old screen does not keep reacting.",
         "type": "beforeUnmount() and the mutation busy/error guard; type the local progress style.",
-        "show": "Navigate away and back, then test an empty project at 0%. Run the task and browser checks."
+        "show": "Navigate away and back, then check an empty project at 0%. Run the task API tests; the complete browser regression script is introduced in chapter 14."
       }
     ],
     "cut": "Explain signal reads with parentheses and writes with .set(). Do not imply ordinary TypeScript helper files receive the compiler's automatic imports.",
@@ -252,7 +252,7 @@
       {
         "say": "Draft editors and publishers have different rights. Editing already published content or restoring a protected revision also needs the required publication permissions.",
         "type": "Show the CMS security patch notes and one permission regression test; do not rewrite the entire framework patch during the lesson.",
-        "show": "Run the CMS tests and demonstrate that a draft-only editor cannot publish."
+        "show": "Demonstrate that a draft-only editor cannot publish. The automated CMS security suite is added and run in chapter 14."
       }
     ],
     "cut": "If demonstrating seed, run it only after creating a customer account and restart the process. Do not seed production on every deployment.",
