@@ -1,14 +1,13 @@
 """Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
 
-import os
+import settings
+from types import SimpleNamespace
 from pathlib import Path
 from urllib.parse import urlsplit
 from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
 from argon2 import PasswordHasher
 from flaxon import Flaxon, Request
 from flaxon.http import JSONResponse
-from flaxon.exceptions import BadRequest
-from database import Database
 from backoffice import configure_backoffice
 from modules.auth.module import auth
 from modules.projects.module import projects
@@ -27,23 +26,18 @@ from settings import (
 
 def create_app(database_path=None, admin_path=None, debug=None):
     debug = DEBUG if debug is None else debug
-    secret_key = os.getenv("FLAXON_SECRET_KEY", "")
-    if not debug and len(secret_key) < 32:
-        raise ValueError(
-            "Set FLAXON_SECRET_KEY to at least 32 random characters in production."
-        )
-    app = Flaxon(
-        "project-manager",
-        debug=debug,
-        openapi=True,
-        config={"SECRET_KEY": secret_key or None},
-    )
+    values = {key: getattr(settings, key) for key in dir(settings) if key.isupper()}
+    values.update(DEBUG=debug)
+    if database_path is not None:
+        values["DATABASE_URL"] = f"sqlite://{Path(database_path).resolve()}"
+    if admin_path is not None:
+        values["ADMIN_STORAGE_PATH"] = Path(admin_path)
+    app = Flaxon.from_settings(SimpleNamespace(__file__=settings.__file__, **values))
     app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
     if not debug:
         app.add_middleware(
             TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
         )
-    app.course_db = Database(database_path or DATABASE_PATH)
     app.public_origin = PUBLIC_ORIGIN
     app.hasher = PasswordHasher()
     app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")
@@ -55,6 +49,9 @@ def create_app(database_path=None, admin_path=None, debug=None):
         (welcome, "/api/welcome"),
     ]:
         app.mount_module(module, prefix=prefix)
+    if app.is_management:
+        return app
+
     configure_backoffice(
         app,
         admin_path or ADMIN_DATABASE_PATH,
@@ -69,7 +66,9 @@ def create_app(database_path=None, admin_path=None, debug=None):
 
     @app.get("/health/course")
     async def health():
-        await app.course_db.one("SELECT 1 FROM users LIMIT 1")
+        from models import User
+
+        await User.all().limit(1)
         return {"data": {"status": "ok"}}
 
     # Explicit shell routes preserve real 404 responses for unknown API paths.

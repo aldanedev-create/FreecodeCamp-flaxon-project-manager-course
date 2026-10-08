@@ -1,7 +1,8 @@
 """Registration and cookie authentication, separate from staff Admin accounts."""
 
 import asyncio
-import sqlite3
+from tortoise.exceptions import IntegrityError
+from models import User
 from pathlib import Path
 from argon2.exceptions import VerifyMismatchError, VerificationError
 from flaxon.modules import FlaxonModule
@@ -42,11 +43,9 @@ async def register(request):
     await limit_auth_attempts(request, email)
     password_hash = await asyncio.to_thread(request.app.hasher.hash, password)
     try:
-        user_id = await request.app.course_db.execute(
-            "INSERT INTO users(name, email, password_hash) VALUES (?, ?, ?)",
-            (name, email, password_hash),
-        )
-    except sqlite3.IntegrityError:
+        user = await User.create(name=name, email=email, password_hash=password_hash)
+        user_id = user.id
+    except IntegrityError:
         raise Conflict("Unable to create this account. Try signing in.")
     return await session_response(
         request, {"id": user_id, "name": name, "email": email}, status=201
@@ -58,9 +57,7 @@ async def login(request):
     await check_csrf(request)
     email, password = credentials(await json_object(request))
     await limit_auth_attempts(request, email)
-    user = await request.app.course_db.one(
-        "SELECT * FROM users WHERE email = ?", (email,)
-    )
+    user = await User.filter(email=email).first().values()
     password_hash = user["password_hash"] if user else request.app.dummy_password_hash
     try:
         await asyncio.to_thread(request.app.hasher.verify, password_hash, password)

@@ -1,6 +1,7 @@
 """Project APIs always constrain queries by the signed-in user's id."""
 
 from pathlib import Path
+from models import Project
 from flaxon.modules import FlaxonModule
 from flaxon.http import JSONResponse
 from flaxon.exceptions import NotFound
@@ -19,9 +20,7 @@ projects = FlaxonModule(
 
 async def owned_project(request, project_id):
     user = await require_user(request)
-    project = await request.app.course_db.one(
-        "SELECT * FROM projects WHERE id = ? AND owner_id = ?", (project_id, user["id"])
-    )
+    project = await Project.filter(id=project_id, owner_id=user["id"]).first().values()
     if project is None:
         raise NotFound("Project not found.")
     return project
@@ -30,9 +29,7 @@ async def owned_project(request, project_id):
 @projects.get("/")
 async def list_projects(request):
     user = await require_user(request)
-    items = await request.app.course_db.all(
-        "SELECT * FROM projects WHERE owner_id = ? ORDER BY id DESC", (user["id"],)
-    )
+    items = await Project.filter(owner_id=user["id"]).order_by("-id").values()
     return {"data": items}
 
 
@@ -43,10 +40,10 @@ async def create_project(request):
     data = await json_object(request)
     name = text(data, "name")
     description = text(data, "description", 1000, required=False)
-    project_id = await request.app.course_db.execute(
-        "INSERT INTO projects(owner_id, name, description) VALUES (?, ?, ?)",
-        (user["id"], name, description),
+    project = await Project.create(
+        owner_id=user["id"], name=name, description=description
     )
+    project_id = project.id
     return JSONResponse(
         {"data": await owned_project(request, project_id)}, status_code=201
     )
@@ -64,9 +61,8 @@ async def update_project(request, project_id):
     data = await json_object(request)
     name = text(data, "name")
     description = text(data, "description", 1000, required=False)
-    await request.app.course_db.execute(
-        "UPDATE projects SET name = ?, description = ? WHERE id = ? AND owner_id = ?",
-        (name, description, project_id, project["owner_id"]),
+    await Project.filter(id=project_id, owner_id=project["owner_id"]).update(
+        name=name, description=description
     )
     return {"data": await owned_project(request, project_id)}
 
@@ -75,8 +71,5 @@ async def update_project(request, project_id):
 async def delete_project(request, project_id):
     await check_csrf(request)
     project = await owned_project(request, project_id)
-    await request.app.course_db.execute(
-        "DELETE FROM projects WHERE id = ? AND owner_id = ?",
-        (project_id, project["owner_id"]),
-    )
+    await Project.filter(id=project_id, owner_id=project["owner_id"]).delete()
     return {"data": {"deleted": True}}

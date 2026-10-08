@@ -20,10 +20,11 @@ def main():
         env = {
             **os.environ,
             "DATA_DIR": directory,
+            "FLAXON_ALLOWED_HOSTS": "127.0.0.1",
             "FLAXON_DEBUG": "0" if production else "1",
             "PUBLIC_ORIGIN": BASE,
             "FLAXON_SECRET_KEY": secrets.token_urlsafe(48),
-            "COURSE_SMOKE_STAFF_PASSWORD": secrets.token_urlsafe(24),
+            "COURSE_SMOKE_STAFF_PASSWORD": "SmokeAa1!" + secrets.token_urlsafe(24),
         }
         subprocess.run(
             [sys.executable, "management.py", "migrate"], cwd=ROOT, env=env, check=True
@@ -110,7 +111,7 @@ store.set('users', 'course-admin', record)
                     page.get_by_label("Email", exact=True).fill(
                         f"learner{width}@example.test"
                     )
-                    page.get_by_label("Password", exact=True).fill(secrets.token_urlsafe(24))
+                    page.get_by_label("Password", exact=True).fill("SmokeAa1!" + secrets.token_urlsafe(24))
                     page.get_by_role(
                         "button", name="Create account", exact=True
                     ).click()

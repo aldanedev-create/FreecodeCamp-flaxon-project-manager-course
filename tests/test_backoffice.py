@@ -119,10 +119,14 @@ def test_database_and_cms_survive_new_application_instance(
     new_app = create_app(
         tmp_path / "app.sqlite3", tmp_path / "admin.sqlite3", debug=True
     )
-    assert (
-        asyncio.run(new_app.course_db.one("SELECT name FROM projects"))["name"]
-        == "Persistent"
-    )
+
+    async def read_project():
+        from models import Project
+
+        async with new_app.db:
+            return (await Project.all().first()).name
+
+    assert asyncio.run(read_project()) == "Persistent"
     assert len(new_app.cms.content_types["help_article"].items) == 1
 
 

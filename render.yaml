@@ -11,6 +11,8 @@ services:
       mountPath: /var/data
       sizeGB: 1
     envVars:
+      - key: PYTHON_VERSION
+        value: "3.12.14"
       - key: FLAXON_DEBUG
         value: "0"
       - key: FLAXON_SECRET_KEY

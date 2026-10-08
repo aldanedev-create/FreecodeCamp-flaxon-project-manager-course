@@ -81,7 +81,7 @@ python -m flaxon run app:app --reload
 
 Open http://127.0.0.1:8000/. Show the welcome screen and click its Python API button.
 Do not set up staff or run the generated migration yet. Chapter 3 supplies the
-course migration and uses a fresh course database directory.
+ORM models and generates its first Python migration.
 
 ## What to say and show at this point
 
@@ -93,5 +93,5 @@ Show: the welcome module, `flaxon_cli.py`, `management.py`, and `ui/app.html`.
 Explain that the generated starter has its own CSS file; chapter 8 replaces the
 shell and removes that file in favour of scoped component CSS.
 
-Stop the server with Ctrl+C before chapter 2. Do not create a nested
+Stop the server with Ctrl+C before chapter 2. Initialize your own checkpoints with `git init` and `git add .`, then `git commit -m "Chapter 01 setup"`. Do not create a nested
 project_manager directory by running the generation command again inside it.

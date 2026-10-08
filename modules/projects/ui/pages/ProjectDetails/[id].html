@@ -1,73 +1,158 @@
-<template><section>
-  <a href="/projects" data-teloce-link>← All projects</a>
-  <p v-if="loading" role="status">Loading project…</p><p v-if="message" role="alert">{{ message }}</p>
-  <div v-if="project">
-    <h1>{{ project.name }}</h1><p>{{ project.description }}</p>
-    <p aria-live="polite">{{ progress }}% complete</p><progress :value="progress" max="100" aria-label="Project progress"></progress>
-    <form @submit.prevent="saveProject" class="card">
-      <h2>Edit project</h2>
-      <label>Name<input v-model="name" required maxlength="120" /></label>
-      <label>Description<textarea v-model="description" maxlength="1000"></textarea></label>
-      <button :disabled="busy">Save project</button>
-      <button type="button" class="danger" @click="deleteProject" :disabled="busy">Delete project</button>
-    </form>
-    <TaskForm :busy="busy" @create="createTask" />
-    <label>Filter tasks<select v-model="filter"><option value="all">All tasks</option><option value="todo">To do</option><option value="doing">Doing</option><option value="done">Done</option></select></label>
-    <TaskList :tasks="visibleTasks" :busy="busy" @status="changeStatus" @remove="removeTask" />
-  </div>
-</section></template>
+<template>
+  <section>
+    <a href="/projects" data-teloce-link>← All projects</a>
+    <p v-if="loading" role="status">Loading project…</p>
+    <p v-if="message" role="alert">{{ message }}</p>
+    <div v-if="project">
+      <h1>{{ project.name }}</h1>
+      <p>{{ project.description }}</p>
+      <p aria-live="polite">{{ progress }}% complete</p>
+      <progress :value="progress" max="100" aria-label="Project progress"></progress>
+      <form @submit.prevent="saveProject" class="card">
+        <h2>Edit project</h2>
+        <label>Name<input v-model="name" required maxlength="120" /></label>
+        <label
+          >Description<textarea v-model="description" maxlength="1000"></textarea>
+        </label>
+        <button :disabled="busy">Save project</button>
+        <button type="button" class="danger" @click="deleteProject" :disabled="busy">
+          Delete project
+        </button>
+      </form>
+      <TaskForm :busy="busy" @create="createTask" />
+      <label
+        >Filter tasks<select v-model="filter">
+          <option value="all">All tasks</option>
+          <option value="todo">To do</option>
+          <option value="doing">Doing</option>
+          <option value="done">Done</option>
+        </select></label
+      >
+      <TaskList
+        :tasks="visibleTasks"
+        :busy="busy"
+        @status="changeStatus"
+        @remove="removeTask"
+      />
+    </div>
+  </section>
+</template>
 <script lang="ts">
-import TaskForm from '../../components/TaskForm.html';
-import TaskList from '../../components/TaskList.html';
-import { api } from '../../../../../ui/api.ts';
-import type { Project, Task } from '../../../../../ui/types.ts';
+import TaskForm from "../../components/TaskForm.html";
+import TaskList from "../../components/TaskList.html";
+import { api } from "../../../../../ui/api.ts";
+import type { Project, Task } from "../../../../../ui/types.ts";
 
 // The compiler imports these signal helpers automatically for this .html component.
 const taskState = signal([]);
 const completion = computed(() => {
   const tasks = taskState();
-  return tasks.length ? Math.round(tasks.filter(task => task.status === 'done').length * 100 / tasks.length) : 0;
+  return tasks.length
+    ? Math.round(
+        (tasks.filter((task) => task.status === "done").length * 100) / tasks.length,
+      )
+    : 0;
 });
 export default {
-  props: ['id'], components: { TaskForm, TaskList },
-  data() { return { project: null, tasks: [], name: '', description: '', filter: 'all', progress: 0, busy: false, loading: true, message: '' }; },
-  computed: { visibleTasks() { return this.filter === 'all' ? this.tasks : this.tasks.filter(task => task.status === this.filter); } },
+  props: ["id"],
+  components: { TaskForm, TaskList },
+  data() {
+    return {
+      project: null,
+      tasks: [],
+      name: "",
+      description: "",
+      filter: "all",
+      progress: 0,
+      busy: false,
+      loading: true,
+      message: "",
+    };
+  },
+  computed: {
+    visibleTasks() {
+      return this.filter === "all"
+        ? this.tasks
+        : this.tasks.filter((task) => task.status === this.filter);
+    },
+  },
   async mounted() {
     taskState.set([]);
-    this.progressEffect = effect(() => { this.progress = completion(); });
+    this.progressEffect = effect(() => {
+      this.progress = completion();
+    });
     try {
-      const [project, tasks] = await Promise.all([api<Project>('/api/projects/' + this.id), api<Task[]>('/api/tasks/project/' + this.id)]);
-      this.project = project; this.name = project.name; this.description = project.description;
+      const [project, tasks] = await Promise.all([
+        api<Project>("/api/projects/" + this.id),
+        api<Task[]>("/api/tasks/project/" + this.id),
+      ]);
+      this.project = project;
+      this.name = project.name;
+      this.description = project.description;
       this.setTasks(tasks);
-    } catch (error) { this.message = error.message; }
-    finally { this.loading = false; }
+    } catch (error) {
+      this.message = error.message;
+    } finally {
+      this.loading = false;
+    }
   },
-  beforeUnmount() { this.progressEffect?.stop(); },
+  beforeUnmount() {
+    this.progressEffect?.stop();
+  },
   methods: {
-    setTasks(tasks) { this.tasks = tasks; taskState.set(tasks); },
+    setTasks(tasks) {
+      this.tasks = tasks;
+      taskState.set(tasks);
+    },
     async mutate(operation) {
       if (this.busy) return;
-      this.busy = true; this.message = '';
-      try { await operation(); }
-      catch (error) { this.message = error.message; }
-      finally { this.busy = false; }
+      this.busy = true;
+      this.message = "";
+      try {
+        await operation();
+      } catch (error) {
+        this.message = error.message;
+      } finally {
+        this.busy = false;
+      }
     },
     async saveProject() {
-      await this.mutate(async () => { this.project = await api<Project>('/api/projects/' + this.id, 'PUT', { name: this.name, description: this.description }); });
+      await this.mutate(async () => {
+        this.project = await api<Project>("/api/projects/" + this.id, "PUT", {
+          name: this.name,
+          description: this.description,
+        });
+      });
     },
     async deleteProject() {
-      if (!window.confirm('Delete this project and all its tasks?')) return;
-      await this.mutate(async () => { await api('/api/projects/' + this.id, 'DELETE', {}); window.__TELOCE_ROUTER__.navigate('/projects'); });
+      if (!window.confirm("Delete this project and all its tasks?")) return;
+      await this.mutate(async () => {
+        await api("/api/projects/" + this.id, "DELETE", {});
+        window.__TELOCE_ROUTER__.navigate("/projects");
+      });
     },
     async createTask(data) {
-      await this.mutate(async () => { const task = await api<Task>('/api/tasks/project/' + this.id, 'POST', data); this.setTasks([task, ...this.tasks]); });
+      await this.mutate(async () => {
+        const task = await api<Task>("/api/tasks/project/" + this.id, "POST", data);
+        this.setTasks([task, ...this.tasks]);
+      });
     },
     async changeStatus(data) {
-      await this.mutate(async () => { const updated = await api<Task>('/api/tasks/' + data.id, 'PATCH', { status: data.status }); this.setTasks(this.tasks.map(task => task.id === updated.id ? updated : task)); });
+      await this.mutate(async () => {
+        const updated = await api<Task>("/api/tasks/" + data.id, "PATCH", {
+          status: data.status,
+        });
+        this.setTasks(
+          this.tasks.map((task) => (task.id === updated.id ? updated : task)),
+        );
+      });
     },
     async removeTask(id) {
-      if (!window.confirm('Delete this task?')) return;
-      await this.mutate(async () => { await api('/api/tasks/' + id, 'DELETE', {}); this.setTasks(this.tasks.filter(task => task.id !== id)); });
+      if (!window.confirm("Delete this task?")) return;
+      await this.mutate(async () => {
+        await api("/api/tasks/" + id, "DELETE", {});
+        this.setTasks(this.tasks.filter((task) => task.id !== id));
+      });
     },
   },
 };
@@ -114,13 +199,18 @@ label {
   margin: 0.9rem 0;
   font-weight: 600;
 }
-input, select, textarea, button {
+input,
+select,
+textarea,
+button {
   font: inherit;
   border-radius: 7px;
   padding: 0.7rem;
   min-height: 44px;
 }
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   border: 1px solid #abb9cf;
   background: white;

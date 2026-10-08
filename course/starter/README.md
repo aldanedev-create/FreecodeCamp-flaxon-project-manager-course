@@ -1,0 +1,61 @@
+# project_manager
+
+Your modular Python web application, with both Teloce and Jinax examples.
+
+Flaxon handles routes, APIs, validation, data, WebSockets, and administration. Build a complete server-rendered application with Flaxon + Jinax, an interactive full-stack application with Flaxon + Teloce, or use both. Your interface is your choice.
+
+```bash
+python -m pip install -e .
+flaxon welcome
+flaxon welcome-status
+python management.py check
+python management.py makemigrations
+python management.py migrate
+python management.py setup-admin
+python management.py runserver
+```
+
+Open http://127.0.0.1:8000 for the welcome SPA and http://127.0.0.1:8000/admin/login for your protected admin. The welcome page works immediately; admin setup asks for your own username and password. Use at least eight characters with upper- and lowercase letters, a number, and a special character. No credentials are generated or committed.
+
+- `app.py`: app factory, module mounting, Jinax, Teloce, database lifecycle and admin.
+- `templates/welcome.html`: complete server-rendered example at `/server-page`.
+- `flaxon_cli.py`: exposes module-owned commands to the CLI.
+- `modules/welcome/module.py`: the module's Python status API.
+- `modules/welcome/ui/Welcome.html`: its component with scoped CSS and TypeScript.
+- `modules/welcome/ui/api.ts`: typed browser API helper.
+- `ui/app.html`: SPA entry that composes feature components.
+- `management.py`: `check`, `makemigrations`, `migrate`, migration status/plan, `setup-admin`, `shell`, and `runserver`.
+- `models.py`: ORM schema using `flaxon.db.Model` and `fields`.
+- `admin.py`: explicit model registrations.
+- `migrations/`: generated Python migrations; commit them with model changes.
+- `data/app.sqlite3`: domain database. `data/admin.sqlite3`: staff/CMS metadata. Persist both.
+
+Run management commands from any directory using the script's path; database and migration paths are anchored to this project. Stop/restart the server after creating an administrator so its account list reloads. `FLAXON_DEBUG=0` disables framework debug mode; configure production security and deployment before exposing your app publicly. The included admin store is a single-node starter configuration.
+
+Use source/editable deployment so `ui/`, `templates/`, `public/`, and `migrations/` remain beside the application. Teloce compiles the components and TypeScript; MinifyJS optimizes the JavaScript. Add a new module for each feature, then mount it in `create_app()`.
+
+## Your module's custom commands
+
+Run `flaxon welcome` or `flaxon welcome-status` from the project directory. These examples use the real synchronous and asynchronous module command APIs. They do not start the server or require a database.
+
+Add a command beside the routes in `modules/welcome/module.py`:
+
+```python
+@welcome.cli_command("my-task", help_text="Run my project task")
+def my_task(console):
+    console.info("Your Python task goes here.")
+    return 0
+```
+
+`flaxon_cli.py` calls `welcome.install_cli_commands(globals())` so the CLI discovers the command. For another feature module, import it there and install its commands too. Custom names must be unique and must not reuse built-in command names.
+
+## Your interface choices
+
+- **Jinax:** open `/server-page` and edit `templates/welcome.html`. For an entirely server-rendered app, remove `app.use_teloce()` and make `/` return `app.jinax.render_response(...)` instead of `request.compile(...)`. Keep your Python routes, modules, database, and admin.
+- **Teloce:** edit the welcome HTML component and its TypeScript helper. Teloce compiles the browser interface and MinifyJS optimizes the JavaScript.
+
+The welcome page uses the logo and documentation links from Flaxon's website. Those external resources need an internet connection; the local example routes and custom commands work offline.
+
+[Documentation](https://flaxon-website.vercel.app/docs.html) · [Examples](https://flaxon-website.vercel.app/examples.html)
+
+Settings are shared with the server. Set a persistent FLAXON_SECRET_KEY before disabling debug. Services/Fleet menus appear only when ADMIN_SERVICES_ENABLED is true. The starter CMS is available through Admin. See the framework ORM guide for PostgreSQL and existing-database migration guidance.

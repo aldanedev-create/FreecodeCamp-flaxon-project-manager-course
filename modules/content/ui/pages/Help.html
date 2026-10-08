@@ -1,16 +1,36 @@
-<template><section><h1>Help centre</h1>
-  <p v-if="loading" role="status">Loading articles…</p><p v-if="message" role="alert">{{ message }}</p>
-  <p v-if="!loading && articles.length === 0">No published articles yet.</p>
-  <div class="cards"><a v-for="article in articles" :key="article.id" :href="'/help/' + article.slug" data-teloce-link class="card"><h2>{{ article.title }}</h2><p>{{ article.summary }}</p></a></div>
-</section></template>
+<template>
+  <section>
+    <h1>Help centre</h1>
+    <p v-if="loading" role="status">Loading articles…</p>
+    <p v-if="message" role="alert">{{ message }}</p>
+    <p v-if="!loading && articles.length === 0">No published articles yet.</p>
+    <div class="cards">
+      <a
+        v-for="article in articles"
+        :key="article.id"
+        :href="'/help/' + article.slug"
+        data-teloce-link
+        class="card"
+        ><h2>{{ article.title }}</h2>
+        <p>{{ article.summary }}</p></a
+      >
+    </div>
+  </section>
+</template>
 <script lang="ts">
-import { api } from '../../../../ui/api.ts';
+import { api } from "../../../../ui/api.ts";
 export default {
-  data() { return { articles: [], loading: true, message: '' }; },
+  data() {
+    return { articles: [], loading: true, message: "" };
+  },
   async mounted() {
-    try { this.articles = await api('/api/content/articles'); }
-    catch (error) { this.message = error.message; }
-    finally { this.loading = false; }
+    try {
+      this.articles = await api("/api/content/articles");
+    } catch (error) {
+      this.message = error.message;
+    } finally {
+      this.loading = false;
+    }
   },
 };
 </script>

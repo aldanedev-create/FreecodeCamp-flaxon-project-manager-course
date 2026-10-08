@@ -81,7 +81,7 @@ bookmarks = {title: 'section-'+str(i) for i,title in enumerate(headings)}
 story = [Spacer(1,25)]
 logo = ROOT/'book/assets/flaxon.png'
 w,h = ImageReader(str(logo)).getSize()
-story += [Image(str(logo), width=150, height=150*h/w, hAlign='LEFT'), Spacer(1,24), Paragraph('Teach a Full-Stack<br/>Project Manager', styles['CoverTitle']), Paragraph('Flaxon + Teloce HTML SPA<br/>Signals, Admin/CMS, and MinifyJS', styles['CoverSub']), Spacer(1,20), Paragraph('Aldane Hutchinson', styles['SectionBook']), Paragraph('Instructor recording guide | Revision 3 | October 2026', styles['SmallBook']), Spacer(1,25), Paragraph('Build protected APIs first. Connect the interface to working data. Verify the whole application before deployment.',styles['BodyBook']), Paragraph('Say, type, show: narration prompts, live-coding steps, demonstrations, editing notes, and the complete scoped-CSS source.', styles['SmallBook']), PageBreak()]
+story += [Image(str(logo), width=150, height=150*h/w, hAlign='LEFT'), Spacer(1,24), Paragraph('Build a Full-Stack<br/>Project Manager', styles['CoverTitle']), Paragraph('Flaxon + Teloce HTML SPA<br/>Signals, Admin/CMS, and MinifyJS', styles['CoverSub']), Spacer(1,20), Paragraph('Aldane Hutchinson', styles['SectionBook']), Paragraph('Learner ebook and recording companion | Revision 4 | October 2026', styles['SmallBook']), Spacer(1,25), Paragraph('Build protected APIs first. Connect the interface to working data. Verify the whole application before deployment.',styles['BodyBook']), Paragraph('Start with the CLI. Copy complete files, run each chapter, and build a working application through deployment.', styles['SmallBook']), PageBreak()]
 story.append(Paragraph('Contents',styles['ChapterBook']))
 for title in headings:
     story.append(Paragraph(f'<link href="#{bookmarks[title]}" color="#1464AA">{inline(title)}</link>',styles['BodyBook']))
@@ -118,12 +118,12 @@ while i<len(lines):
     if line.startswith('## '):
         story.append(Paragraph(inline(line[3:]),styles['SectionBook']));i+=1;continue
     if line.startswith('!['):i+=1;continue
-    if line.startswith('- '):
-        story.append(Paragraph('&#8226; '+inline(line[2:]),styles['BodyBook']));i+=1;continue
+    if line.startswith('- ') or re.match(r'^\d+\. ', line):
+        story.append(Paragraph(('&#8226; '+inline(line[2:])) if line.startswith('- ') else inline(line), styles['BodyBook']));i+=1;continue
     paragraph=[line];i+=1
-    while i<len(lines) and lines[i].strip() and not lines[i].startswith(('#','```','- ')):
+    while i<len(lines) and lines[i].strip() and not lines[i].startswith(('#','```','- ')) and not re.match(r'^\d+\. ', lines[i]):
         paragraph.append(lines[i]);i+=1
     story.append(Paragraph(inline(' '.join(paragraph)),styles['BodyBook']))
-doc=BookDoc(str(OUT),pagesize=(612,792),rightMargin=54,leftMargin=54,topMargin=52,bottomMargin=56,title='Instructor Recording Guide: Full-Stack Project Manager',author='Aldane Hutchinson')
+doc=BookDoc(str(OUT),pagesize=(612,792),rightMargin=54,leftMargin=54,topMargin=52,bottomMargin=56,title='Build a Full-Stack Project Manager',author='Aldane Hutchinson')
 doc.build(story,onFirstPage=footer,onLaterPages=footer)
 print(OUT)

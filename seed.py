@@ -1,35 +1,27 @@
 """Idempotent sample content. Register your own user before running this command."""
 
 from app import create_app
+from models import User, Project, Task
 
 
 async def seed():
     app = create_app()
-    user = await app.course_db.one("SELECT id FROM users ORDER BY id LIMIT 1")
-    if not user:
-        raise ValueError(
-            "Register an account in the browser before seeding sample projects."
-        )
-    if not await app.course_db.one(
-        "SELECT id FROM projects WHERE owner_id = ?", (user["id"],)
-    ):
-        project_id = await app.course_db.execute(
-            "INSERT INTO projects(owner_id, name, description) VALUES (?, ?, ?)",
-            (
-                user["id"],
-                "Launch my portfolio",
-                "A small project to practise planning.",
-            ),
-        )
-        for title, status in [
-            ("Choose a design", "done"),
-            ("Build the homepage", "doing"),
-            ("Deploy the website", "todo"),
-        ]:
-            await app.course_db.execute(
-                "INSERT INTO tasks(project_id, title, status) VALUES (?, ?, ?)",
-                (project_id, title, status),
+    async with app.db:
+        user = await User.all().order_by("id").first()
+        if user is None:
+            raise ValueError("Register an account before seeding sample projects.")
+        if not await Project.filter(owner_id=user.id).exists():
+            project = await Project.create(
+                owner_id=user.id,
+                name="Launch my portfolio",
+                description="A small project to practise planning.",
             )
+            for title, status in [
+                ("Choose a design", "done"),
+                ("Build the homepage", "doing"),
+                ("Deploy the website", "todo"),
+            ]:
+                await Task.create(project_id=project.id, title=title, status=status)
     articles = app.cms.content_types["help_article"]
     if not articles.items:
         articles.create(

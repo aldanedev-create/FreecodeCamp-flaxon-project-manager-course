@@ -1,8 +1,9 @@
 # Backend first: architecture and API walkthrough
 
-`app.py` composes modules. `database.py` owns short SQLite operations, executed
-in worker threads so they do not block the ASGI loop. `security.py` owns opaque
-sessions and CSRF; `validation.py` validates writes. SQL uses placeholders.
+`app.py` mounts modules explicitly and creates the application from `settings.py`.
+`models.py` defines Tortoise models exposed through `flaxon.db`. `management.py`
+generates and applies Python migrations. `security.py` owns opaque sessions and
+CSRF; `validation.py` validates writes before ORM queries run.
 
 The domain database has users, projects, tasks, sessions, and auth attempts.
 Users own projects; tasks belong to projects. Foreign keys cascade task deletion

@@ -11,3 +11,4 @@ dist/
 playwright-report/
 cookies.txt
 *.git.bundle
+tmp/

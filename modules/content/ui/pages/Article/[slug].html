@@ -1,15 +1,32 @@
-<template><article><a href="/help" data-teloce-link>← Help centre</a>
-  <p v-if="loading" role="status">Loading article…</p><p v-if="message" role="alert">{{ message }}</p>
-  <div v-if="article"><h1>{{ article.title }}</h1><p>{{ article.summary }}</p><div class="article-body" v-html="article.body"></div></div>
-</article></template>
+<template>
+  <article>
+    <a href="/help" data-teloce-link>← Help centre</a>
+    <p v-if="loading" role="status">Loading article…</p>
+    <p v-if="message" role="alert">{{ message }}</p>
+    <div v-if="article">
+      <h1>{{ article.title }}</h1>
+      <p>{{ article.summary }}</p>
+      <div class="article-body" v-html="article.body"></div>
+    </div>
+  </article>
+</template>
 <script lang="ts">
-import { api } from '../../../../../ui/api.ts';
+import { api } from "../../../../../ui/api.ts";
 export default {
-  props: ['slug'], data() { return { article: null, loading: true, message: '' }; },
+  props: ["slug"],
+  data() {
+    return { article: null, loading: true, message: "" };
+  },
   async mounted() {
-    try { this.article = await api('/api/content/articles/' + encodeURIComponent(this.slug)); }
-    catch (error) { this.message = error.message; }
-    finally { this.loading = false; }
+    try {
+      this.article = await api(
+        "/api/content/articles/" + encodeURIComponent(this.slug),
+      );
+    } catch (error) {
+      this.message = error.message;
+    } finally {
+      this.loading = false;
+    }
   },
 };
 </script>

@@ -1,5 +1,5 @@
 # Resolved in a fresh Python 3.12 environment. Local framework wheels are pinned separately.
-aiosqlite==0.21.0
+aiosqlite==0.22.1
 anyio==4.15.1
 argon2-cffi==25.1.0
 argon2-cffi-bindings==26.1.0
@@ -30,3 +30,6 @@ tree-sitter-javascript==0.25.0
 tree-sitter-typescript==0.23.2
 typing_extensions==4.16.0
 uvicorn==0.38.0
+tortoise-orm==1.1.7
+pypika-tortoise==0.6.5
+iso8601==2.1.0

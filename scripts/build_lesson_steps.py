@@ -19,8 +19,7 @@ def factory(stage):
         text=text.replace('from argon2 import PasswordHasher\n','')
         text=text.replace('    app.hasher = PasswordHasher()\n','').replace('    app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")\n','')
     if stage < 3:
-        text=text.replace('from database import Database\n','').replace('    app.course_db = Database(database_path or DATABASE_PATH)\n','')
-        text=text.replace('        await app.course_db.one("SELECT 1 FROM users LIMIT 1")\n','')
+        text=re.sub(r'        from models import User\n\s*await User.all\(\).limit\(1\)\n','',text)
     if stage < 8:
         text=re.sub(r'    app.use_teloce\(.*?\n    \)\n','',text,flags=re.S)
         begin=text.index('    # Explicit shell routes')
@@ -37,7 +36,8 @@ def factory(stage):
             text=text.replace('    @app.get("/projects/<int:project_id>")\n','')
     return text
 
-shell=(ROOT/'ui/app.html').read_text().replace('        <a href="/help" data-teloce-link>Help</a>\n','')
+shell = re.sub(r"\s*<a href=\"/help\" data-teloce-link>Help</a>", "", (ROOT/'ui/app.html').read_text())
+
 def placeholder(title,props=''):
     return f'''<template><section><h1>{title}</h1><p>This screen is built in the next UI lesson.</p></section></template>
 <script lang="ts">export default {{{props}}};</script>
@@ -48,8 +48,8 @@ p {{ line-height: 1.6; }}
 '''
 # Each chapter lists complete files. CREATE/EDIT is calculated against earlier steps.
 files={
-2:['settings.py','app.py'],
-3:['database.py','migrations/0001_initial.json','management.py','app.py'],
+2:['settings.py','management.py','app.py'],
+3:['models.py','admin.py','migrations/__init__.py','app.py'],
 4:['validation.py','security.py','modules/auth/__init__.py','modules/auth/module.py','app.py'],
 5:['modules/projects/__init__.py','modules/projects/module.py','scripts/course_api_demo.py','app.py'],
 6:['modules/tasks/__init__.py','modules/tasks/module.py','app.py'],
@@ -58,31 +58,33 @@ files={
 9:['modules/auth/ui/pages/Login.html','modules/projects/ui/pages/ProjectList.html'],
 10:['modules/projects/ui/components/TaskForm.html','modules/projects/ui/components/TaskList.html','modules/projects/ui/pages/ProjectDetails/[id].html'],
 11:['app.py'],
-12:['backoffice.py','app.py'],
-13:['modules/content/__init__.py','modules/content/module.py','modules/content/ui/pages/Help.html','modules/content/ui/pages/Article/[slug].html','seed.py','ui/app.html','app.py'],
+12:['admin.py','backoffice.py','app.py'],
+13:['flaxon_cli.py','modules/content/__init__.py','modules/content/module.py','modules/content/ui/pages/Help.html','modules/content/ui/pages/Article/[slug].html','seed.py','ui/app.html','app.py'],
 14:['tests/test_backoffice.py','tests/test_cms_security.py','scripts/browser_smoke.py'],
 15:['.env.example','scripts/build_ui.py','render.yaml']}
 commands={
-2:'python -m flaxon run app:app --reload\n# In a second terminal:\ncurl http://127.0.0.1:8000/api/welcome/status',
-3:'python management.py migrate\npython management.py migrate --status\npython -m flaxon run app:app --reload',
-4:'python -m flaxon run app:app --reload\n# In a second terminal:\ncurl -c cookies.txt http://127.0.0.1:8000/api/auth/session',
-5:'python -m flaxon run app:app --reload\n# In a second terminal:\npython scripts/course_api_demo.py',
-6:'python -m flaxon run app:app --reload\n# Exercise the task URLs shown in this chapter with your cookie and new CSRF token.',
+2:'python management.py runserver\n# In a second terminal:\ncurl http://127.0.0.1:8000/api/welcome/status',
+3:'python management.py check\npython management.py makemigrations --name initial\npython management.py migrate --plan\npython management.py migrate\npython management.py migrate --status\npython management.py runserver',
+4:'python management.py runserver\n# In a second terminal:\ncurl -c cookies.txt http://127.0.0.1:8000/api/auth/session',
+5:'python management.py runserver\n# In a second terminal:\npython scripts/course_api_demo.py',
+6:'python management.py runserver\n# Exercise the task URLs shown in this chapter with your cookie and new CSRF token.',
 7:'python -m pytest -q tests/test_api.py',
-8:'python -m flaxon run app:app --reload\n# Open http://127.0.0.1:8000/\n# Account/project screens are placeholders until chapter 9.',
-9:'python -m flaxon run app:app --reload\n# Open /login; register; create a project on /projects.\n# Project details are completed in chapter 10.',
-10:'python -m flaxon run app:app --reload\n# Navigate to a project by its SPA link and add two tasks.\n# Direct detail-page refresh is added in chapter 11.',
-11:'python -m flaxon run app:app --reload\n# Refresh a nested /projects/ID URL, then use Back and Forward.',
-12:'python management.py setup-admin\npython -m flaxon run app:app --reload\n# Open /admin/login with the staff account you just created.',
-13:'python management.py seed\n# Stop/restart the running server after seeding:\npython -m flaxon run app:app --reload\n# Open /help and /admin/cms/.',
+8:'python management.py runserver\n# Open http://127.0.0.1:8000/\n# Account/project screens are placeholders until chapter 9.',
+9:'python management.py runserver\n# Open /login; register; create a project on /projects.\n# Project details are completed in chapter 10.',
+10:'python management.py runserver\n# Navigate to a project by its SPA link and add two tasks.\n# Direct detail-page refresh is added in chapter 11.',
+11:'python management.py runserver\n# Refresh a nested /projects/ID URL, then use Back and Forward.',
+12:'python management.py setup-admin\npython management.py runserver\n# Open /admin/login with the staff account you just created.',
+13:'python management.py seed\n# Stop/restart the running server after seeding:\npython management.py runserver\n# Open /help and /admin/cms/.',
 14:'python -m playwright install chromium\npython -m pytest -q\npython scripts/browser_smoke.py\npython scripts/browser_smoke.py --production',
 15:'python scripts/build_ui.py\npython -m pip check'}
-existing={'app.py','settings.py','management.py','migrations/0001_initial.json','ui/app.html'}
+existing={'app.py','settings.py','management.py','admin.py','ui/app.html'}
 steps=[]
 for stage in range(2,16):
     entries=[]
     for path in files[stage]:
         content=factory(stage) if path=='app.py' else (ROOT/path).read_text()
+        if stage==3 and path=='admin.py':
+            content='"""Staff model registration is added in chapter 12."""\ndef register(admin):\n    pass\n'
         if stage==8:
             if path=='ui/app.html':content=shell
             elif path=='modules/auth/ui/pages/Login.html':content=placeholder('Account')
@@ -90,6 +92,6 @@ for stage in range(2,16):
             elif path=='modules/projects/ui/pages/ProjectDetails/[id].html':content=placeholder('Project details',"props: ['id']")
         entries.append({'path':path,'action':'EDIT - replace the entire file' if path in existing else 'CREATE - make parent folders, then create this file','content':content})
         existing.add(path)
-    steps.append({'chapter':stage,'files':entries,'commands':commands[stage],'delete':['migrations/0001_project_notes.json'] if stage==3 else []})
+    steps.append({'chapter':stage,'files':entries,'commands':commands[stage],'delete':['public/app.css'] if stage==8 else []})
 (ROOT/'course/build-steps.json').write_text(json.dumps(steps,indent=2)+'\n')
 print('Generated exact build steps for chapters 2-15')

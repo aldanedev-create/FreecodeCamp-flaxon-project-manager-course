@@ -2,7 +2,7 @@
 
 This deployment keeps SQLite and the Admin/CMS store on one persistent disk.
 Use a paid web service with a disk, one instance, and one Uvicorn worker.
-The included `.python-version` selects the latest Python 3.12 patch on Render. The
+The Blueprint pins Python 3.12.14, matching the clean verification environment. The
 free service's ephemeral filesystem is unsuitable for this data model.
 
 ## 1. Connect your repository

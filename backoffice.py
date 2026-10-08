@@ -1,5 +1,6 @@
 """Staff model adapters reuse the domain database; CMS owns only editorial content."""
 
+from models import Project, Task
 from flaxon.admin import AdminDashboard, AdminConfig
 from flaxon.admin.registry import Registry
 from flaxon.admin.cms import CMS, ContentType, CMSField
@@ -22,13 +23,11 @@ def configure_backoffice(app, admin_path, uploads_path):
     class ProjectAdmin:
         @classmethod
         async def get_instances(cls):
-            return await app.course_db.all("SELECT * FROM projects ORDER BY id DESC")
+            return await Project.all().order_by("-id").values()
 
         @classmethod
         async def get_instance(cls, object_id):
-            return await app.course_db.one(
-                "SELECT * FROM projects WHERE id = ?", (object_id,)
-            )
+            return await Project.filter(id=object_id).first().values()
 
         @classmethod
         async def create_instance(cls, data):
@@ -43,9 +42,8 @@ def configure_backoffice(app, admin_path, uploads_path):
                 return None
             name = text(data, "name")
             description = text(data, "description", 1000, required=False)
-            await app.course_db.execute(
-                "UPDATE projects SET name = ?, description = ? WHERE id = ?",
-                (name, description, object_id),
+            await Project.filter(id=object_id).update(
+                name=name, description=description
             )
             return await cls.get_instance(object_id)
 
@@ -54,21 +52,17 @@ def configure_backoffice(app, admin_path, uploads_path):
             current = await cls.get_instance(object_id)
             if not current:
                 return False
-            await app.course_db.execute(
-                "DELETE FROM projects WHERE id = ?", (object_id,)
-            )
+            await Project.filter(id=object_id).delete()
             return True
 
     class TaskAdmin:
         @classmethod
         async def get_instances(cls):
-            return await app.course_db.all("SELECT * FROM tasks ORDER BY id DESC")
+            return await Task.all().order_by("-id").values()
 
         @classmethod
         async def get_instance(cls, object_id):
-            return await app.course_db.one(
-                "SELECT * FROM tasks WHERE id = ?", (object_id,)
-            )
+            return await Task.filter(id=object_id).first().values()
 
         @classmethod
         async def create_instance(cls, data):
@@ -80,9 +74,8 @@ def configure_backoffice(app, admin_path, uploads_path):
             if current is None:
                 return None
             values = {**current, **task_fields(data, partial=True)}
-            await app.course_db.execute(
-                "UPDATE tasks SET title = ?, status = ?, due_date = ? WHERE id = ?",
-                (values["title"], values["status"], values["due_date"], object_id),
+            await Task.filter(id=object_id).update(
+                **{key: values[key] for key in ("title", "status", "due_date")}
             )
             return await cls.get_instance(object_id)
 
@@ -91,7 +84,7 @@ def configure_backoffice(app, admin_path, uploads_path):
             current = await cls.get_instance(object_id)
             if not current:
                 return False
-            await app.course_db.execute("DELETE FROM tasks WHERE id = ?", (object_id,))
+            await Task.filter(id=object_id).delete()
             return True
 
     admin.register(

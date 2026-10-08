@@ -1,7 +1,8 @@
 import asyncio
 import time
 import pytest
-from conftest import Account
+from conftest import Account, orm
+from models import Task, Session
 
 
 def project(account):
@@ -140,12 +141,7 @@ def test_task_workflow_filter_and_cascade(account, application):
     assert account.call(path + "?status=todo").json()["data"] == []
     assert account.call(path + "?status=unknown").status_code == 400
     account.call(f"/api/projects/{item['id']}", "delete", {})
-    assert (
-        asyncio.run(
-            application.course_db.one("SELECT * FROM tasks WHERE id = ?", (task_id,))
-        )
-        is None
-    )
+    assert orm(application, lambda: Task.filter(id=task_id).first()) is None
 
 
 @pytest.mark.parametrize(
@@ -181,11 +177,7 @@ def test_task_ownership_and_deletion(client, account):
 
 
 def test_expired_session_is_rejected(account, application):
-    asyncio.run(
-        application.course_db.execute(
-            "UPDATE sessions SET expires_at = ?", (int(time.time()) - 1,)
-        )
-    )
+    orm(application, lambda: Session.all().update(expires_at=int(time.time()) - 1))
     assert account.call("/api/projects/").status_code == 401
 
 

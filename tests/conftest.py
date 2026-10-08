@@ -1,6 +1,4 @@
 import asyncio
-import json
-import sqlite3
 import pytest
 from app import create_app
 import httpx
@@ -9,6 +7,7 @@ import httpx
 class TestClient:
     def __init__(self, app):
         self.app = app
+        self.loop = getattr(app, "test_loop", None)
 
     def __getattr__(self, method):
         def request(path, json_data=None, **kwargs):
@@ -21,7 +20,11 @@ class TestClient:
                         method.upper(), path, json=json_data, **kwargs
                     )
 
-            return asyncio.run(send())
+            return (
+                self.loop.run_until_complete(send())
+                if self.loop
+                else asyncio.run(send())
+            )
 
         return request
 
@@ -32,10 +35,15 @@ from settings import ROOT
 @pytest.fixture
 def application(tmp_path):
     path = tmp_path / "app.sqlite3"
-    migration = json.loads((ROOT / "migrations/0001_initial.json").read_text())
-    with sqlite3.connect(path) as connection:
-        connection.executescript(migration["up"])
-    return create_app(path, tmp_path / "admin.sqlite3", debug=True)
+    app = create_app(path, tmp_path / "admin.sqlite3", debug=True)
+    loop = asyncio.new_event_loop()
+    app.test_loop = loop
+    loop.run_until_complete(app.db.initialize())
+    with app.db.bind():
+        loop.run_until_complete(app.db.context.generate_schemas())
+    yield app
+    loop.run_until_complete(app.db.close())
+    loop.close()
 
 
 @pytest.fixture
@@ -83,3 +91,9 @@ class Account:
 @pytest.fixture
 def account(client):
     return Account(client)
+
+
+def orm(application, query):
+    """Run a direct ORM assertion in the same database context as this test app."""
+    with application.db.bind():
+        return application.test_loop.run_until_complete(query())

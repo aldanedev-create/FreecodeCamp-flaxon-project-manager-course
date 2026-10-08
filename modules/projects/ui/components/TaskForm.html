@@ -1,17 +1,24 @@
-<template><form @submit.prevent="submit" class="card">
-  <h2>Add a task</h2>
-  <label>Task title<input name="task-title" v-model="title" maxlength="160" required /></label>
-  <label>Due date<input name="due-date" type="date" v-model="dueDate" /></label>
-  <button :disabled="busy">Add task</button>
-</form></template>
+<template>
+  <form @submit.prevent="submit" class="card">
+    <h2>Add a task</h2>
+    <label
+      >Task title<input name="task-title" v-model="title" maxlength="160" required
+    /></label>
+    <label>Due date<input name="due-date" type="date" v-model="dueDate" /></label>
+    <button :disabled="busy">Add task</button>
+  </form>
+</template>
 <script lang="ts">
 export default {
-  props: ['busy'], emits: ['create'],
-  data() { return { title: '', dueDate: '' }; },
+  props: ["busy"],
+  emits: ["create"],
+  data() {
+    return { title: "", dueDate: "" };
+  },
   methods: {
     submit() {
       if (this.busy || !this.title.trim()) return;
-      this.$emit('create', { title: this.title, due_date: this.dueDate || null });
+      this.$emit("create", { title: this.title, due_date: this.dueDate || null });
     },
   },
 };
@@ -58,13 +65,18 @@ label {
   margin: 0.9rem 0;
   font-weight: 600;
 }
-input, select, textarea, button {
+input,
+select,
+textarea,
+button {
   font: inherit;
   border-radius: 7px;
   padding: 0.7rem;
   min-height: 44px;
 }
-input, select, textarea {
+input,
+select,
+textarea {
   width: 100%;
   border: 1px solid #abb9cf;
   background: white;

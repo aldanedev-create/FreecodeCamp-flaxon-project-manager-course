@@ -1,135 +1,207 @@
-from pathlib import Path
-import re
+"""Build the learner ebook from the same complete files verified by chapter tests."""
 import json
-ROOT=Path(__file__).resolve().parents[1]
-def source(path,start=None,end=None):
- s=(ROOT/path).read_text()
- if start:s=s[s.index(start):]
- if end:s=s[:s.index(end)]
- lang=Path(path).suffix.lstrip('.')
- lang={'py':'python','ts':'typescript'}.get(lang,lang)
- return f'File: `{path}`\n\n```{lang}\n{s.rstrip()}\n```\n'
-build_steps={item["chapter"]:item for item in json.loads((ROOT/"course/build-steps.json").read_text())}
-recording_plan=json.loads((ROOT/"course/recording-plan.json").read_text())
-chapters=[]
-def chapter(title,goal,explain,code,commands,result,errors,exercise):
- number=len(chapters)+1
- plan=recording_plan[len(chapters)]
- scenes=[]
- for i,scene in enumerate(plan['scenes'],1):
-  scenes.append(f"## Take {i} | Say, type, show\n\nSay: {scene['say']}\n\nType or explain on screen: {scene['type']}\n\nShow and verify: {scene['show']}\n")
- recording=f"## Recording preparation\n\nTarget edited length: {plan['minutes']} minutes. This is a planning range, not a recording already made.\n\nBefore the take: {plan['before']}\n\n"+'\n'.join(scenes)+f"\n## Editing and chapter handoff\n\nEditing note: {plan['cut']}\n\nEnd the chapter: {plan['finish']}\n"
- exact=''
- if number==1:
-  exact=(ROOT/'course/lesson-01-setup.md').read_text()
- else:
-  step=build_steps[number]
-  exact='## Files to create or edit, in this order\n\nStop the development server before replacing files. Work inside `project_manager/`. Each block below is the complete file for this chapter. Replace the whole file when marked EDIT; do not append a second handler or factory. Create any missing parent folders.\n\n'
-  for path in step.get('delete',[]):
-   exact+=f'## DELETE: {path}\n\nRemove this generated starter migration before adding the course migration. Both use version 0001; keeping both causes a duplicate migration version error. The course uses a separate fresh database.\n\n'
-  for entry in step['files']:
-   lang={'py':'python','ts':'typescript'}.get(Path(entry['path']).suffix.lstrip('.'),Path(entry['path']).suffix.lstrip('.'))
-   exact+=f"## {entry['action']}: {entry['path']}\n\n```{lang}\n{entry['content'].rstrip()}\n```\n\n"
-  if number==3:
-   exact+='## Start the course database cleanly\n\nCreate `.env` with `DATA_DIR=data/course_recording` before the first migration. This selects a fresh course database and leaves any generated-starter database alone. Do not delete a real database. Do not apply the generated migration before replacing it with the course migration above.\n\n'
-  if number==8:
-   exact+='## Remove the unused generated stylesheet\n\nDelete `public/app.css`. The new factory has no stylesheets argument or assets mount, and each new HTML component owns its style scoped block. The optional old Jinax starter page is no longer mounted by this course factory.\n\n'
-  exact+='## Run these commands now\n\n```bash\n'+step['commands']+'\n```\n\n'
- chapters.append(f'''# {title}
+from pathlib import Path
 
-## Lesson outcome
+ROOT = Path(__file__).resolve().parents[1]
+STEPS = json.loads((ROOT / "course/build-steps.json").read_text())
 
-{goal}
+LESSONS = [
+    ("Preview and CLI setup", "Generate your own project and run its welcome screen.",
+     "You will build a project manager with customer accounts, private projects, tasks, progress, a staff Admin and published help. Flaxon runs Python on the server. Teloce compiles HTML components and TypeScript into a browser SPA. MinifyJS optimizes the production JavaScript. We build the APIs first so every screen connects to a working backend.",
+     "The welcome page loads. Click its API button and see the Python response. The welcome command prints the project name.",
+     "If flaxon is missing, activate the environment or use python -m flaxon. Environment creation does not install application dependencies; run the separate installation commands. Keep course_reference beside project_manager. Do not generate inside the completed repository.",
+     "Find the welcome module's route and the HTML component that calls it."),
+    ("Settings, management and application composition", "Replace the welcome shell with a small backend and keep one shared configuration.",
+     "settings.py reads environment values and gives both the server and management commands the same database location. app.py creates an application from those settings and mounts modules explicitly. management.py delegates to Flaxon; you do not maintain a second command framework. The factory returns early in management mode so migration commands do not compile browser assets or open the staff store. For now, the only mounted feature is the generated welcome module. Later chapters add each module when its code is ready.",
+     "The root returns a Backend lesson ready JSON message. /api/welcome/status returns its timestamp and framework version.",
+     "Run commands inside project_manager. Do not place module mounts in settings.py. Keep the generated models.py until chapter 3; the ORM discovers it but does not create tables on startup.",
+     "Change PROJECT_NAME in settings.py and inspect app.settings in a Python session."),
+    ("Models and Python migrations", "Define all five application tables and apply the first Python migration.",
+     "User owns projects; Project owns tasks. The ForeignKeyField names use the root ORM label models. Cascading a project deletion removes its tasks. Session stores a digest of an opaque cookie and an expiry; AuthAttempt persists login attempt counts. Define the schema once in models.py. makemigrations compares models with migration history and generates Python code; migrate applies that code. Commit the generated file. No JSON migration is needed. We define the complete schema now so later API chapters focus on behavior rather than repeated table changes.",
+     "check reports valid settings and registrations. makemigrations creates migrations/0001_initial.py. migrate applies it; status lists it as applied. A second migrate performs no new schema changes.",
+     "Use a fresh learner project. Do not apply the starter ProjectNote migration before replacing models.py. If you already migrated the starter, select a NEW DATA_DIR in .env and start the course migration history in a separate project. Do not delete or reset a database containing data you need. No such table means the selected database has not been migrated.",
+     "Add a priority field to Task in a disposable copy. Generate and inspect a second migration without applying it to your course database."),
+    ("Customer authentication and sessions", "Register, sign in, sign out and reject requests without valid sessions.",
+     "validation.py checks JSON and field types before handlers write anything. security.py reads hashed session tokens, compares CSRF tokens, checks browser origins and rotates sessions after authentication changes. Password hashing runs in a worker thread because Argon2 is CPU intensive. The login handler verifies a dummy hash for unknown emails. The durable limiter counts attempts inside a transaction. Customer accounts are separate from staff Admin accounts. Start by requesting /api/auth/session; this issues an anonymous cookie and CSRF token. Registration and login replace both, so use the new values for the next request.",
+     "GET /api/auth/session returns data.user = null and a CSRF token. POST /api/auth/register with the cookie and token creates a customer. GET /api/projects is introduced next; the auth module itself now supports login and logout.",
+     "Use PUBLIC_ORIGIN exactly, including scheme, hostname and port. A 403 can mean a missing or rotated CSRF token, wrong Origin or non-JSON body. Passwords must have 12-128 characters. Never put the HttpOnly cookie in localStorage.",
+     "Use curl or a small HTTP client to register, then log out and show that the previous cookie cannot authenticate."),
+    ("Owned project APIs", "Create, list, read, update and delete projects belonging to the signed-in customer.",
+     "owned_project combines the requested ID with the authenticated owner's ID in the ORM query. Every detail, edit and delete uses that guard. Creation takes owner_id from the session rather than accepting it from JSON. list_projects filters before returning rows. A nonexistent project and another person's project both return 404. The small HTTP demo establishes cookies and CSRF automatically, registers an account and exercises a working project endpoint.",
+     "The HTTP demo creates a project and reads it back. Projects return a data envelope with the owner, name and description. A second customer's request cannot retrieve it.",
+     "Do not repeat /api/projects inside decorators: app.py supplies that mount prefix. Use a trailing slash for the list/create endpoint. A 401 means no valid customer session; 404 after sign-in can be an ownership denial.",
+     "Extend the demo to update a project's description and assert the read response changed."),
+    ("Task workflow", "Add tasks, update status and due dates, filter tasks and delete them.",
+     "Tasks belong to an owned project. list_tasks checks that project before querying its tasks. owned_task checks the parent project before permitting any mutation. A PATCH validates only supplied fields; allowed statuses are todo, doing and done. Date-only values use YYYY-MM-DD or null. The ORM handles values as parameters rather than SQL fragments. Deleting a project cascades through the database relationship.",
+     "A signed-in customer can create a task, mark it done, filter by done and remove it. Invalid status and impossible date inputs return 400.",
+     "Use /api/tasks/project/PROJECT_ID for task lists and creation. Use /api/tasks/TASK_ID for PATCH and DELETE. An empty PATCH and an unknown status are rejected.",
+     "Create two customers and prove one cannot update the other's task."),
+    ("Backend tests", "Run realistic HTTP requests against disposable ORM databases before writing the UI.",
+     "conftest.py creates a test app and owns its event loop and ORM lifecycle. generate_schemas is used ONLY to prepare disposable test databases; production and development use migrations. TestClient exercises the ASGI app with HTTPX. Account carries its cookie and rotated CSRF token. Tests cover valid workflows, rejected input, expired sessions and cross-user access. Read an ownership test aloud: arrange two accounts, create a project, attempt another user's request and assert it is denied.",
+     "tests/test_api.py passes. Each test uses temporary files and does not modify your learner database.",
+     "Do not run later Admin tests yet. Keep the ORM context and event loop alive for the whole fixture. Sharing one account's cookie with another makes an ownership test invalid.",
+     "Add a regression test that sends an extra owner_id in project JSON and proves it cannot choose a different owner."),
+    ("Teloce HTML shell and scoped CSS", "Serve a browser shell and placeholder pages from the existing backend.",
+     "app.use_teloce registers the compiler, runtime and browser routes. request.compile returns the compiled app.html shell for known page URLs. Each .html file has a template, script lang=ts and style scoped. The shell provides data-teloce-router-view. Module ui_routes maps compiled page names to browser paths. The first account/project pages are labelled placeholders; we replace them in the next two chapters. Shared types.ts describes JSON contracts and api.ts includes cookies, CSRF and error handling. Scoped CSS belongs to each component, so there is no separate app.css file.",
+     "The shell and navigation appear at /. The account and project placeholder pages mount. /api/welcome/status still responds as JSON.",
+     "A blank page can be a compiler/import error: inspect terminal and browser console. Delete public/app.css after replacing the factory; the completed app does not mount it. The shell's explicit global body reset is intentional; child components own their other rules.",
+     "Change the shell's scoped header rules without modifying a child component's styles."),
+    ("Login and project screens", "Replace placeholders with working account forms and a project list.",
+     "Login uses the shared API helper to load the anonymous session, submit register/login, and replace cached session state after rotation. Loading guards disable duplicate submissions and error messages remain visible. ProjectList requests only authorized records from the API and creates a project from a form. Internal project anchors use data-teloce-link. The server owns authorization; TypeScript types and disabled buttons do not enforce permissions.",
+     "Register in /login, open /projects and create a project. Sign out and sign back in. The new project survives the restart.",
+     "Always inspect response.ok. A resolved fetch promise can still represent a 400/403/500. Relative imports are resolved from each HTML component. Registration must refresh the cached CSRF token.",
+     "Show the validation message for an empty project name and make the same denied request directly to the API."),
+    ("Task components, signals and progress", "Complete the task detail screen using reusable components and reactive progress.",
+     "TaskForm emits a create event; TaskList emits status and remove events. ProjectDetails owns API calls and the task collection. signal stores that collection, computed derives completion, and an effect copies the value into displayed component data. Stop the effect before unmount. Teloce's .html compiler imports detected signal helpers automatically: do not add a redundant import. Ordinary TypeScript modules do not get the same automatic imports. Replacing the collection via its setter keeps progress and task display consistent. Empty projects return 0 percent.",
+     "Create two tasks and complete one: progress becomes 50 percent. Filtering to done changes the visible rows while overall project progress remains 50 percent.",
+     "Read a signal by calling it and replace it through set. An effect left alive after navigation can update an obsolete screen. Do not calculate project progress from only filtered rows.",
+     "Complete both tasks and expect 100 percent, then delete one and verify progress stays correct."),
+    ("SPA routing and direct refresh", "Support internal clicks, Back/Forward and direct nested URLs.",
+     "There are two routers. Teloce's ui_routes maps /projects/:id to the detail component and passes id as a prop. data-teloce-link lets an ordinary anchor navigate without replacing the document; data-teloce-router-view provides the mount point. Flaxon's explicit /projects/<int:project_id> shell route handles direct visits and refreshes. The browser then fetches protected JSON. Keep Admin links as ordinary full-page navigation. Do not use a catch-all shell route that turns an unknown API path into HTML.",
+     "Click into a project, use Back and Forward and refresh /projects/ID. The same screen loads. /api/does-not-exist remains a JSON 404.",
+     "A successful click with a failed refresh means the server shell route is missing. A document reload on an internal link means its data-teloce-link marker is missing. Use /projects/:id in browser routes and <int:project_id> in Python routes.",
+     "Put a temporary window marker in the browser console and prove an internal link preserves it."),
+    ("Staff Admin", "Create staff credentials and manage existing domain records with explicit permissions.",
+     "The custom ORM adapters deliberately expose only approved project/task fields and enforce the application's ownership creation rules. Staff create customer-owned records through the customer workflow; permitted staff may inspect and edit existing records. Root admin.py describes registration for management checks; backoffice.py configures the actual custom dashboard adapters. This is an example of business-specific adapters. Flaxon also supports direct ORM registration for ordinary CRUD. Staff records use a separate durable AdminStore. setup-admin creates the first privileged staff account interactively, with no default password. Grant view/change/delete capabilities separately for ordinary staff.",
+     "Staff sign-in works at /admin/login. The model lists show the same projects and tasks used by the customer API. A public customer account cannot access staff tools.",
+     "Role labels alone do not grant every capability. Use project.view_project and task.view_task for readers; add change permissions only when needed. These staff adapters are global operations tools, not a tenant-scoped customer portal.",
+     "Create a read-only staff user and prove a direct edit request is denied as well as hiding its edit controls."),
+    ("CMS help and sample data", "Publish sanitized help articles and show them through read-only public endpoints.",
+     "CMS uses staff authentication. Help articles have title, summary, body and draft/published status. Public endpoints whitelist fields and expose only published items. Rich text is sanitized before the article component displays it with v-html; ordinary customer text remains escaped. seed is a project custom command exposed by flaxon_cli.py. It creates a sample project for the first registered customer and a published help article. Stop the server before seeding, then restart it so in-process CMS state reloads. Publishing permission remains distinct from drafting permission.",
+     "Run seed after registering a customer. /help lists the sample published article and the article page survives a refresh. Drafts remain absent from public responses.",
+     "Do not call authenticated CMS editing endpoints from public reader pages. Do not display arbitrary HTML using v-html. A draft editor also needs publishing permission to modify live content.",
+     "Create a draft in staff CMS, confirm it is hidden publicly, then publish it with a permitted staff account."),
+    ("Full-stack verification", "Exercise customer, staff and CMS workflows in a real browser.",
+     "API tests cannot prove form listeners, history navigation or mobile layout. The browser script starts a disposable server, seeds a temporary staff account and tests desktop and 390-pixel workflows. It checks registration, login, projects, tasks, progress, help, navigation, refresh and logout. Run it in development and production mode to test MinifyJS output. Use labels, status messages and alerts; also rehearse with the keyboard.",
+     "All application tests and both browser modes pass. Test data stays outside your learner database. No browser console errors occur in the verified workflow.",
+     "Install Chromium before Playwright. Stop other servers using port 8123. Loopback production smoke verifies assets and behavior, not cloud infrastructure or TLS.",
+     "Complete the workflow using only the keyboard and check one layout change at both desktop and mobile sizes."),
+    ("Production build and Render", "Build optimized assets and deploy one persistent application instance.",
+     "The Blueprint installs pinned dependencies and builds Teloce with MinifyJS. The start command applies committed Python migrations, then starts one Uvicorn worker. SQLite and staff/CMS data live under /var/data on a paid persistent disk. Render's build and pre-deploy processes cannot access that disk, which is why this design migrates at startup. Set PUBLIC_ORIGIN to your exact HTTPS service URL, DEBUG to false and a persistent generated secret. This course deliberately uses one instance: scaling needs a shared database, sessions, media and CMS coordination strategy.",
+     "After deployment, /health/course returns ok. Create a project/task, publish an article, refresh a nested route, sign out and restart the service. Customer and staff data survive; cookies use Secure and HttpOnly.",
+     "Free Render services cannot attach this persistent disk. Do not generate new migration files during deployment: commit them beforehand. An incorrect PUBLIC_ORIGIN causes CSRF failures. An ephemeral database loses records on restart. Production deployment must be verified in your account; local smoke is not proof of a live deployment.",
+     "Back up both SQLite files safely, restore them into a test environment and verify a project plus one published help article."),
+]
 
-{recording}
+NOTES = {
+ "settings.py": "Read this first: choose paths and environment values in one place. The rest of the app uses these values.",
+ "management.py": "This short entry point delegates commands to Flaxon and fixes the project root.",
+ "app.py": "Replace the factory with this chapter's complete version. It mounts only the features already introduced.",
+ "models.py": "These five models are the complete schema. Relationships define ownership and deletion behavior; handlers add authorization.",
+ "admin.py": "Keep explicit registration in this file. At chapter 3 it is empty; chapter 12 adds the domain models.",
+ "security.py": "Read each helper in order: identify a session, require its user, check CSRF, rotate credentials, then limit attempts.",
+ "validation.py": "Validate JSON before passing values to ORM calls. Reuse these checks in all mutations.",
+ "backoffice.py": "These adapters query the same ORM models as the API and expose a deliberate staff field whitelist.",
+ "ui/api.ts": "Centralize fetch, cookies, CSRF rotation and error messages here so pages share one contract.",
+ "ui/types.ts": "Match the Python response fields exactly. These types document the browser contract; runtime validation stays on the server.",
+ "ui/app.html": "This is the SPA shell. Its internal anchors and router view cooperate with each module's page mappings.",
+ "tests/conftest.py": "Own the test database lifecycle and event loop. Never use development files in this fixture.",
+ "seed.py": "Populate sample data explicitly after a customer exists; do not seed on every server start.",
+ "render.yaml": "This is the complete single-instance deployment definition. Supply the service-specific HTTPS origin in Render.",
+}
 
-## How it works
+def fence(path, content):
+    language = {".py": "python", ".ts": "typescript", ".html": "html", ".yaml": "yaml"}.get(Path(path).suffix, "text")
+    return f"```{language}\n{content.rstrip()}\n```\n"
 
-{explain}
+intro = '''# Build a Full-Stack Project Manager
 
-{exact}
-
-## Demonstration notes
-
-Use the chapter commands above; the complete-reference tests and screens mentioned in the narration become available as their files are introduced. Do not run later-chapter tests against an earlier stage.
-
-## Expected result
-
-{result}
-
-## Common errors
-
-{errors}
-
-## Viewer exercise and wrap-up
-
-{exercise}
-
-Ask the viewer to pause, try the exercise, and compare the result with the chapter's expected behavior.
-''')
-chapter('01 | Preview and setup','Run the finished application once, then generate the welcome starter in a separate folder.','The finished app has customer accounts, owned projects, tasks, progress, a staff Admin, and published help content. Flaxon handles HTTP, validation, authorization, persistence, and server composition. Teloce compiles HTML components into browser JavaScript; MinifyJS optimizes that JavaScript for production. Admin remains a separate server-rendered interface.\n\nUse Python 3.12, Git, and a terminal. Basic Python, HTML, CSS, and JavaScript are prerequisites. This book introduces the small amount of TypeScript used here. The dependencies include a labelled course-only Flaxon build containing CMS fixes; it is not an official PyPI release. Install the supplied dependency files, not an unrelated latest version.',source('requirements-dev.txt'),'git clone https://github.com/aldanedev-create/FreecodeCamp-flaxon-project-manager-course.git\ncd FreecodeCamp-flaxon-project-manager-course\npython -m venv .venv\n# Windows PowerShell: .\\.venv\\Scripts\\Activate.ps1\n# macOS/Linux: source .venv/bin/activate\npython scripts/verify_vendor.py\npython -m pip install -r requirements-dev.txt\npython management.py migrate\npython -m flaxon run app:app --reload','Open http://127.0.0.1:8000/ and show the generated welcome screen and its working Python API button. The starter environment uses the pinned course dependencies. Stop the server before chapter 2. Do not run the generated migration: chapter 3 replaces it and selects a fresh database directory.','A missing `flaxon` command usually means the virtual environment is inactive. Use `python -m flaxon`. If PowerShell blocks activation, run the environment Python directly (`.venv\\Scripts\\python.exe`). A missing wheel usually means you ran installation outside the repository root. Do not generate over the completed repository.','Generate the starter under a new directory name. Find the welcome module and its custom command before changing any code.')
-chapter('02 | Application factories and modules','Understand how one application composes independent features.','A module collects routes and, when needed, its interface files. An API prefix is mounted by the application factory. The project module can own both `/api/projects/` and its browser pages without mixing browser authorization with server authorization. `create_app()` allows tests to use disposable databases. Configuration comes from settings and environment variables; production startup rejects a missing secret.\n\nStart with the welcome module, then add auth, projects, tasks, and content as the chapters introduce them. The complete factory in the source appendix is the final composition, so it naturally contains features taught later.',source('modules/projects/module.py',start='projects = FlaxonModule(',end='async def owned_project'),'python -m flaxon run app:app --reload\n# In a second terminal:\ncurl http://127.0.0.1:8000/api/welcome/status','The welcome route responds and module routes receive their mounted prefixes. The completed project API is protected. Teloce UI route patterns use `:id`; Python routes use `<int:project_id>`.','Do not repeat `/api/projects` inside module decorators: the mount adds it. A wrong relative import can stop startup. Keep feature-specific pages in their module UI folder and shared helpers in root `ui/`.','Explain which file you would edit to change a project route, its screen, and its API prefix.')
-chapter('03 | Database and migrations','Persist users, projects, tasks, sessions, and authentication attempts.','The migration establishes relationships before endpoints write records. Each project belongs to a user; each task belongs to a project. Foreign keys cascade task deletion when a project is removed. Indexes support common ownership and project queries.\n\nThe Database helper opens a connection for each operation, enables foreign keys, and executes blocking SQLite work in `asyncio.to_thread`. A connection context commits a successful operation and rolls it back on failure. SQL placeholders separate values from SQL structure. The default database files live under `data/`; deployment moves them to a persistent directory. Never delete a real database just to rerun a migration.',source('database.py'),'python management.py migrate\npython management.py migrate --status','The first run applies the initial migration; a second run applies zero new migrations. Status reports applied and pending counts. Restarting the application preserves records. The full migration JSON is included in the source appendix.','`no such table` means migrations have not run against the database selected by `DATA_DIR`. Foreign keys must be enabled on each connection. Do not concatenate a project name into SQL. Migration SQL is application code; request values are parameters.','Use a temporary database to verify that deleting a project removes its tasks. Write down which foreign key implements that behavior.')
-chapter('04 | Authentication and cookie sessions','Register, sign in, sign out, and protect API requests before building forms.','Passwords are hashed with Argon2. The browser receives a random session cookie; the database stores a digest of its token. Server-side expiry is eight hours. Registration, login, and logout revoke the previous session and issue a new session and CSRF token.\n\nFirst request `/api/auth/session` to establish an anonymous session. JSON mutations require `X-CSRF-Token`; browser requests also undergo an Origin check when that header is supplied. Authentication answers who the caller is. Ownership checks later answer which records that person may use. Public registration never creates staff Admin access.',source('security.py',start='async def require_user(',end='async def session_response('),'python -m pytest -q tests/test_api.py -k "registration or login_logout or wrong_password or rate_limit"\ncurl -c cookies.txt http://127.0.0.1:8000/api/auth/session','The session response is `{"data":{"user":null,"csrf":"..."}}` before sign-in. Follow `docs/backend.md` or `scripts/course_api_demo.py` to register without guessing cookie behavior. After registration, use the new cookie and new token. `chapter-04-auth` is a runnable backend-only checkpoint.','A 403 usually indicates a stale/missing token, wrong JSON Content-Type, or Origin mismatch. Use exactly `http://127.0.0.1:8000` locally if that is PUBLIC_ORIGIN. A 401 means the endpoint requires a signed-in user. Passwords must be 12-128 characters. Do not commit cookie jars.','Sign out, then replay a request with the old session. Explain why server-side revocation matters even if the browser has deleted its cookie.')
-chapter('05 | Project APIs and ownership','Create, list, read, update, and delete only the signed-in user\'s projects.','A project name is required and limited to 120 characters; an optional description is limited to 1000. Server validation trims text. Creating a project records the owner from the authenticated session rather than a browser-supplied owner ID.\n\n`owned_project()` combines the record ID with the current user ID. Missing and other users\' projects both return 404. This avoids revealing whether a private record exists. GET lists only owned rows. PUT and DELETE check CSRF and ownership. Success responses consistently place records under `data`; creation returns HTTP 201.',source('modules/projects/module.py',start='async def owned_project(',end='@projects.get("/<int:project_id>")'),'python scripts/course_api_demo.py\npython -m pytest -q tests/test_api.py -k project_crud','The demo registers a temporary learner, creates a project through HTTP, and reads it back. The ownership test uses another account and verifies that the second user cannot read or alter the first user\'s project.','Hiding a button does not enforce authorization. Never trust owner_id from JSON. Trailing slash matters for the collection URL: use `/api/projects/`. Empty or oversized names are rejected on the server even if HTML validation is bypassed.','Add a test for a name containing only spaces. Predict the status before running it. Then describe why a project owned by another user returns 404.')
-chapter('06 | Tasks, status, dates, and filtering','Build the task workflow on top of project ownership.','Tasks use `todo`, `doing`, and `done`. Creating a task checks its project first. Updating a task loads the task, then verifies its project ownership; knowing a task ID is not authorization. PATCH changes only supplied fields. Due dates use ISO `YYYY-MM-DD` or null.\n\nA list request may filter by status, but SQL still includes the project ID. The API rejects unknown statuses before querying. Parameterized SQL safely handles titles containing quotation marks. Task deletion is explicit; project deletion cascades through the database.',source('validation.py',start='def task_fields('),'python -m pytest -q tests/test_api.py -k task\n# Signed-in browser / authenticated HTTP client:\n# GET /api/tasks/project/PROJECT_ID?status=done','You can create a task, change its status, clear its due date, filter the project task list, and delete it. Invalid statuses and impossible dates receive error responses. The task module is included in full in the appendix.','Do not filter all tasks first and authorize later. Passing an empty PATCH body is an error. Do not confuse a date-only field with an instant in a timezone. Client-side filtering improves presentation; API authorization remains mandatory.','Add a task with February 30 as its due date. Verify the rejection and add a regression assertion.')
-chapter('07 | Test the backend before the frontend','Verify successful requests and denied requests using disposable databases.','The tests create the schema in a temporary directory and call `create_app()` with those paths. The TestClient wraps HTTPX ASGITransport, so requests exercise routing, middleware, validation, and handlers without opening a TCP port. The Account helper establishes a session and carries cookies and CSRF headers between requests.\n\nStudy one test line by line: arrange two accounts, create a project, exercise another user\'s access, and assert the response. Assertions should protect behavior that could break or leak information, not merely repeat implementation details.',source('tests/test_api.py',start='def test_project_crud_and_ownership(',end='def test_task_workflow_filter_and_cascade('),'python -m pytest -q\npython -m pip check','The verified full course suite has 43 passing cases, including parameterized inputs. Tests cover authentication, session expiry, ownership, task validation, body limits, Admin boundaries, and CMS publishing permissions. Counts may grow when you add exercises.','Do not point tests at your development database. A shared cookie between two Account objects invalidates the ownership scenario. A test that asserts only 200 misses whether the returned records belong to the correct user.','Write one denied-request test of your own. Explain which user, input, or permission makes the request invalid.')
-chapter('08 | First Teloce HTML screen','Connect the server to a browser SPA shell.','Flaxon calls `app.use_teloce()` with the project root, UI directory, and MinifyJS option. The compiler builds `.html` components and serves the runtime and assets. `request.compile("app.html", {})` returns the compiled shell for known browser paths. The shell provides a router view; route pages mount inside it.\n\nA component contains a template, a TypeScript script, and scoped style. Each page and child component owns its own CSS. The compiler adds a component attribute to elements and rewrites selectors to match that attribute, so parent selectors do not automatically style child internals. Font and colour may still inherit normally. The shell uses only a deliberate :global(body) margin reset because body is outside the component. There is no public/app.css or stylesheets argument in the completed factory. This course uses `.html`, not `.vel`. Module UI routes map the compiled page names to URL patterns. Flaxon can also render whole applications with Jinax; this project chooses Teloce for customer screens and server-rendered Admin for staff.',source('ui/app.html'),'python -m flaxon run app:app --reload\n# Open http://127.0.0.1:8000/projects','Navigation and the page mount appear. Before sign-in the project screen shows an understandable account message; it does not display private records. Unknown API paths still return an API 404 rather than the HTML shell.','A blank router view may mean a missing module UI route, compiler error, or wrong compiled name. Do not write a catch-all server route that replaces every API error with HTML. Check the terminal and browser console first.','Identify the shell, one module page, and one child component. Explain which part Flaxon executes and which part runs in the browser.')
-chapter('09 | Authentication UI and typed API helper','Submit account forms and share consistent request handling.','TypeScript interfaces describe the JSON contract for users, projects, tasks, sessions, and articles. The API helper loads the session, includes cookies and the CSRF token, unwraps data, and surfaces server error messages. Authentication responses update the cached session after rotation.\n\nThe Login component uses `v-model`, guarded submission, loading/error state, and `v-show` when switching form mode. Keeping the form DOM intact avoids listener loss found during this project\'s browser testing. Never store the HttpOnly session token in localStorage. TypeScript transpilation removes types; this build is not a full static type checker.',source('ui/api.ts'),'python -m flaxon run app:app --reload\n# Open /login; register, sign out, then sign in.','Submitting disables duplicate actions, validation errors are visible, and valid authentication changes the account state. The next write uses the rotated CSRF token rather than the anonymous token.','A wrong relative import can prevent compilation. A 403 immediately after registration suggests cached old CSRF state. Fetch resolves even for HTTP errors: inspect response.ok rather than assuming every resolved promise succeeded.','Attempt an incorrect password and inspect the message. Add a short explanation next to the password field without weakening server validation.')
-chapter('10 | Components, signals, and progress','Make project tasks reactive and reuse the task form and list.','ProjectDetails loads a project and its tasks in parallel. TaskForm emits a create event; TaskList emits status and remove events. The parent owns requests and replaces the task list after successful writes, giving the UI one clear source of truth. Busy guards prevent duplicate submissions.\n\nThe task signal holds the collection. Computed completion returns zero for an empty collection and rounds the percentage of done tasks. An effect copies that value into component data for display and is stopped before unmount. The `.html` compiler automatically imports detected signal helpers; do not add redundant signal imports here. Ordinary `.ts` files do not receive the same automatic imports.',source('modules/projects/ui/pages/ProjectDetails/[id].html',start='// The compiler imports',end='export default {'),'python -m pytest -q tests/test_api.py -k task_workflow\npython scripts/browser_smoke.py','Changing one task from todo to done updates progress. Filtering hides or shows tasks without changing the overall completion calculation. An empty project remains at 0%, not NaN.','Calling a signal reads it; `.set()` replaces its value. Updating only the component array without calling setTasks would leave the separate signal stale. An effect that survives unmount can keep obsolete component state alive.','Add two tasks, complete one, and expect 50%. Filter to done and explain why project progress should still use the full task collection.')
-chapter('11 | SPA routing with data-teloce-link','Support internal navigation, Back/Forward, and direct refresh.','Three parts cooperate. First, module ui_routes register `/projects` and `/projects/:id` in the browser. Second, `data-teloce-router-view` marks the shell mount point. Third, `data-teloce-link` on internal anchors lets Teloce navigate without reloading the document. Dynamic IDs become component props.\n\nPython shell routes are still necessary for a direct visit or refresh at `/projects/42`. The server returns the shell, then Teloce mounts the page and requests its authorized JSON data. Staff Admin is a separate interface; its anchor intentionally navigates normally. After deleting a project, the component uses the existing router\'s navigate method.',source('app.py',start='    # Explicit shell routes',end='    return app'),'python scripts/browser_smoke.py\n# Open /projects, select a project, use Back and Forward.\n# Refresh the nested /projects/ID URL.','Internal links keep the current document. Back/Forward mounts the corresponding page. A direct nested URL renders its screen after authentication, while an invalid API URL stays 404.','A working click but failed refresh indicates missing Python shell routes. A full reload on an internal link indicates a missing data-teloce-link marker. Do not add the marker to unrelated Admin or external URLs. Route patterns and component props must agree.','Add a Help navigation link using the marker. Test click, Back, and direct refresh, then describe the server and browser work in each case.')
-chapter('12 | Staff Admin and model adapters','Manage customer projects and tasks through separate staff accounts.','AdminDashboard registers a persistent staff store with strict_permissions enabled. Domain registration and Admin registration are separate. management.py setup-admin prompts for credentials without putting a password in Git or the command line.\n\nThe ProjectAdmin and TaskAdmin adapters reuse the same domain database as the APIs. Staff can view and change permitted records; creating records is deliberately left to the customer workflow so ownership is established correctly. Permissioned staff may access all registered records, so these adapters are not a tenant-restricted customer portal. Grant narrow capabilities and reserve superuser for trusted administrators.',source('backoffice.py',start='    admin = AdminDashboard(',end='    class ProjectAdmin:'),'python management.py setup-admin\npython -m flaxon run app:app --reload\n# Open /admin/login, then /admin/.','A public account cannot sign into staff Admin. A staff administrator can see project and task model lists. Changes through an adapter persist in the same app.sqlite3 read by the customer API. Follow docs/security.md for exact role keys.','Role names alone do not grant every custom model capability. Use project.view_project and task.view_task for readers, then specific change keys for operators. The standalone bootstrap command creates staff data but the server must still configure AdminDashboard.','Create a read-only staff group and verify an attempted edit is denied. Explain why hiding the Edit button alone is insufficient.')
-chapter('13 | CMS help content and publishing','Publish sanitized help articles while preserving editorial boundaries.','The CMS receives the Admin authentication backend. help_article has title, summary, and rich-text body fields, with draft and published statuses. Public endpoints expose only published records and a small field whitelist. The Article component uses v-html only for rich text sanitized by nh3. Ordinary task/user text remains escaped.\n\nThe bundled framework patch makes CMS without auth deny access by default. Creating, editing, importing, restoring, and acting on protected publication states require publishing rights. Editing a published article also requires publication permission; a draft-only editor must not silently change live content. These are targeted fixes, not a complete security audit.',source('backoffice.py',start='    cms = CMS(app, auth=admin.auth)',end='    cms.register(\n        ContentType(\n            "announcement"'),'python management.py seed\n# Restart the server after seeding.\npython -m pytest -q tests/test_cms_security.py\n# Browse /admin/cms/ and /help.','Only published help content appears publicly. Draft edits and publication rights are distinct. Help editors need model view/add/change permissions; publishers additionally need cms.publish_content and, when restoring revisions, cms.restore_revision.','Do not expose the authenticated CMS editing API as a public content feed. Do not trust raw HTML from an arbitrary field. Seed only after a domain account exists and restart afterward because the CMS keeps in-process content state.','Create a draft and verify it is absent from /help. Have an authorized publisher publish it, then verify the article appears.')
-chapter('14 | Full-stack verification and accessibility','Check real browser behavior in development and production modes.','API tests cannot prove that a compiled form listener works, a route preserves the document, or a layout fits mobile. The browser smoke script uses disposable data and Chromium at desktop and mobile sizes. It checks account forms, project/task workflows, progress, staff content, navigation, history, refresh, and logout.\n\nLoading messages use status semantics; errors use alerts; labels name form controls. Busy state is visible and buttons are disabled during work. Verify keyboard focus and contrast as you change visual styles. Production smoke checks the minified interface locally, not the actual Render infrastructure.',source('scripts/build_ui.py'),'python -m playwright install chromium\npython -m pytest -q\npython scripts/browser_smoke.py\npython scripts/browser_smoke.py --production\npython -m pip check','The full suite and both browser modes pass. Browser tests create their own databases rather than modifying your learner records. Desktop and 390-pixel mobile layouts support the same workflow.','Install Chromium before running Playwright. A port already in use can prevent the test server starting. Local Chromium treats loopback as trustworthy; an actual deployed site must use HTTPS. Do not treat passing local smoke tests as proof of cloud deployment.','Complete the workflow using only the keyboard. Record one accessibility improvement and retest it at mobile width.')
-chapter('15 | Production build and Render deployment','Prepare one persistent instance with secrets, HTTPS, and verified data survival.','MinifyJS runs through the Teloce production build. Runtime dependencies are pinned. The Render Blueprint uses one Python service, one worker, and a persistent disk mounted at /var/data. Both app.sqlite3 and admin.sqlite3 must survive restarts. SQLite migrations run in the start command because the live disk is available at runtime rather than build time.\n\nSet FLAXON_DEBUG=0, a random secret of at least 32 characters, and the exact HTTPS PUBLIC_ORIGIN. Production Host checks and browser Origin checks depend on that URL. Create staff interactively in the service Shell. This book describes the repository\'s prepared configuration; it has not been deployed to your Render account. Verify current service settings with the official references listed in docs/render.md.',source('render.yaml'),'python scripts/verify_vendor.py\npython scripts/build_ui.py\npython -m pip check\n# In Render Shell after deployment:\npython management.py setup-admin','After configuring the service, check /health/course, register, create a project/task, publish help, refresh a nested route, sign out, and restart the service. Data must persist. Secure and HttpOnly cookies must appear over HTTPS; debug traces must be absent.','An ephemeral filesystem loses SQLite data. More workers or instances need shared storage and coordination; do not increase them with this design. A changed domain requires PUBLIC_ORIGIN to change too. Do not seed automatically at every deployment.','Write a recovery checklist and back up both databases using SQLite\'s online backup API or a quiesced copy. Restore into a test environment and verify one project and one help article.')
-intro='''# Instructor Recording Guide: Full-Stack Project Manager
-
-Flaxon + Teloce HTML SPA + signals + Admin/CMS + MinifyJS
+Flaxon + Teloce HTML SPA + signals + scoped CSS + Admin/CMS + MinifyJS
 
 Author: Aldane Hutchinson
 
-Instructor edition - revision 3 - October 2026
+Learner ebook and recording companion - revision 4 - October 2026
 
 ![Flaxon logo](assets/flaxon.png)
 
 ## Read this first
 
-Start with `flaxon new project_manager`, then build in the generated directory. This PDF is your working recording guide. Keep it beside your editor while you rehearse and record. Each chapter gives a lesson outcome, preparation, narration prompts, code to type, demonstrations, editing notes, commands, expected results, common errors, and an exercise. Read the Say prompts aloud during rehearsal, then use your own wording on camera.
+Start with `flaxon new project_manager`. Build in that generated directory; keep the separate course_reference checkout for pinned dependencies and recovery files. Use Python 3.12 and basic Python, HTML and JavaScript knowledge. You do not need Node.js for this course.
 
-The guide follows the actual course repository. Every chapter now prints the complete files to create or replace, in order. Intermediate factories mount only features already taught. Early UI pages are deliberately labelled placeholders and are replaced later. The complete source appendix is a reference, while the chapter file blocks are the build sequence. Type the important behavior while recording. Teach a few CSS rules in each component and provide the remainder of that component's scoped block. The completed app uses no external app.css stylesheet.
+Follow chapters in order. Stop the development server before replacing Python files. Every file block is COMPLETE for that step: replace the whole file rather than appending duplicate routes. Create parent folders when they do not exist. Empty __init__.py blocks mean create an empty file. Commands run inside project_manager unless a chapter explicitly says otherwise. Once a check passes, commit your work before the next lesson.
 
-Repository: https://github.com/aldanedev-create/FreecodeCamp-flaxon-project-manager-course
+The framework wheel includes unreleased ORM and CLI improvements; installing a different PyPI version will not reproduce this book. Keep the supplied requirements and vendor wheels together. Their checksums are verified before installation. This revision uses Python ORM migrations and management.py throughout. Older chapter tags describe the previous course revision and remain unchanged.
 
-Use `main` for the completed application, `starter-scoped-css` for the prepared welcome starter, `chapter-04-auth` for the authentication backend, and `backend-ready` for the complete API checkpoint. See course/checkpoints.md for the exact checkpoint scope and tag publication instructions. The source appendix belongs to the completed app; do not paste every final file into the first lesson at once.
+Each lesson gives a goal, an explanation, exact files, commands, expected results, common errors and a short exercise. For recording, demonstrate the expected result, explain the boundary being changed, type the important behavior and run its check. The final recording appendix is optional; you can learn the application directly from the chapters.
 
-This is an independent teaching project. Publication of a video by freeCodeCamp is not guaranteed. Flaxon\'s course-only security build is described in vendor/README.md. Real HTTPS/Render deployment, mail, media scanning, and multi-process operation were not verified in this environment.
+## Finished application
 
-## Prepare your recording workspace
-
-- Open a separate teaching checkout and the completed reference. Do not delete working production code to stage a lesson.
-- Show the finished feature at the beginning of each chapter, then return to the lesson's starting state. Four recovery checkpoints exist; not every chapter has a separate snapshot.
-- Rehearse each take once. When adapting the generated starter, use the pinned dependency files and vendor wheels from the completed repository.
-- Record a short microphone test, enlarge code, close personal tabs, and hide credentials. Capture 1080p if your equipment supports it.
-- Keep the editor, terminal, browser, and this PDF ready. Pause while switching views so edits are easy to follow.
-- If you make a typing mistake, state the problem and correction. Cut long waits, but show the command and verified result.
-- Record the 12-15-minute sample lesson first, ask learners for specific feedback, then revise the full-course takes.
-
-## Learning route
-
-- Run and understand the starter.
-- Build persistent, protected APIs and test them.
-- Compile HTML components and connect them to those APIs.
-- Add task reactivity and SPA navigation.
-- Configure staff Admin and published help content.
-- Verify the complete workflow and prepare deployment.
+Customer pages: /login, /projects, /projects/ID, /help and /help/SLUG. Customers register, manage their own projects and tasks, filter status and see progress. Staff pages: /admin/login, /admin/project, /admin/task and /admin/cms/. Staff permission checks run on the server. Each Teloce component has scoped CSS. Internal SPA anchors use data-teloce-link; staff navigation remains ordinary page navigation.
 
 ## Contents
 
 '''
-intro+='\n'.join(f'- {c.splitlines()[0][2:]}' for c in chapters)+'\n- Appendix A | Complete application source\n- Appendix B | Recording your sample lesson\n'
-files=['settings.py','app.py','database.py','security.py','validation.py','management.py','migrations/0001_initial.json','modules/auth/module.py','modules/projects/module.py','modules/tasks/module.py','backoffice.py','modules/content/module.py','seed.py','ui/types.ts','ui/api.ts','ui/app.html','ui/pages/Home.html','modules/auth/ui/pages/Login.html','modules/projects/ui/pages/ProjectList.html','modules/projects/ui/pages/ProjectDetails/[id].html','modules/projects/ui/components/TaskForm.html','modules/projects/ui/components/TaskList.html','modules/content/ui/pages/Help.html','modules/content/ui/pages/Article/[slug].html','.env.example','requirements.txt','requirements-dev.txt','scripts/build_ui.py','render.yaml']
-appendix='# Appendix A | Complete application source\n\nThese files are printed in full so you can follow the lesson without reconstructing missing handlers. The repository additionally contains the pinned transitive lock, vendored wheels, welcome starter reference, test fixtures, regression suites, and browser smoke script. Clone it to obtain binary dependencies and all tests. PDF code lines may wrap for print; copy exact code from Markdown or repository files.\n\n'
-for f in files:appendix+='## '+f+'\n\n'+source(f)+'\n'
-sample=ROOT/'course/sample-lesson.md'
-if sample.exists(): appendix+='\n# Appendix B | Recording your sample lesson\n\n'+sample.read_text().replace('# Sample lesson:', '## Sample lesson:', 1)
-(ROOT/'book/companion.md').write_text(intro+'\n'.join(chapters)+appendix)
+chapters = []
+for number, lesson in enumerate(LESSONS, 1):
+    title, goal, explanation, result, errors, exercise = lesson
+    parts = [f"# {number:02d} | {title}\n\n## Goal\n\n{goal}\n\n## What you are building\n\n{explanation}\n\n"]
+    if number == 1:
+        parts.append((ROOT / "course/lesson-01-setup.md").read_text())
+    else:
+        step = STEPS[number - 2]
+        parts.append("## Build this chapter\n\nStop the server. Work in project_manager. Copy each complete file below in order.\n\n")
+        for i, entry in enumerate(step["files"], 1):
+            path = entry["path"]
+            note = NOTES.get(path, "This file owns the feature named by its module or component. Read the route/form flow before continuing.")
+            parts.append(f"## Step {i}: {entry['action']} - {path}\n\n{note}\n\n" + fence(path, entry["content"]) + "\n")
+        for path in step.get("delete", []):
+            parts.append(f"## Remove {path}\n\nThe replacement factory and components no longer load this generated starter stylesheet. Remove the file after replacing the shell.\n\n")
+        parts.append("## Run and check\n\n```bash\n" + step["commands"] + "\n```\n\n")
+        if number == 4:
+            parts.append('''## Make the first authenticated request
+
+Keep the server running. In a second terminal use an HTTP client to GET /api/auth/session and save its Set-Cookie value and data.csrf. Then POST /api/auth/register with that cookie, Content-Type: application/json and X-CSRF-Token set to data.csrf. The complete Python demo in chapter 5 automates this exchange. For curl on macOS/Linux:
+
+```bash
+curl -c cookies.txt http://127.0.0.1:8000/api/auth/session
+# Replace TOKEN with data.csrf from the response above:
+curl -b cookies.txt -c cookies.txt -H 'Content-Type: application/json' -H 'X-CSRF-Token: TOKEN' -d '{"name":"Learner","email":"learner@example.test","password":"LearningPython123!"}' http://127.0.0.1:8000/api/auth/register
+```
+
+Save the NEW token returned by registration. Do not commit cookies.txt.
+
+''')
+        if number == 6:
+            parts.append('''## Exercise the task API now
+
+Use the cookie and current CSRF token from chapter 4; replace PROJECT_ID with the ID returned by chapter 5. Then read the task list and change TASK_ID to the returned task ID:
+
+```bash
+curl -b cookies.txt -H 'Content-Type: application/json' -H 'X-CSRF-Token: TOKEN' -d '{"title":"Record the lesson","status":"todo","due_date":"2026-12-01"}' http://127.0.0.1:8000/api/tasks/project/PROJECT_ID
+curl -b cookies.txt http://127.0.0.1:8000/api/tasks/project/PROJECT_ID
+curl -X PATCH -b cookies.txt -H 'Content-Type: application/json' -H 'X-CSRF-Token: TOKEN' -d '{"status":"done"}' http://127.0.0.1:8000/api/tasks/TASK_ID
+curl -b cookies.txt 'http://127.0.0.1:8000/api/tasks/project/PROJECT_ID?status=done'
+```
+
+''')
+        if number == 15:
+            parts.append('''## Deploy the completed project
+
+1. Stop the local server. Run all tests and both browser checks from chapter 14. Run the production build above.
+2. Commit your Python migrations, application files, vendor wheels and requirements. Keep .env, data, cookie jars and local virtual environments out of Git. Push the project to your GitHub repository.
+3. In Render, choose New > Blueprint, connect your repository and select the branch containing render.yaml. Review the paid service and persistent disk before deploying.
+4. Supply PUBLIC_ORIGIN as the exact https://SERVICE.onrender.com address (or your configured HTTPS domain). Keep FLAXON_DEBUG=0, DATA_DIR=/var/data and the generated persistent secret. Python is pinned by the Blueprint.
+5. Deploy and inspect logs: migrations must complete before Uvicorn listens. Do not move SQLite migrations to a pre-deploy command; that process cannot access the attached disk.
+6. In the service Shell run python management.py setup-admin and enter staff credentials interactively. Never commit a staff password.
+7. Visit /health/course, then register a customer, create a project and task, sign into staff Admin and publish a help article. Refresh /projects/ID and /help/SLUG. Sign out and check protected API requests are rejected.
+8. Restart the service and confirm both the project and help article survive. Inspect browser cookies over HTTPS for Secure and HttpOnly. Back up data and uploads before upgrades.
+
+Official deployment references, checked October 2026: [Render Blueprints](https://render.com/docs/blueprint-spec), [persistent disks](https://render.com/docs/disks), [deployment lifecycle](https://render.com/docs/deploys), and [Python versions](https://render.com/docs/python-version). This book supplies deployable configuration; it does not claim a deployment has been made in your account.
+
+''')
+    parts.append(f"## Expected result\n\n{result}\n\n## Common errors\n\n{errors}\n\n## Short exercise\n\n{exercise}\n\n## What to say and show\n\nSay: \"{goal} The server remains responsible for persistence and authorization; the browser presents the result.\"\n\nShow the expected result above, then point to the file responsible for it. Run the chapter check before the next lesson.\n\n## Save your checkpoint\n\n```bash\ngit add .\ngit commit -m \"Complete chapter {number:02d}: {title}\"\n```\n")
+    chapters.append("".join(parts))
+    directory = ROOT / "book/chapters"
+    directory.mkdir(parents=True, exist_ok=True)
+    (directory / f"{number:02d}.md").write_text(chapters[-1])
+intro += "\n".join(f"- {i:02d}: {item[0]}" for i, item in enumerate(LESSONS, 1)) + "\n\n"
+appendix = '''# Appendix | Recording this application
+
+Rehearse the complete build once before recording. Keep this ebook beside the editor. For each lesson: demonstrate the current result, introduce the file, explain one function or component at a time, type its behavior, run the check and show the working result. Provide full scoped CSS for copying, then explain a few relevant rules while recording.
+
+Record a short sample using chapter 5's owned project endpoint, its HTTP demo, and chapter 9's ProjectList form. Tell viewers which earlier chapters supply sessions and validation. Gather feedback on pacing and error explanations before recording all chapters.
+
+The repository contains the completed application, generated learner starter, chapter files and verification script. Use the revision-4 chapter snapshots rather than the earlier SQL-course tags. A snapshot is for recovery, not a replacement for teaching the file changes.
+'''
+(ROOT / "book/companion.md").write_text(intro + "\n\n".join(chapters) + "\n\n" + appendix)
+print(f"Wrote {len(chapters)} complete learner chapters")

@@ -15,4 +15,5 @@ jobs:
       - run: python -m playwright install --with-deps chromium
       - run: python scripts/browser_smoke.py
       - run: python scripts/browser_smoke.py --production
+      - run: python scripts/verify_chapters.py
       - run: python scripts/build_ui.py
