@@ -1,6 +1,6 @@
 """Maintain exact file replacements for the generated-project teaching sequence."""
 from pathlib import Path
-import json,re
+import json,re,difflib
 ROOT=Path(__file__).resolve().parents[1]
 FINAL=(ROOT/'app.py').read_text()
 
@@ -79,6 +79,30 @@ commands={
 15:'python scripts/build_ui.py\npython -m pip check'}
 existing={'app.py','settings.py','management.py','admin.py','ui/app.html'}
 steps=[]
+previous = {p.relative_to(ROOT/'course/starter').as_posix(): p.read_text() for p in (ROOT/'course/starter').rglob('*') if p.is_file()}
+
+def edits(before, after):
+    """Return unique replacement anchors, or use a complete file for large edits."""
+    old, new = before.splitlines(keepends=True), after.splitlines(keepends=True)
+    matcher = difflib.SequenceMatcher(a=old, b=new, autojunk=False)
+    groups = list(matcher.get_grouped_opcodes(3))
+    if not groups or len(groups) > 4 or matcher.ratio() < 0.60:
+        return []
+    operations = []
+    for group in groups:
+        start, end = group[0][1], group[-1][2]
+        first, last = group[0][3], group[-1][4]
+        anchor, replacement = ''.join(old[start:end]), ''.join(new[first:last])
+        if not anchor or before.count(anchor) != 1:
+            return []
+        operations.append({'before': anchor, 'after': replacement})
+    result = before
+    for operation in operations:
+        if result.count(operation['before']) != 1:
+            return []
+        result = result.replace(operation['before'], operation['after'], 1)
+    return operations if result == after else []
+
 for stage in range(2,16):
     entries=[]
     for path in files[stage]:
@@ -90,7 +114,12 @@ for stage in range(2,16):
             elif path=='modules/auth/ui/pages/Login.html':content=placeholder('Account')
             elif path=='modules/projects/ui/pages/ProjectList.html':content=placeholder('Projects')
             elif path=='modules/projects/ui/pages/ProjectDetails/[id].html':content=placeholder('Project details',"props: ['id']")
-        entries.append({'path':path,'action':'EDIT - replace the entire file' if path in existing else 'CREATE - make parent folders, then create this file','content':content})
+        before = previous.get(path)
+        operations = edits(before, content) if before is not None and stage > 2 else []
+        action = 'EDIT - replace the marked blocks' if operations else ('EDIT - replace the entire file' if path in existing else 'CREATE - make parent folders, then create this file')
+        if before != content:
+            entries.append({'path':path,'action':action,'content':content,'edits':operations})
+        previous[path] = content
         existing.add(path)
     steps.append({'chapter':stage,'files':entries,'commands':commands[stage],'delete':['public/app.css'] if stage==8 else []})
 (ROOT/'course/build-steps.json').write_text(json.dumps(steps,indent=2)+'\n')

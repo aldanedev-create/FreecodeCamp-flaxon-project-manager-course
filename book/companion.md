@@ -4,7 +4,7 @@ Flaxon + Teloce HTML SPA + signals + scoped CSS + Admin/CMS + MinifyJS
 
 Author: Aldane Hutchinson
 
-Learner ebook and recording companion - revision 4 - October 2026
+Learner ebook and recording companion - revision 5 - October 2026
 
 ![Flaxon logo](assets/flaxon.png)
 
@@ -12,9 +12,9 @@ Learner ebook and recording companion - revision 4 - October 2026
 
 Start with `flaxon new project_manager`. Build in that generated directory; keep the separate course_reference checkout for pinned dependencies and recovery files. Use Python 3.12 and basic Python, HTML and JavaScript knowledge. You do not need Node.js for this course.
 
-Follow chapters in order. Stop the development server before replacing Python files. Every file block is COMPLETE for that step: replace the whole file rather than appending duplicate routes. Create parent folders when they do not exist. Empty __init__.py blocks mean create an empty file. Commands run inside project_manager unless a chapter explicitly says otherwise. Once a check passes, commit your work before the next lesson.
+Follow chapters in order. Stop the development server before replacing Python files. Follow the action label on each step. CREATE supplies the complete new file. REPLACE THE ENTIRE FILE supplies a complete replacement. EDIT MARKED BLOCKS shows an exact existing block and its replacement: find the old block once and replace only that block, keeping everything else. Never append a duplicate function or route. Complete recovery files are available for every chapter. Create parent folders when they do not exist. Empty __init__.py blocks mean create an empty file. Commands run inside project_manager unless a chapter explicitly says otherwise. Once a check passes, commit your work before the next lesson.
 
-The framework wheel includes unreleased ORM and CLI improvements; installing a different PyPI version will not reproduce this book. Keep the supplied requirements and vendor wheels together. Their checksums are verified before installation. This revision uses Python ORM migrations and management.py throughout. Older chapter tags describe the previous course revision and remain unchanged.
+The recording target is Flaxon 3.0.0. Its release installation commands become usable only after publication and a clean release rehearsal. Until then, the supplied preview wheels are the verified installation path; they are not labelled as a published 3.0.0 package. Keep the supplied requirements and vendor wheels together. Their checksums are verified before installation. This revision uses Python ORM migrations and management.py throughout. Older chapter tags describe the previous course revision and remain unchanged.
 
 Each lesson gives a goal, an explanation, exact files, commands, expected results, common errors and a short exercise. For recording, demonstrate the expected result, explain the boundary being changed, type the important behavior and run its check. The final recording appendix is optional; you can learn the application directly from the chapters.
 
@@ -49,6 +49,40 @@ Generate your own project and run its welcome screen.
 ## What you are building
 
 You will build a project manager with customer accounts, private projects, tasks, progress, a staff Admin and published help. Flaxon runs Python on the server. Teloce compiles HTML components and TypeScript into a browser SPA. MinifyJS optimizes the production JavaScript. We build the APIs first so every screen connects to a working backend.
+
+## Choose the installation before recording
+
+The public course targets **Flaxon 3.0.0**. The release is planned, not published by this book. After publication and the clean release rehearsal, learners can install it from PyPI instead of copying preview wheels. Do not mix the two installation paths.
+
+### Release path: after Flaxon 3.0.0 is published
+
+Use a new parent folder. Create and activate an environment as shown below, then install the release:
+
+```bash
+python -m venv course_env
+# macOS/Linux: source course_env/bin/activate
+# Windows PowerShell: .\course_env\Scripts\Activate.ps1
+python -m pip install "flaxon[standard,admin]==3.0.0"
+flaxon new project_manager
+cd project_manager
+# Activate the generated .venv using your platform's command:
+# macOS/Linux: source .venv/bin/activate
+# Windows PowerShell: .\.venv\Scripts\Activate.ps1
+python -m pip install "flaxon[standard,admin]==3.0.0" minifyjs==0.1.3 pytest==9.1.1 httpx==0.28.1 playwright==1.51.0
+python -m pip check
+python -m flaxon welcome
+python -m flaxon run app:app --reload
+```
+
+**CREATE `requirements.txt`:** after the release passes the course checks, copy the complete contents of `requirements-release.txt` from the course repository into the generated project. Keep that file in Git. Chapters 2-15 then use the same application code and commands. Skip `prepare_course.py` and the preview wheel-copying commands on this path. Chapter 15 deployment uses your release requirements; its vendor-verification helper runs only for the preview path.
+
+**Say:** "We installed the published course version, then generated our own project. Flaxon already includes the ORM integration. We still apply migrations explicitly."
+
+**Viewers should see:** the generated welcome screen and a successful Python API request. If the exact release cannot be installed, it has not been published on the configured package index; use the labelled preview path to rehearse, not a different version presented as 3.0.0.
+
+### Preview path: verified bundled build before release
+
+The following existing bootstrap installs the bundled preview. It is for rehearsal until the release path passes the same checks. It does not install Flaxon 3.0.0.
 
 ## Start here: create the project with the CLI
 
@@ -185,11 +219,13 @@ settings.py reads environment values and gives both the server and management co
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: EDIT - replace the entire file - settings.py
 
 Read this first: choose paths and environment values in one place. The rest of the app uses these values.
+
+Select all existing contents of this file and replace them with the complete code below.
 
 ```python
 """Shared configuration for the server and management commands."""
@@ -221,9 +257,17 @@ ADMIN_STORE_BACKEND = "sqlite"
 ADMIN_STORAGE_PATH = ADMIN_DATABASE_PATH
 ```
 
+**Say:** "Read this first: choose paths and environment values in one place. The rest of the app uses these values."
+
+**Type:** Follow the action above in `settings.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: EDIT - replace the entire file - management.py
 
 This short entry point delegates commands to Flaxon and fixes the project root.
+
+Select all existing contents of this file and replace them with the complete code below.
 
 ```python
 """One entry point for Flaxon's project commands."""
@@ -240,9 +284,17 @@ if __name__ == "__main__":
     raise SystemExit(main())
 ```
 
+**Say:** "This short entry point delegates commands to Flaxon and fixes the project root."
+
+**Type:** Follow the action above in `management.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 3: EDIT - replace the entire file - app.py
 
-Replace the factory with this chapter's complete version. It mounts only the features already introduced.
+The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.
+
+Select all existing contents of this file and replace them with the complete code below.
 
 ```python
 """Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
@@ -302,6 +354,12 @@ def create_app(database_path=None, admin_path=None, debug=None):
 app = create_app()
 ```
 
+**Say:** "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact."
+
+**Type:** Follow the action above in `app.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Run and check
 
 ```bash
@@ -348,11 +406,13 @@ User owns projects; Project owns tasks. The ForeignKeyField names use the root O
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - models.py
 
 These five models are the complete schema. Relationships define ownership and deletion behavior; handlers add authorization.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Application tables. Generate Python migrations whenever these models change."""
@@ -425,9 +485,17 @@ class AuthAttempt(Model):
         table = "auth_attempts"
 ```
 
+**Say:** "These five models are the complete schema. Relationships define ownership and deletion behavior; handlers add authorization."
+
+**Type:** Follow the action above in `models.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: EDIT - replace the entire file - admin.py
 
 Keep explicit registration in this file. At chapter 3 it is empty; chapter 12 adds the domain models.
+
+Select all existing contents of this file and replace them with the complete code below.
 
 ```python
 """Staff model registration is added in chapter 12."""
@@ -435,61 +503,47 @@ def register(admin):
     pass
 ```
 
+**Say:** "Keep explicit registration in this file. At chapter 3 it is empty; chapter 12 adds the domain models."
+
+**Type:** Follow the action above in `admin.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 3: CREATE - make parent folders, then create this file - migrations/__init__.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 
 ```
 
-## Step 4: EDIT - replace the entire file - app.py
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
 
-Replace the factory with this chapter's complete version. It mounts only the features already introduced.
+**Type:** Follow the action above in `migrations/__init__.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
+## Step 4: EDIT - replace the marked blocks - app.py
+
+The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.
+
+### Edit 1: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
 
 ```python
-"""Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
 
-import settings
-from types import SimpleNamespace
-from pathlib import Path
-from urllib.parse import urlsplit
-from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
-from flaxon import Flaxon, Request
-from flaxon.http import JSONResponse
-from modules.welcome.module import welcome
-from settings import (
-    ROOT,
-    DATA_DIR,
-    DATABASE_PATH,
-    ADMIN_DATABASE_PATH,
-    DEBUG,
-    PUBLIC_ORIGIN,
-)
+    @app.get("/health/course")
+    async def health():
+        return {"data": {"status": "ok"}}
 
+    @app.get("/")
+```
+### Replace that block with
 
-def create_app(database_path=None, admin_path=None, debug=None):
-    debug = DEBUG if debug is None else debug
-    values = {key: getattr(settings, key) for key in dir(settings) if key.isupper()}
-    values.update(DEBUG=debug)
-    if database_path is not None:
-        values["DATABASE_URL"] = f"sqlite://{Path(database_path).resolve()}"
-    if admin_path is not None:
-        values["ADMIN_STORAGE_PATH"] = Path(admin_path)
-    app = Flaxon.from_settings(SimpleNamespace(__file__=settings.__file__, **values))
-    app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
-    if not debug:
-        app.add_middleware(
-            TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
-        )
-    app.public_origin = PUBLIC_ORIGIN
-    for module, prefix in [
-        (welcome, "/api/welcome"),
-    ]:
-        app.mount_module(module, prefix=prefix)
-    if app.is_management:
-        return app
-
+```python
 
     @app.get("/health/course")
     async def health():
@@ -499,14 +553,15 @@ def create_app(database_path=None, admin_path=None, debug=None):
         return {"data": {"status": "ok"}}
 
     @app.get("/")
-    async def home():
-        return {"data": {"message": "Backend lesson ready. The SPA starts in chapter 8."}}
-
-    return app
-
-
-app = create_app()
 ```
+
+Leave the rest of the file unchanged.
+
+**Say:** "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact."
+
+**Type:** Follow the action above in `app.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
 
 ## Run and check
 
@@ -518,6 +573,74 @@ python management.py migrate
 python management.py migrate --status
 python management.py runserver
 ```
+
+## Flaxon API and ORM: the commands you will teach
+
+This course uses the current Flaxon public integration rather than JSON migrations or hand-written SQL. Flaxon's `Model` and `fields` come from Tortoise; queries are asynchronous. The Flaxon 3.0.0 release target must export the same APIs before recording the release installation path.
+
+**Say:** "Models describe tables. Settings choose the database. Flaxon opens and closes connections. Migrations record schema changes, and management.py applies them explicitly."
+
+In `models.py`, the exact imports are:
+
+```python
+from flaxon.db import Model, fields
+```
+
+You have already created `Project` in this chapter. After migrating, use these queries in an async handler or the management shell. These examples explain the API; do not paste them at module scope, and do not add an unsecured demonstration route:
+
+```python
+project = await Project.create(
+    owner_id=user["id"], name="Record the course", description="First project"
+)
+projects = await Project.filter(owner_id=user["id"]).order_by("-created_at")
+project = await Project.filter(id=project_id, owner_id=user["id"]).first()
+await Project.filter(id=project_id, owner_id=user["id"]).update(name="New name")
+await Project.filter(id=project_id, owner_id=user["id"]).delete()
+```
+
+`user` is the authenticated customer dictionary and `project_id` is the validated route parameter introduced in chapters 4-5. Never trust an owner ID supplied by the browser. A model relationship does not perform authorization automatically.
+
+For an operation that must commit or roll back together:
+
+```python
+from flaxon.db import in_transaction
+
+async with in_transaction() as connection:
+    project = await Project.create(
+        owner_id=user["id"], name="Atomic project", using_db=connection
+    )
+    await Task.create(
+        project_id=project.id, title="First task", using_db=connection
+    )
+```
+
+The server manages normal connection startup and shutdown through `Flaxon.from_settings(...)`. The course tests create disposable schemas explicitly; normal application startup never silently changes tables.
+
+Keep these responsibilities separate:
+
+- `settings.py`: `DATABASE_URL`, debug mode, secrets and deployment configuration.
+- `models.py`: fields, foreign keys, indexes and readable model names.
+- `app.py`: `Flaxon.from_settings(...)`, middleware and `app.mount_module(...)`.
+- `management.py`: one short entry point backed by `flaxon.management.execute`.
+- `admin.py`: explicit staff model registration; chapter 12 adds controlled adapters.
+
+Run these from `project_manager`:
+
+```bash
+python management.py check
+python management.py makemigrations --name initial
+python management.py migrate --plan
+python management.py migrate
+python management.py migrate --status
+python management.py shell
+python management.py setup-admin
+python management.py runserver
+```
+
+Only run `makemigrations --name initial` once for this initial schema. Later changes use a descriptive new name. `createsuperuser` is an alias for `setup-admin`; migration files are Python and belong in Git. Stop the server before changing configuration. Staff credentials and customer accounts are separate.
+
+The later chapters show actual `FlaxonModule` definitions, JSON responses, request parsing, middleware, Teloce compilation and Admin/CMS integration in their complete files. Optional SSR is outside this course's client-rendered SPA; use the dedicated framework guide when adding it.
+
 
 ## Expected result
 
@@ -557,11 +680,13 @@ validation.py checks JSON and field types before handlers write anything. securi
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - validation.py
 
 Validate JSON before passing values to ORM calls. Reuse these checks in all mutations.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Validate every write on the server, even when the browser already validated it."""
@@ -627,9 +752,17 @@ def task_fields(data, partial=False):
     return result
 ```
 
+**Say:** "Validate JSON before passing values to ORM calls. Reuse these checks in all mutations."
+
+**Type:** Follow the action above in `validation.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - security.py
 
 Read each helper in order: identify a session, require its user, check CSRF, rotate credentials, then limit attempts.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Opaque cookie sessions and session-bound CSRF; account ownership stays on the server."""
@@ -741,17 +874,33 @@ async def limit_auth_attempts(request, email):
         raise TooManyRequests("Too many attempts. Try again in 15 minutes.")
 ```
 
+**Say:** "Read each helper in order: identify a session, require its user, check CSRF, rotate credentials, then limit attempts."
+
+**Type:** Follow the action above in `security.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 3: CREATE - make parent folders, then create this file - modules/auth/__init__.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Module-owned APIs and interface files."""
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `modules/auth/__init__.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 4: CREATE - make parent folders, then create this file - modules/auth/module.py
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Create the auth module with session, registration, login and logout routes. Start with the anonymous CSRF handshake; registration rotates the cookie and token.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Registration and cookie authentication, separate from staff Admin accounts."""
@@ -831,15 +980,33 @@ async def logout(request):
     return await session_response(request)
 ```
 
-## Step 5: EDIT - replace the entire file - app.py
+**Say:** "Create the auth module with session, registration, login and logout routes. Start with the anonymous CSRF handshake; registration rotates the cookie and token."
 
-Replace the factory with this chapter's complete version. It mounts only the features already introduced.
+**Type:** Follow the action above in `modules/auth/module.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
+## Step 5: EDIT - replace the marked blocks - app.py
+
+The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.
+
+### Edit 1: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
 
 ```python
-"""Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
+from pathlib import Path
+from urllib.parse import urlsplit
+from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
+from flaxon import Flaxon, Request
+from flaxon.http import JSONResponse
+from modules.welcome.module import welcome
+from settings import (
+    ROOT,
+```
+### Replace that block with
 
-import settings
-from types import SimpleNamespace
+```python
 from pathlib import Path
 from urllib.parse import urlsplit
 from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
@@ -850,26 +1017,26 @@ from modules.auth.module import auth
 from modules.welcome.module import welcome
 from settings import (
     ROOT,
-    DATA_DIR,
-    DATABASE_PATH,
-    ADMIN_DATABASE_PATH,
-    DEBUG,
-    PUBLIC_ORIGIN,
-)
+```
 
+Leave the rest of the file unchanged.
 
-def create_app(database_path=None, admin_path=None, debug=None):
-    debug = DEBUG if debug is None else debug
-    values = {key: getattr(settings, key) for key in dir(settings) if key.isupper()}
-    values.update(DEBUG=debug)
-    if database_path is not None:
-        values["DATABASE_URL"] = f"sqlite://{Path(database_path).resolve()}"
-    if admin_path is not None:
-        values["ADMIN_STORAGE_PATH"] = Path(admin_path)
-    app = Flaxon.from_settings(SimpleNamespace(__file__=settings.__file__, **values))
-    app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
-    if not debug:
-        app.add_middleware(
+### Edit 2: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
+
+```python
+            TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
+        )
+    app.public_origin = PUBLIC_ORIGIN
+    for module, prefix in [
+        (welcome, "/api/welcome"),
+    ]:
+        app.mount_module(module, prefix=prefix)
+```
+### Replace that block with
+
+```python
             TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
         )
     app.public_origin = PUBLIC_ORIGIN
@@ -880,26 +1047,15 @@ def create_app(database_path=None, admin_path=None, debug=None):
         (welcome, "/api/welcome"),
     ]:
         app.mount_module(module, prefix=prefix)
-    if app.is_management:
-        return app
-
-
-    @app.get("/health/course")
-    async def health():
-        from models import User
-
-        await User.all().limit(1)
-        return {"data": {"status": "ok"}}
-
-    @app.get("/")
-    async def home():
-        return {"data": {"message": "Backend lesson ready. The SPA starts in chapter 8."}}
-
-    return app
-
-
-app = create_app()
 ```
+
+Leave the rest of the file unchanged.
+
+**Say:** "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact."
+
+**Type:** Follow the action above in `app.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
 
 ## Run and check
 
@@ -959,19 +1115,29 @@ owned_project combines the requested ID with the authenticated owner's ID in the
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - modules/projects/__init__.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
 
+Create the parent directories, then save this complete file.
+
 ```python
 """Module-owned APIs and interface files."""
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `modules/projects/__init__.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - modules/projects/module.py
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Create the projects module, then implement owned_project before the handlers that use it. The mount adds /api/projects once. Every ORM query for an existing project includes the signed-in customer's owner ID.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Project APIs always constrain queries by the signed-in user's id."""
@@ -1051,9 +1217,17 @@ async def delete_project(request, project_id):
     return {"data": {"deleted": True}}
 ```
 
+**Say:** "Create the projects module, then implement owned_project before the handlers that use it. The mount adds /api/projects once. Every ORM query for an existing project includes the signed-in customer's owner ID."
+
+**Type:** Follow the action above in `modules/projects/module.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 3: CREATE - make parent folders, then create this file - scripts/course_api_demo.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Show the project API over HTTP; start the development server first."""
@@ -1095,19 +1269,31 @@ if __name__ == "__main__":
     main()
 ```
 
-## Step 4: EDIT - replace the entire file - app.py
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
 
-Replace the factory with this chapter's complete version. It mounts only the features already introduced.
+**Type:** Follow the action above in `scripts/course_api_demo.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
+## Step 4: EDIT - replace the marked blocks - app.py
+
+The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.
+
+### Edit 1: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
 
 ```python
-"""Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
+from flaxon import Flaxon, Request
+from flaxon.http import JSONResponse
+from modules.auth.module import auth
+from modules.welcome.module import welcome
+from settings import (
+    ROOT,
+```
+### Replace that block with
 
-import settings
-from types import SimpleNamespace
-from pathlib import Path
-from urllib.parse import urlsplit
-from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
-from argon2 import PasswordHasher
+```python
 from flaxon import Flaxon, Request
 from flaxon.http import JSONResponse
 from modules.auth.module import auth
@@ -1115,30 +1301,25 @@ from modules.projects.module import projects
 from modules.welcome.module import welcome
 from settings import (
     ROOT,
-    DATA_DIR,
-    DATABASE_PATH,
-    ADMIN_DATABASE_PATH,
-    DEBUG,
-    PUBLIC_ORIGIN,
-)
+```
 
+Leave the rest of the file unchanged.
 
-def create_app(database_path=None, admin_path=None, debug=None):
-    debug = DEBUG if debug is None else debug
-    values = {key: getattr(settings, key) for key in dir(settings) if key.isupper()}
-    values.update(DEBUG=debug)
-    if database_path is not None:
-        values["DATABASE_URL"] = f"sqlite://{Path(database_path).resolve()}"
-    if admin_path is not None:
-        values["ADMIN_STORAGE_PATH"] = Path(admin_path)
-    app = Flaxon.from_settings(SimpleNamespace(__file__=settings.__file__, **values))
-    app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
-    if not debug:
-        app.add_middleware(
-            TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
-        )
-    app.public_origin = PUBLIC_ORIGIN
-    app.hasher = PasswordHasher()
+### Edit 2: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
+
+```python
+    app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")
+    for module, prefix in [
+        (auth, "/api/auth"),
+        (welcome, "/api/welcome"),
+    ]:
+        app.mount_module(module, prefix=prefix)
+```
+### Replace that block with
+
+```python
     app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")
     for module, prefix in [
         (auth, "/api/auth"),
@@ -1146,26 +1327,15 @@ def create_app(database_path=None, admin_path=None, debug=None):
         (welcome, "/api/welcome"),
     ]:
         app.mount_module(module, prefix=prefix)
-    if app.is_management:
-        return app
-
-
-    @app.get("/health/course")
-    async def health():
-        from models import User
-
-        await User.all().limit(1)
-        return {"data": {"status": "ok"}}
-
-    @app.get("/")
-    async def home():
-        return {"data": {"message": "Backend lesson ready. The SPA starts in chapter 8."}}
-
-    return app
-
-
-app = create_app()
 ```
+
+Leave the rest of the file unchanged.
+
+**Say:** "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact."
+
+**Type:** Follow the action above in `app.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
 
 ## Run and check
 
@@ -1213,19 +1383,29 @@ Tasks belong to an owned project. list_tasks checks that project before querying
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - modules/tasks/__init__.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
 
+Create the parent directories, then save this complete file.
+
 ```python
 """Module-owned APIs and interface files."""
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `modules/tasks/__init__.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - modules/tasks/module.py
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Create the tasks module. Require ownership of the parent project before listing, creating, editing or deleting tasks. Validate status and due dates before saving.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Tasks belong to projects; project ownership guards every task operation."""
@@ -1288,20 +1468,31 @@ async def delete_task(request, task_id):
     return {"data": {"deleted": True}}
 ```
 
-## Step 3: EDIT - replace the entire file - app.py
+**Say:** "Create the tasks module. Require ownership of the parent project before listing, creating, editing or deleting tasks. Validate status and due dates before saving."
 
-Replace the factory with this chapter's complete version. It mounts only the features already introduced.
+**Type:** Follow the action above in `modules/tasks/module.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
+## Step 3: EDIT - replace the marked blocks - app.py
+
+The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.
+
+### Edit 1: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
 
 ```python
-"""Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
+from flaxon.http import JSONResponse
+from modules.auth.module import auth
+from modules.projects.module import projects
+from modules.welcome.module import welcome
+from settings import (
+    ROOT,
+```
+### Replace that block with
 
-import settings
-from types import SimpleNamespace
-from pathlib import Path
-from urllib.parse import urlsplit
-from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
-from argon2 import PasswordHasher
-from flaxon import Flaxon, Request
+```python
 from flaxon.http import JSONResponse
 from modules.auth.module import auth
 from modules.projects.module import projects
@@ -1309,31 +1500,25 @@ from modules.tasks.module import tasks
 from modules.welcome.module import welcome
 from settings import (
     ROOT,
-    DATA_DIR,
-    DATABASE_PATH,
-    ADMIN_DATABASE_PATH,
-    DEBUG,
-    PUBLIC_ORIGIN,
-)
+```
 
+Leave the rest of the file unchanged.
 
-def create_app(database_path=None, admin_path=None, debug=None):
-    debug = DEBUG if debug is None else debug
-    values = {key: getattr(settings, key) for key in dir(settings) if key.isupper()}
-    values.update(DEBUG=debug)
-    if database_path is not None:
-        values["DATABASE_URL"] = f"sqlite://{Path(database_path).resolve()}"
-    if admin_path is not None:
-        values["ADMIN_STORAGE_PATH"] = Path(admin_path)
-    app = Flaxon.from_settings(SimpleNamespace(__file__=settings.__file__, **values))
-    app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
-    if not debug:
-        app.add_middleware(
-            TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
-        )
-    app.public_origin = PUBLIC_ORIGIN
-    app.hasher = PasswordHasher()
-    app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")
+### Edit 2: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
+
+```python
+    for module, prefix in [
+        (auth, "/api/auth"),
+        (projects, "/api/projects"),
+        (welcome, "/api/welcome"),
+    ]:
+        app.mount_module(module, prefix=prefix)
+```
+### Replace that block with
+
+```python
     for module, prefix in [
         (auth, "/api/auth"),
         (projects, "/api/projects"),
@@ -1341,26 +1526,15 @@ def create_app(database_path=None, admin_path=None, debug=None):
         (welcome, "/api/welcome"),
     ]:
         app.mount_module(module, prefix=prefix)
-    if app.is_management:
-        return app
-
-
-    @app.get("/health/course")
-    async def health():
-        from models import User
-
-        await User.all().limit(1)
-        return {"data": {"status": "ok"}}
-
-    @app.get("/")
-    async def home():
-        return {"data": {"message": "Backend lesson ready. The SPA starts in chapter 8."}}
-
-    return app
-
-
-app = create_app()
 ```
+
+Leave the rest of the file unchanged.
+
+**Say:** "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact."
+
+**Type:** Follow the action above in `app.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
 
 ## Run and check
 
@@ -1418,11 +1592,13 @@ conftest.py creates a test app and owns its event loop and ORM lifecycle. genera
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - tests/conftest.py
 
 Own the test database lifecycle and event loop. Never use development files in this fixture.
+
+Create the parent directories, then save this complete file.
 
 ```python
 import asyncio
@@ -1526,9 +1702,17 @@ def orm(application, query):
         return application.test_loop.run_until_complete(query())
 ```
 
+**Say:** "Own the test database lifecycle and event loop. Never use development files in this fixture."
+
+**Type:** Follow the action above in `tests/conftest.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - tests/test_api.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 import asyncio
@@ -1751,6 +1935,12 @@ def test_production_requires_secret(monkeypatch, tmp_path):
         create_app(tmp_path / "app.sqlite3", tmp_path / "admin.sqlite3", debug=False)
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `tests/test_api.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Run and check
 
 ```bash
@@ -1795,11 +1985,13 @@ app.use_teloce registers the compiler, runtime and browser routes. request.compi
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - ui/types.ts
 
 Match the Python response fields exactly. These types document the browser contract; runtime validation stays on the server.
+
+Create the parent directories, then save this complete file.
 
 ```typescript
 export interface User {
@@ -1834,9 +2026,17 @@ export interface Article {
 }
 ```
 
+**Say:** "Match the Python response fields exactly. These types document the browser contract; runtime validation stays on the server."
+
+**Type:** Follow the action above in `ui/types.ts`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - ui/api.ts
 
 Centralize fetch, cookies, CSRF rotation and error messages here so pages share one contract.
+
+Create the parent directories, then save this complete file.
 
 ```typescript
 import type { Session } from "./types";
@@ -1869,9 +2069,17 @@ export async function api<T>(path: string, method = "GET", body?: unknown): Prom
 }
 ```
 
+**Say:** "Centralize fetch, cookies, CSRF rotation and error messages here so pages share one contract."
+
+**Type:** Follow the action above in `ui/api.ts`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 3: EDIT - replace the entire file - ui/app.html
 
 This is the SPA shell. Its internal anchors and router view cooperate with each module's page mappings.
+
+Select all existing contents of this file and replace them with the complete code below.
 
 ```html
 <template>
@@ -1953,9 +2161,17 @@ footer a {
 </style>
 ```
 
+**Say:** "This is the SPA shell. Its internal anchors and router view cooperate with each module's page mappings."
+
+**Type:** Follow the action above in `ui/app.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 4: CREATE - make parent folders, then create this file - ui/pages/Home.html
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```html
 <template>
@@ -2018,9 +2234,17 @@ p {
 </style>
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `ui/pages/Home.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 5: CREATE - make parent folders, then create this file - modules/auth/ui/pages/Login.html
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Replace the placeholder with account forms. Use the session API and rotated CSRF token; do not read the HttpOnly cookie from JavaScript.
+
+Create the parent directories, then save this complete file.
 
 ```html
 <template><section><h1>Account</h1><p>This screen is built in the next UI lesson.</p></section></template>
@@ -2031,9 +2255,17 @@ p { line-height: 1.6; }
 </style>
 ```
 
+**Say:** "Replace the placeholder with account forms. Use the session API and rotated CSRF token; do not read the HttpOnly cookie from JavaScript."
+
+**Type:** Follow the action above in `modules/auth/ui/pages/Login.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 6: CREATE - make parent folders, then create this file - modules/projects/ui/pages/ProjectList.html
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Replace the placeholder with the complete projects screen. Connect its form to the typed API helper; show loading, error and empty states. Keep all CSS inside style scoped.
+
+Create the parent directories, then save this complete file.
 
 ```html
 <template><section><h1>Projects</h1><p>This screen is built in the next UI lesson.</p></section></template>
@@ -2044,9 +2276,17 @@ p { line-height: 1.6; }
 </style>
 ```
 
+**Say:** "Replace the placeholder with the complete projects screen. Connect its form to the typed API helper; show loading, error and empty states. Keep all CSS inside style scoped."
+
+**Type:** Follow the action above in `modules/projects/ui/pages/ProjectList.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 7: CREATE - make parent folders, then create this file - modules/projects/ui/pages/ProjectDetails/[id].html
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Replace the placeholder with the project detail page. Load the owned project and its tasks using the router ID, then compose the task form, list and progress display.
+
+Create the parent directories, then save this complete file.
 
 ```html
 <template><section><h1>Project details</h1><p>This screen is built in the next UI lesson.</p></section></template>
@@ -2057,59 +2297,31 @@ p { line-height: 1.6; }
 </style>
 ```
 
-## Step 8: EDIT - replace the entire file - app.py
+**Say:** "Replace the placeholder with the project detail page. Load the owned project and its tasks using the router ID, then compose the task form, list and progress display."
 
-Replace the factory with this chapter's complete version. It mounts only the features already introduced.
+**Type:** Follow the action above in `modules/projects/ui/pages/ProjectDetails/[id].html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
+## Step 8: EDIT - replace the marked blocks - app.py
+
+The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.
+
+### Edit 1: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
 
 ```python
-"""Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
-
-import settings
-from types import SimpleNamespace
-from pathlib import Path
-from urllib.parse import urlsplit
-from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
-from argon2 import PasswordHasher
-from flaxon import Flaxon, Request
-from flaxon.http import JSONResponse
-from modules.auth.module import auth
-from modules.projects.module import projects
-from modules.tasks.module import tasks
-from modules.welcome.module import welcome
-from settings import (
-    ROOT,
-    DATA_DIR,
-    DATABASE_PATH,
-    ADMIN_DATABASE_PATH,
-    DEBUG,
-    PUBLIC_ORIGIN,
-)
+    if app.is_management:
+        return app
 
 
-def create_app(database_path=None, admin_path=None, debug=None):
-    debug = DEBUG if debug is None else debug
-    values = {key: getattr(settings, key) for key in dir(settings) if key.isupper()}
-    values.update(DEBUG=debug)
-    if database_path is not None:
-        values["DATABASE_URL"] = f"sqlite://{Path(database_path).resolve()}"
-    if admin_path is not None:
-        values["ADMIN_STORAGE_PATH"] = Path(admin_path)
-    app = Flaxon.from_settings(SimpleNamespace(__file__=settings.__file__, **values))
-    app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
-    if not debug:
-        app.add_middleware(
-            TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
-        )
-    app.public_origin = PUBLIC_ORIGIN
-    app.hasher = PasswordHasher()
-    app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")
-    for module, prefix in [
-        (auth, "/api/auth"),
-        (projects, "/api/projects"),
-        (tasks, "/api/tasks"),
-        (welcome, "/api/welcome"),
-    ]:
-        app.mount_module(module, prefix=prefix)
+    @app.get("/health/course")
+    async def health():
+```
+### Replace that block with
+
+```python
     if app.is_management:
         return app
 
@@ -2122,8 +2334,27 @@ def create_app(database_path=None, admin_path=None, debug=None):
 
     @app.get("/health/course")
     async def health():
-        from models import User
+```
 
+Leave the rest of the file unchanged.
+
+### Edit 2: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
+
+```python
+        await User.all().limit(1)
+        return {"data": {"status": "ok"}}
+
+    @app.get("/")
+    async def home():
+        return {"data": {"message": "Backend lesson ready. The SPA starts in chapter 8."}}
+
+    return app
+```
+### Replace that block with
+
+```python
         await User.all().limit(1)
         return {"data": {"status": "ok"}}
 
@@ -2135,10 +2366,15 @@ def create_app(database_path=None, admin_path=None, debug=None):
         return await request.compile("app.html", {})
 
     return app
-
-
-app = create_app()
 ```
+
+Leave the rest of the file unchanged.
+
+**Say:** "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact."
+
+**Type:** Follow the action above in `app.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
 
 ## Remove public/app.css
 
@@ -2190,11 +2426,13 @@ Login uses the shared API helper to load the anonymous session, submit register/
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: EDIT - replace the entire file - modules/auth/ui/pages/Login.html
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Replace the placeholder with account forms. Use the session API and rotated CSRF token; do not read the HttpOnly cookie from JavaScript.
+
+Select all existing contents of this file and replace them with the complete code below.
 
 ```html
 <template>
@@ -2380,9 +2618,17 @@ button:disabled {
 </style>
 ```
 
+**Say:** "Replace the placeholder with account forms. Use the session API and rotated CSRF token; do not read the HttpOnly cookie from JavaScript."
+
+**Type:** Follow the action above in `modules/auth/ui/pages/Login.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: EDIT - replace the entire file - modules/projects/ui/pages/ProjectList.html
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Replace the placeholder with the complete projects screen. Connect its form to the typed API helper; show loading, error and empty states. Keep all CSS inside style scoped.
+
+Select all existing contents of this file and replace them with the complete code below.
 
 ```html
 <template>
@@ -2552,6 +2798,12 @@ button:disabled {
 </style>
 ```
 
+**Say:** "Replace the placeholder with the complete projects screen. Connect its form to the typed API helper; show loading, error and empty states. Keep all CSS inside style scoped."
+
+**Type:** Follow the action above in `modules/projects/ui/pages/ProjectList.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Run and check
 
 ```bash
@@ -2598,11 +2850,13 @@ TaskForm emits a create event; TaskList emits status and remove events. ProjectD
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - modules/projects/ui/components/TaskForm.html
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Create the reusable task form. Collect title, status and due date, validate feedback and emit the saved task to its parent.
+
+Create the parent directories, then save this complete file.
 
 ```html
 <template>
@@ -2712,9 +2966,17 @@ button:disabled {
 </style>
 ```
 
+**Say:** "Create the reusable task form. Collect title, status and due date, validate feedback and emit the saved task to its parent."
+
+**Type:** Follow the action above in `modules/projects/ui/components/TaskForm.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - modules/projects/ui/components/TaskList.html
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Create the reusable task list. Use stable task IDs for keyed rows and show the filtered workflow without changing database ownership.
+
+Create the parent directories, then save this complete file.
 
 ```html
 <template>
@@ -2842,9 +3104,17 @@ button:disabled {
 </style>
 ```
 
+**Say:** "Create the reusable task list. Use stable task IDs for keyed rows and show the filtered workflow without changing database ownership."
+
+**Type:** Follow the action above in `modules/projects/ui/components/TaskList.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 3: EDIT - replace the entire file - modules/projects/ui/pages/ProjectDetails/[id].html
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Replace the placeholder with the project detail page. Load the owned project and its tasks using the router ID, then compose the task form, list and progress display.
+
+Select all existing contents of this file and replace them with the complete code below.
 
 ```html
 <template>
@@ -3093,6 +3363,12 @@ progress {
 </style>
 ```
 
+**Say:** "Replace the placeholder with the project detail page. Load the owned project and its tasks using the router ID, then compose the task form, list and progress display."
+
+**Type:** Follow the action above in `modules/projects/ui/pages/ProjectDetails/[id].html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Run and check
 
 ```bash
@@ -3139,91 +3415,41 @@ There are two routers. Teloce's ui_routes maps /projects/:id to the detail compo
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
-## Step 1: EDIT - replace the entire file - app.py
+## Step 1: EDIT - replace the marked blocks - app.py
 
-Replace the factory with this chapter's complete version. It mounts only the features already introduced.
+The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.
+
+### Edit 1: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
 
 ```python
-"""Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
+    @app.get("/")
+    @app.get("/login")
+    @app.get("/projects")
+    async def spa(request: Request, project_id=None, slug=None):
+        return await request.compile("app.html", {})
+```
+### Replace that block with
 
-import settings
-from types import SimpleNamespace
-from pathlib import Path
-from urllib.parse import urlsplit
-from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
-from argon2 import PasswordHasher
-from flaxon import Flaxon, Request
-from flaxon.http import JSONResponse
-from modules.auth.module import auth
-from modules.projects.module import projects
-from modules.tasks.module import tasks
-from modules.welcome.module import welcome
-from settings import (
-    ROOT,
-    DATA_DIR,
-    DATABASE_PATH,
-    ADMIN_DATABASE_PATH,
-    DEBUG,
-    PUBLIC_ORIGIN,
-)
-
-
-def create_app(database_path=None, admin_path=None, debug=None):
-    debug = DEBUG if debug is None else debug
-    values = {key: getattr(settings, key) for key in dir(settings) if key.isupper()}
-    values.update(DEBUG=debug)
-    if database_path is not None:
-        values["DATABASE_URL"] = f"sqlite://{Path(database_path).resolve()}"
-    if admin_path is not None:
-        values["ADMIN_STORAGE_PATH"] = Path(admin_path)
-    app = Flaxon.from_settings(SimpleNamespace(__file__=settings.__file__, **values))
-    app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
-    if not debug:
-        app.add_middleware(
-            TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
-        )
-    app.public_origin = PUBLIC_ORIGIN
-    app.hasher = PasswordHasher()
-    app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")
-    for module, prefix in [
-        (auth, "/api/auth"),
-        (projects, "/api/projects"),
-        (tasks, "/api/tasks"),
-        (welcome, "/api/welcome"),
-    ]:
-        app.mount_module(module, prefix=prefix)
-    if app.is_management:
-        return app
-
-    app.use_teloce(
-        project_root=ROOT,
-        ui_dir="ui",
-        title="Project Manager",
-        options={"minifier": "minifyjs"},
-    )
-
-    @app.get("/health/course")
-    async def health():
-        from models import User
-
-        await User.all().limit(1)
-        return {"data": {"status": "ok"}}
-
-    # Explicit shell routes preserve real 404 responses for unknown API paths.
+```python
     @app.get("/")
     @app.get("/login")
     @app.get("/projects")
     @app.get("/projects/<int:project_id>")
     async def spa(request: Request, project_id=None, slug=None):
         return await request.compile("app.html", {})
-
-    return app
-
-
-app = create_app()
 ```
+
+Leave the rest of the file unchanged.
+
+**Say:** "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact."
+
+**Type:** Follow the action above in `app.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
 
 ## Run and check
 
@@ -3270,11 +3496,13 @@ The custom ORM adapters deliberately expose only approved project/task fields an
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: EDIT - replace the entire file - admin.py
 
 Keep explicit registration in this file. At chapter 3 it is empty; chapter 12 adds the domain models.
+
+Select all existing contents of this file and replace them with the complete code below.
 
 ```python
 """Registration metadata checked by management.py; the custom backoffice uses this same schema."""
@@ -3299,9 +3527,17 @@ def register(admin):
     )
 ```
 
+**Say:** "Keep explicit registration in this file. At chapter 3 it is empty; chapter 12 adds the domain models."
+
+**Type:** Follow the action above in `admin.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - backoffice.py
 
 These adapters query the same ORM models as the API and expose a deliberate staff field whitelist.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Staff model adapters reuse the domain database; CMS owns only editorial content."""
@@ -3438,18 +3674,31 @@ def configure_backoffice(app, admin_path, uploads_path):
     app.backoffice, app.cms = admin, cms
 ```
 
-## Step 3: EDIT - replace the entire file - app.py
+**Say:** "These adapters query the same ORM models as the API and expose a deliberate staff field whitelist."
 
-Replace the factory with this chapter's complete version. It mounts only the features already introduced.
+**Type:** Follow the action above in `backoffice.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
+## Step 3: EDIT - replace the marked blocks - app.py
+
+The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.
+
+### Edit 1: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
 
 ```python
-"""Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
+from argon2 import PasswordHasher
+from flaxon import Flaxon, Request
+from flaxon.http import JSONResponse
+from modules.auth.module import auth
+from modules.projects.module import projects
+from modules.tasks.module import tasks
+```
+### Replace that block with
 
-import settings
-from types import SimpleNamespace
-from pathlib import Path
-from urllib.parse import urlsplit
-from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
+```python
 from argon2 import PasswordHasher
 from flaxon import Flaxon, Request
 from flaxon.http import JSONResponse
@@ -3457,41 +3706,25 @@ from backoffice import configure_backoffice
 from modules.auth.module import auth
 from modules.projects.module import projects
 from modules.tasks.module import tasks
-from modules.welcome.module import welcome
-from settings import (
-    ROOT,
-    DATA_DIR,
-    DATABASE_PATH,
-    ADMIN_DATABASE_PATH,
-    DEBUG,
-    PUBLIC_ORIGIN,
-)
+```
 
+Leave the rest of the file unchanged.
 
-def create_app(database_path=None, admin_path=None, debug=None):
-    debug = DEBUG if debug is None else debug
-    values = {key: getattr(settings, key) for key in dir(settings) if key.isupper()}
-    values.update(DEBUG=debug)
-    if database_path is not None:
-        values["DATABASE_URL"] = f"sqlite://{Path(database_path).resolve()}"
-    if admin_path is not None:
-        values["ADMIN_STORAGE_PATH"] = Path(admin_path)
-    app = Flaxon.from_settings(SimpleNamespace(__file__=settings.__file__, **values))
-    app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
-    if not debug:
-        app.add_middleware(
-            TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
-        )
-    app.public_origin = PUBLIC_ORIGIN
-    app.hasher = PasswordHasher()
-    app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")
-    for module, prefix in [
-        (auth, "/api/auth"),
-        (projects, "/api/projects"),
-        (tasks, "/api/tasks"),
-        (welcome, "/api/welcome"),
-    ]:
-        app.mount_module(module, prefix=prefix)
+### Edit 2: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
+
+```python
+    if app.is_management:
+        return app
+
+    app.use_teloce(
+        project_root=ROOT,
+        ui_dir="ui",
+```
+### Replace that block with
+
+```python
     if app.is_management:
         return app
 
@@ -3503,30 +3736,15 @@ def create_app(database_path=None, admin_path=None, debug=None):
     app.use_teloce(
         project_root=ROOT,
         ui_dir="ui",
-        title="Project Manager",
-        options={"minifier": "minifyjs"},
-    )
-
-    @app.get("/health/course")
-    async def health():
-        from models import User
-
-        await User.all().limit(1)
-        return {"data": {"status": "ok"}}
-
-    # Explicit shell routes preserve real 404 responses for unknown API paths.
-    @app.get("/")
-    @app.get("/login")
-    @app.get("/projects")
-    @app.get("/projects/<int:project_id>")
-    async def spa(request: Request, project_id=None, slug=None):
-        return await request.compile("app.html", {})
-
-    return app
-
-
-app = create_app()
 ```
+
+Leave the rest of the file unchanged.
+
+**Say:** "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact."
+
+**Type:** Follow the action above in `app.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
 
 ## Run and check
 
@@ -3574,11 +3792,13 @@ CMS uses staff authentication. Help articles have title, summary, body and draft
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - flaxon_cli.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Expose commands owned by feature modules to the Flaxon CLI.
@@ -3605,17 +3825,33 @@ def seed_command(args, console):
 seed = Command("seed", seed_command, help_text="Create sample projects and published help content")
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `flaxon_cli.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - modules/content/__init__.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Module-owned APIs and interface files."""
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `modules/content/__init__.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 3: CREATE - make parent folders, then create this file - modules/content/module.py
 
-This file owns the feature named by its module or component. Read the route/form flow before continuing.
+Create the public content API. Return only published CMS help articles. Staff draft and publishing operations remain in Admin.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Public read-only content endpoints; never expose the authenticated CMS API to readers."""
@@ -3664,9 +3900,17 @@ async def get_article(request, slug):
     raise NotFound("Article not found.")
 ```
 
+**Say:** "Create the public content API. Return only published CMS help articles. Staff draft and publishing operations remain in Admin."
+
+**Type:** Follow the action above in `modules/content/module.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 4: CREATE - make parent folders, then create this file - modules/content/ui/pages/Help.html
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```html
 <template>
@@ -3749,9 +3993,17 @@ p {
 </style>
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `modules/content/ui/pages/Help.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 5: CREATE - make parent folders, then create this file - modules/content/ui/pages/Article/[slug].html
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```html
 <template>
@@ -3819,9 +4071,17 @@ p {
 </style>
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `modules/content/ui/pages/Article/[slug].html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 6: CREATE - make parent folders, then create this file - seed.py
 
 Populate sample data explicitly after a customer exists; do not seed on every server start.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Idempotent sample content. Register your own user before running this command."""
@@ -3862,14 +4122,31 @@ async def seed():
     print("Sample projects, tasks, and help content are ready.")
 ```
 
-## Step 7: EDIT - replace the entire file - ui/app.html
+**Say:** "Populate sample data explicitly after a customer exists; do not seed on every server start."
+
+**Type:** Follow the action above in `seed.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
+## Step 7: EDIT - replace the marked blocks - ui/app.html
 
 This is the SPA shell. Its internal anchors and router view cooperate with each module's page mappings.
 
+### Edit 1: find this exact block
+
+Open `ui/app.html`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
+
 ```html
-<template>
-  <div class="app-shell">
-    <header>
+      <a href="/" data-teloce-link class="brand">Project Manager</a>
+      <nav aria-label="Main navigation">
+        <a href="/projects" data-teloce-link>Projects</a>
+        <a href="/login" data-teloce-link>Account</a>
+      </nav>
+    </header>
+```
+### Replace that block with
+
+```html
       <a href="/" data-teloce-link class="brand">Project Manager</a>
       <nav aria-label="Main navigation">
         <a href="/projects" data-teloce-link>Projects</a>
@@ -3877,92 +4154,35 @@ This is the SPA shell. Its internal anchors and router view cooperate with each 
         <a href="/login" data-teloce-link>Account</a>
       </nav>
     </header>
-    <main id="router-view" data-teloce-router-view></main>
-    <footer>Built with Flaxon and Teloce. <a href="/admin/">Staff Admin</a></footer>
-  </div>
-</template>
-<script lang="ts">
-export default {};
-</script>
-<style scoped>
-/* Only the document reset is global: body is outside this component. */
-:global(body) {
-  margin: 0;
-}
-.app-shell {
-  min-height: 100vh;
-  font-family: system-ui, sans-serif;
-  color: #17243a;
-  background: #f3f6fc;
-}
-header {
-  display: flex;
-  justify-content: space-between;
-  gap: 1rem;
-  align-items: center;
-  padding: 1.2rem max(1rem, calc((100vw - 1080px) / 2));
-  background: #17243a;
-  color: white;
-}
-header a {
-  color: white;
-  text-decoration: none;
-}
-.brand {
-  font-weight: 800;
-  font-size: 1.3rem;
-}
-nav {
-  display: flex;
-  gap: 1rem;
-  flex-wrap: wrap;
-}
-main {
-  max-width: 1080px;
-  margin: auto;
-  min-height: 75vh;
-  padding: 2rem 1rem;
-}
-footer {
-  padding: 1.5rem;
-  text-align: center;
-  color: #526079;
-}
-footer a {
-  color: #1d4ed8;
-}
-:focus-visible {
-  outline: 3px solid #f59e0b;
-  outline-offset: 3px;
-}
-@media (max-width: 520px) {
-  header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-  main {
-    padding: 1rem;
-  }
-}
-</style>
 ```
 
-## Step 8: EDIT - replace the entire file - app.py
+Leave the rest of the file unchanged.
 
-Replace the factory with this chapter's complete version. It mounts only the features already introduced.
+**Say:** "This is the SPA shell. Its internal anchors and router view cooperate with each module's page mappings."
+
+**Type:** Follow the action above in `ui/app.html`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
+## Step 8: EDIT - replace the marked blocks - app.py
+
+The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.
+
+### Edit 1: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
 
 ```python
-"""Compose the CLI starter's modules, staff backoffice, and Teloce SPA."""
+from modules.auth.module import auth
+from modules.projects.module import projects
+from modules.tasks.module import tasks
+from modules.welcome.module import welcome
+from settings import (
+    ROOT,
+```
+### Replace that block with
 
-import settings
-from types import SimpleNamespace
-from pathlib import Path
-from urllib.parse import urlsplit
-from flaxon.middleware import BodyLimitMiddleware, TrustedHostsMiddleware
-from argon2 import PasswordHasher
-from flaxon import Flaxon, Request
-from flaxon.http import JSONResponse
-from backoffice import configure_backoffice
+```python
 from modules.auth.module import auth
 from modules.projects.module import projects
 from modules.tasks.module import tasks
@@ -3970,32 +4190,25 @@ from modules.content.module import content
 from modules.welcome.module import welcome
 from settings import (
     ROOT,
-    DATA_DIR,
-    DATABASE_PATH,
-    ADMIN_DATABASE_PATH,
-    DEBUG,
-    PUBLIC_ORIGIN,
-)
+```
 
+Leave the rest of the file unchanged.
 
-def create_app(database_path=None, admin_path=None, debug=None):
-    debug = DEBUG if debug is None else debug
-    values = {key: getattr(settings, key) for key in dir(settings) if key.isupper()}
-    values.update(DEBUG=debug)
-    if database_path is not None:
-        values["DATABASE_URL"] = f"sqlite://{Path(database_path).resolve()}"
-    if admin_path is not None:
-        values["ADMIN_STORAGE_PATH"] = Path(admin_path)
-    app = Flaxon.from_settings(SimpleNamespace(__file__=settings.__file__, **values))
-    app.add_middleware(BodyLimitMiddleware, max_size=256 * 1024)
-    if not debug:
-        app.add_middleware(
-            TrustedHostsMiddleware, allowed_hosts=[urlsplit(PUBLIC_ORIGIN).hostname]
-        )
-    app.public_origin = PUBLIC_ORIGIN
-    app.hasher = PasswordHasher()
-    app.dummy_password_hash = app.hasher.hash("dummy-password-for-timing-only")
-    for module, prefix in [
+### Edit 2: find this exact block
+
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
+
+```python
+        (auth, "/api/auth"),
+        (projects, "/api/projects"),
+        (tasks, "/api/tasks"),
+        (welcome, "/api/welcome"),
+    ]:
+        app.mount_module(module, prefix=prefix)
+```
+### Replace that block with
+
+```python
         (auth, "/api/auth"),
         (projects, "/api/projects"),
         (tasks, "/api/tasks"),
@@ -4003,30 +4216,24 @@ def create_app(database_path=None, admin_path=None, debug=None):
         (welcome, "/api/welcome"),
     ]:
         app.mount_module(module, prefix=prefix)
-    if app.is_management:
-        return app
+```
 
-    configure_backoffice(
-        app,
-        admin_path or ADMIN_DATABASE_PATH,
-        Path(admin_path or ADMIN_DATABASE_PATH).parent / "uploads",
-    )
-    app.use_teloce(
-        project_root=ROOT,
-        ui_dir="ui",
-        title="Project Manager",
-        options={"minifier": "minifyjs"},
-    )
+Leave the rest of the file unchanged.
 
-    @app.get("/health/course")
-    async def health():
-        from models import User
+### Edit 3: find this exact block
 
-        await User.all().limit(1)
-        return {"data": {"status": "ok"}}
+Open `app.py`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.
 
-    # Explicit shell routes preserve real 404 responses for unknown API paths.
-    @app.get("/")
+```python
+    @app.get("/login")
+    @app.get("/projects")
+    @app.get("/projects/<int:project_id>")
+    async def spa(request: Request, project_id=None, slug=None):
+        return await request.compile("app.html", {})
+```
+### Replace that block with
+
+```python
     @app.get("/login")
     @app.get("/projects")
     @app.get("/projects/<int:project_id>")
@@ -4034,12 +4241,15 @@ def create_app(database_path=None, admin_path=None, debug=None):
     @app.get("/help/<slug>")
     async def spa(request: Request, project_id=None, slug=None):
         return await request.compile("app.html", {})
-
-    return app
-
-
-app = create_app()
 ```
+
+Leave the rest of the file unchanged.
+
+**Say:** "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact."
+
+**Type:** Follow the action above in `app.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
 
 ## Run and check
 
@@ -4088,11 +4298,13 @@ API tests cannot prove form listeners, history navigation or mobile layout. The 
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - tests/test_backoffice.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 import asyncio
@@ -4239,9 +4451,17 @@ def test_staff_model_adapter_reads_domain_records_and_denies_ungranted_changes(
     assert client.post("/admin/project/1/delete", headers=headers).status_code == 403
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `tests/test_backoffice.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - tests/test_cms_security.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 import asyncio
@@ -4397,9 +4617,17 @@ def test_actions_require_publisher_permission(action):
     assert response.status_code == 403
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `tests/test_cms_security.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 3: CREATE - make parent folders, then create this file - scripts/browser_smoke.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Run desktop/mobile workflows against a fresh temporary database. No real user data."""
@@ -4608,6 +4836,12 @@ if __name__ == "__main__":
     main()
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `scripts/browser_smoke.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Run and check
 
 ```bash
@@ -4655,11 +4889,13 @@ The Blueprint installs pinned dependencies and builds Teloce with MinifyJS. The 
 
 ## Build this chapter
 
-Stop the server. Work in project_manager. Copy each complete file below in order.
+Stop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.
 
 ## Step 1: CREATE - make parent folders, then create this file - .env.example
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```text
 FLAXON_DEBUG=1
@@ -4670,9 +4906,17 @@ PUBLIC_ORIGIN=http://127.0.0.1:8000
 FLAXON_SECRET_KEY=
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `.env.example`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 2: CREATE - make parent folders, then create this file - scripts/build_ui.py
 
 This file owns the feature named by its module or component. Read the route/form flow before continuing.
+
+Create the parent directories, then save this complete file.
 
 ```python
 """Build production Teloce assets without touching the live database or Render disk."""
@@ -4695,9 +4939,17 @@ with tempfile.TemporaryDirectory() as build_data:
     print(f"Built {result.get('compiled', 0)} Teloce components with MinifyJS.")
 ```
 
+**Say:** "This file owns the feature named by its module or component. Read the route/form flow before continuing."
+
+**Type:** Follow the action above in `scripts/build_ui.py`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Step 3: CREATE - make parent folders, then create this file - render.yaml
 
 This is the complete single-instance deployment definition. Supply the service-specific HTTPS origin in Render.
+
+Create the parent directories, then save this complete file.
 
 ```yaml
 services:
@@ -4725,12 +4977,34 @@ services:
         sync: false
 ```
 
+**Say:** "This is the complete single-instance deployment definition. Supply the service-specific HTTPS origin in Render."
+
+**Type:** Follow the action above in `render.yaml`; explain each new function or binding as you add it.
+
+**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.
+
 ## Run and check
 
 ```bash
 python scripts/build_ui.py
 python -m pip check
 ```
+
+## Release-only edit: Render installation
+
+If you chose the published Flaxon 3.0.0 path, use `requirements-release.txt` as your project's `requirements.txt`. In `render.yaml`, find:
+
+```yaml
+    buildCommand: python scripts/verify_vendor.py && pip install -r requirements.txt && python scripts/build_ui.py
+```
+
+Replace only that line with:
+
+```yaml
+    buildCommand: pip install -r requirements.txt && python scripts/build_ui.py
+```
+
+Leave the rest of the Blueprint unchanged. The preview path keeps wheel verification and includes `vendor/`. The release path installs the pinned published packages and does not need preview wheels. This release branch must pass the clean course rehearsal after publication before you record it.
 
 ## Deploy the completed project
 
@@ -4777,4 +5051,4 @@ Rehearse the complete build once before recording. Keep this ebook beside the ed
 
 Record a short sample using chapter 5's owned project endpoint, its HTTP demo, and chapter 9's ProjectList form. Tell viewers which earlier chapters supply sessions and validation. Gather feedback on pacing and error explanations before recording all chapters.
 
-The repository contains the completed application, generated learner starter, chapter files and verification script. Use the revision-4 chapter snapshots rather than the earlier SQL-course tags. A snapshot is for recovery, not a replacement for teaching the file changes.
+The repository contains the completed application, generated learner starter, chapter files and verification script. `course/checkpoints/chapter-NN.json` supplies the exact complete files for chapters 2-15. Run `python scripts/restore_chapter.py 5 ../chapter-05-recovery` from course_reference to recover chapter 5 into a new folder. Existing work is never overwritten. Use the revision-5 chapter snapshots rather than the earlier SQL-course tags. A snapshot is for recovery, not a replacement for teaching the file changes.
