@@ -1,3 +1,19 @@
+# Current ebook checkpoints
+
+Revision 5 builds from `flaxon new project_manager`. Its complete chapter 2-15 snapshots live in `course/checkpoints/chapter-NN.json`; the generated beginning is `course/starter/`. These match the ordered edits in `course/build-steps.json`. Historical SQL-course Git tags and branches below belong to an older edition and must not be used as recovery for this book.
+
+Recover into a new directory from course_reference:
+
+```bash
+python scripts/restore_chapter.py 5 ../chapter-05-recovery
+```
+
+Then follow the chosen dependency path, migrate that recovery directory's database and run its chapter checks. Existing learner folders are never overwritten. The recording revision changes instruction style; its final application source remains the same.
+
+Save your own Git commit at each book milestone. You can add a local tag such as `chapter-05-project-api` to that commit. Do not move existing published tags.
+
+## Historical checkpoints (previous editions)
+
 # Runnable course checkpoints
 
 These are four real states, not fifteen tags pointing to the finished app.

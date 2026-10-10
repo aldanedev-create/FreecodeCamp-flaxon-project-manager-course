@@ -84,9 +84,19 @@ LESSONS = [
 ]
 
 NOTES = {
+ "modules/projects/module.py": "Create the projects module, then implement owned_project before the handlers that use it. The mount adds /api/projects once. Every ORM query for an existing project includes the signed-in customer's owner ID.",
+ "modules/auth/module.py": "Create the auth module with session, registration, login and logout routes. Start with the anonymous CSRF handshake; registration rotates the cookie and token.",
+ "modules/tasks/module.py": "Create the tasks module. Require ownership of the parent project before listing, creating, editing or deleting tasks. Validate status and due dates before saving.",
+ "modules/content/module.py": "Create the public content API. Return only published CMS help articles. Staff draft and publishing operations remain in Admin.",
+ "modules/projects/ui/pages/ProjectList.html": "Replace the placeholder with the complete projects screen. Connect its form to the typed API helper; show loading, error and empty states. Keep all CSS inside style scoped.",
+ "modules/auth/ui/pages/Login.html": "Replace the placeholder with account forms. Use the session API and rotated CSRF token; do not read the HttpOnly cookie from JavaScript.",
+ "modules/projects/ui/components/TaskForm.html": "Create the reusable task form. Collect title, status and due date, validate feedback and emit the saved task to its parent.",
+ "modules/projects/ui/components/TaskList.html": "Create the reusable task list. Use stable task IDs for keyed rows and show the filtered workflow without changing database ownership.",
+ "modules/projects/ui/pages/ProjectDetails/[id].html": "Replace the placeholder with the project detail page. Load the owned project and its tasks using the router ID, then compose the task form, list and progress display.",
+
  "settings.py": "Read this first: choose paths and environment values in one place. The rest of the app uses these values.",
  "management.py": "This short entry point delegates commands to Flaxon and fixes the project root.",
- "app.py": "Replace the factory with this chapter's complete version. It mounts only the features already introduced.",
+ "app.py": "The application factory mounts only the features already introduced. Follow the action label: a marked-block edit keeps the surrounding factory intact.",
  "models.py": "These five models are the complete schema. Relationships define ownership and deletion behavior; handlers add authorization.",
  "admin.py": "Keep explicit registration in this file. At chapter 3 it is empty; chapter 12 adds the domain models.",
  "security.py": "Read each helper in order: identify a session, require its user, check CSRF, rotate credentials, then limit attempts.",
@@ -110,7 +120,7 @@ Flaxon + Teloce HTML SPA + signals + scoped CSS + Admin/CMS + MinifyJS
 
 Author: Aldane Hutchinson
 
-Learner ebook and recording companion - revision 4 - October 2026
+Learner ebook and recording companion - revision 5 - October 2026
 
 ![Flaxon logo](assets/flaxon.png)
 
@@ -118,9 +128,9 @@ Learner ebook and recording companion - revision 4 - October 2026
 
 Start with `flaxon new project_manager`. Build in that generated directory; keep the separate course_reference checkout for pinned dependencies and recovery files. Use Python 3.12 and basic Python, HTML and JavaScript knowledge. You do not need Node.js for this course.
 
-Follow chapters in order. Stop the development server before replacing Python files. Every file block is COMPLETE for that step: replace the whole file rather than appending duplicate routes. Create parent folders when they do not exist. Empty __init__.py blocks mean create an empty file. Commands run inside project_manager unless a chapter explicitly says otherwise. Once a check passes, commit your work before the next lesson.
+Follow chapters in order. Stop the development server before replacing Python files. Follow the action label on each step. CREATE supplies the complete new file. REPLACE THE ENTIRE FILE supplies a complete replacement. EDIT MARKED BLOCKS shows an exact existing block and its replacement: find the old block once and replace only that block, keeping everything else. Never append a duplicate function or route. Complete recovery files are available for every chapter. Create parent folders when they do not exist. Empty __init__.py blocks mean create an empty file. Commands run inside project_manager unless a chapter explicitly says otherwise. Once a check passes, commit your work before the next lesson.
 
-The framework wheel includes unreleased ORM and CLI improvements; installing a different PyPI version will not reproduce this book. Keep the supplied requirements and vendor wheels together. Their checksums are verified before installation. This revision uses Python ORM migrations and management.py throughout. Older chapter tags describe the previous course revision and remain unchanged.
+The recording target is Flaxon 3.0.0. Its release installation commands become usable only after publication and a clean release rehearsal. Until then, the supplied preview wheels are the verified installation path; they are not labelled as a published 3.0.0 package. Keep the supplied requirements and vendor wheels together. Their checksums are verified before installation. This revision uses Python ORM migrations and management.py throughout. Older chapter tags describe the previous course revision and remain unchanged.
 
 Each lesson gives a goal, an explanation, exact files, commands, expected results, common errors and a short exercise. For recording, demonstrate the expected result, explain the boundary being changed, type the important behavior and run its check. The final recording appendix is optional; you can learn the application directly from the chapters.
 
@@ -139,11 +149,19 @@ for number, lesson in enumerate(LESSONS, 1):
         parts.append((ROOT / "course/lesson-01-setup.md").read_text())
     else:
         step = STEPS[number - 2]
-        parts.append("## Build this chapter\n\nStop the server. Work in project_manager. Copy each complete file below in order.\n\n")
+        parts.append("## Build this chapter\n\nStop the server. Work in project_manager. Follow each CREATE, whole-file replacement, or marked-block edit below in order.\n\n")
         for i, entry in enumerate(step["files"], 1):
             path = entry["path"]
             note = NOTES.get(path, "This file owns the feature named by its module or component. Read the route/form flow before continuing.")
-            parts.append(f"## Step {i}: {entry['action']} - {path}\n\n{note}\n\n" + fence(path, entry["content"]) + "\n")
+            parts.append(f"## Step {i}: {entry['action']} - {path}\n\n{note}\n\n")
+            operations = entry.get("edits", [])
+            if operations:
+                for edit_number, operation in enumerate(operations, 1):
+                    parts.append(f"### Edit {edit_number}: find this exact block\n\nOpen `{path}`. Locate this block once. The unchanged surrounding lines identify its position; do not use line numbers from another revision.\n\n" + fence(path, operation["before"]))
+                    parts.append("### Replace that block with\n\n" + fence(path, operation["after"]) + "\nLeave the rest of the file unchanged.\n\n")
+            else:
+                parts.append(("Create the parent directories, then save this complete file.\n\n" if entry['action'].startswith('CREATE') else "Select all existing contents of this file and replace them with the complete code below.\n\n") + fence(path, entry["content"]) + "\n")
+            parts.append(f"**Say:** \"{note}\"\n\n**Type:** Follow the action above in `{path}`; explain each new function or binding as you add it.\n\n**Viewers should see:** The saved file matches this step. After all steps, run the chapter checks below and show the expected result.\n\n")
         for path in step.get("delete", []):
             parts.append(f"## Remove {path}\n\nThe replacement factory and components no longer load this generated starter stylesheet. Remove the file after replacing the shell.\n\n")
         parts.append("## Run and check\n\n```bash\n" + step["commands"] + "\n```\n\n")
@@ -175,7 +193,23 @@ curl -b cookies.txt 'http://127.0.0.1:8000/api/tasks/project/PROJECT_ID?status=d
 
 ''')
         if number == 15:
-            parts.append('''## Deploy the completed project
+            parts.append('''## Release-only edit: Render installation
+
+If you chose the published Flaxon 3.0.0 path, use `requirements-release.txt` as your project's `requirements.txt`. In `render.yaml`, find:
+
+```yaml
+    buildCommand: python scripts/verify_vendor.py && pip install -r requirements.txt && python scripts/build_ui.py
+```
+
+Replace only that line with:
+
+```yaml
+    buildCommand: pip install -r requirements.txt && python scripts/build_ui.py
+```
+
+Leave the rest of the Blueprint unchanged. The preview path keeps wheel verification and includes `vendor/`. The release path installs the pinned published packages and does not need preview wheels. This release branch must pass the clean course rehearsal after publication before you record it.
+
+## Deploy the completed project
 
 1. Stop the local server. Run all tests and both browser checks from chapter 14. Run the production build above.
 2. Commit your Python migrations, application files, vendor wheels and requirements. Keep .env, data, cookie jars and local virtual environments out of Git. Push the project to your GitHub repository.
@@ -189,6 +223,8 @@ curl -b cookies.txt 'http://127.0.0.1:8000/api/tasks/project/PROJECT_ID?status=d
 Official deployment references, checked October 2026: [Render Blueprints](https://render.com/docs/blueprint-spec), [persistent disks](https://render.com/docs/disks), [deployment lifecycle](https://render.com/docs/deploys), and [Python versions](https://render.com/docs/python-version). This book supplies deployable configuration; it does not claim a deployment has been made in your account.
 
 ''')
+    if number == 3:
+        parts.append((ROOT / "course/orm-api-reference.md").read_text() + "\n\n")
     parts.append(f"## Expected result\n\n{result}\n\n## Common errors\n\n{errors}\n\n## Short exercise\n\n{exercise}\n\n## What to say and show\n\nSay: \"{goal} The server remains responsible for persistence and authorization; the browser presents the result.\"\n\nShow the expected result above, then point to the file responsible for it. Run the chapter check before the next lesson.\n\n## Save your checkpoint\n\n```bash\ngit add .\ngit commit -m \"Complete chapter {number:02d}: {title}\"\n```\n")
     chapters.append("".join(parts))
     directory = ROOT / "book/chapters"
@@ -201,7 +237,7 @@ Rehearse the complete build once before recording. Keep this ebook beside the ed
 
 Record a short sample using chapter 5's owned project endpoint, its HTTP demo, and chapter 9's ProjectList form. Tell viewers which earlier chapters supply sessions and validation. Gather feedback on pacing and error explanations before recording all chapters.
 
-The repository contains the completed application, generated learner starter, chapter files and verification script. Use the revision-4 chapter snapshots rather than the earlier SQL-course tags. A snapshot is for recovery, not a replacement for teaching the file changes.
+The repository contains the completed application, generated learner starter, chapter files and verification script. `course/checkpoints/chapter-NN.json` supplies the exact complete files for chapters 2-15. Run `python scripts/restore_chapter.py 5 ../chapter-05-recovery` from course_reference to recover chapter 5 into a new folder. Existing work is never overwritten. Use the revision-5 chapter snapshots rather than the earlier SQL-course tags. A snapshot is for recovery, not a replacement for teaching the file changes.
 '''
 (ROOT / "book/companion.md").write_text(intro + "\n\n".join(chapters) + "\n\n" + appendix)
 print(f"Wrote {len(chapters)} complete learner chapters")

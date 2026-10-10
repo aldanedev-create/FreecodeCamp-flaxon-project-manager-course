@@ -81,7 +81,7 @@ bookmarks = {title: 'section-'+str(i) for i,title in enumerate(headings)}
 story = [Spacer(1,25)]
 logo = ROOT/'book/assets/flaxon.png'
 w,h = ImageReader(str(logo)).getSize()
-story += [Image(str(logo), width=150, height=150*h/w, hAlign='LEFT'), Spacer(1,24), Paragraph('Build a Full-Stack<br/>Project Manager', styles['CoverTitle']), Paragraph('Flaxon + Teloce HTML SPA<br/>Signals, Admin/CMS, and MinifyJS', styles['CoverSub']), Spacer(1,20), Paragraph('Aldane Hutchinson', styles['SectionBook']), Paragraph('Learner ebook and recording companion | Revision 4 | October 2026', styles['SmallBook']), Spacer(1,25), Paragraph('Build protected APIs first. Connect the interface to working data. Verify the whole application before deployment.',styles['BodyBook']), Paragraph('Start with the CLI. Copy complete files, run each chapter, and build a working application through deployment.', styles['SmallBook']), PageBreak()]
+story += [Image(str(logo), width=150, height=150*h/w, hAlign='LEFT'), Spacer(1,24), Paragraph('Build a Full-Stack<br/>Project Manager', styles['CoverTitle']), Paragraph('Flaxon + Teloce HTML SPA<br/>Signals, Admin/CMS, and MinifyJS', styles['CoverSub']), Spacer(1,20), Paragraph('Aldane Hutchinson', styles['SectionBook']), Paragraph('Learner ebook and recording companion | Revision 5 | October 2026', styles['SmallBook']), Spacer(1,25), Paragraph('Build protected APIs first. Connect the interface to working data. Verify the whole application before deployment.',styles['BodyBook']), Paragraph('Start with the CLI. Follow exact file edits, run each chapter, and build a working application through deployment.', styles['SmallBook']), PageBreak()]
 story.append(Paragraph('Contents',styles['ChapterBook']))
 for title in headings:
     story.append(Paragraph(f'<link href="#{bookmarks[title]}" color="#1464AA">{inline(title)}</link>',styles['BodyBook']))
@@ -115,6 +115,8 @@ while i<len(lines):
         if title.startswith('Appendix'): story.append(PageBreak())
         else: story.extend([CondPageBreak(430), Spacer(1,16)])
         p=Paragraph(inline(title),styles['ChapterBook']);p.bookmark=bookmarks[title];story.append(p);i+=1;continue
+    if line.startswith('### '):
+        story.append(Paragraph(inline(line[4:]),styles['SectionBook']));i+=1;continue
     if line.startswith('## '):
         story.append(Paragraph(inline(line[3:]),styles['SectionBook']));i+=1;continue
     if line.startswith('!['):i+=1;continue

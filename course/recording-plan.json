@@ -10,7 +10,7 @@
       },
       {
         "say": "Flaxon owns the Python server. Teloce compiles our HTML components into JavaScript. MinifyJS optimizes the compiled JavaScript for production; we do not need a Node build for this project.",
-        "type": "In a separate folder: flaxon new project-manager --no-venv, then cd project-manager and python management.py migrate.",
+        "type": "Run flaxon new project_manager, activate its environment, install the chosen course dependencies, then start the welcome app. Do not apply the starter migration; chapter 3 replaces its models before the first course migration.",
         "show": "Run flaxon welcome and flaxon welcome-status. Open the generated welcome page and show its module folder."
       },
       {
@@ -33,7 +33,7 @@
       },
       {
         "say": "A prefix is added once. A slash inside a project module will become /api/projects/ when we mount that module. Tests can create a fresh app against a temporary database.",
-        "type": "The FlaxonModule declaration in modules/projects/module.py as a preview; save its UI mapping for the frontend chapter.",
+        "type": "Show the existing welcome mount. Projects are introduced and mounted only in chapter 5; do not create a future module here.",
         "show": "Contrast a Python route parameter with a browser :id pattern. Show the module-owned files rather than inventing a new routing API."
       }
     ],

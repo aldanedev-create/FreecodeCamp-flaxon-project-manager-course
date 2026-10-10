@@ -10,9 +10,9 @@ flaxon new project_manager
 ```
 
 Start at [chapter 1](book/chapters/01.md) and build in the generated directory.
-The [learner ebook](book/companion.md) provides complete files and commands for all
+The [learner ebook](book/companion.md) provides exact CREATE/EDIT/REPLACE instructions, recording notes and commands for all
 15 chapters. `course/starter/` contains the generated starter; `main` contains the
-completed app. Revision-4 recovery snapshots are in `course/checkpoints/`.
+completed app. Revision-5 recovery snapshots are in `course/checkpoints/`.
 Earlier Git tags describe the previous SQL-course revision and are preserved.
 
 ## Run the finished application
@@ -140,3 +140,7 @@ configuration and runs the available tests. To recover a checkpoint in a NEW
 folder, use `python scripts/restore_chapter.py 10 recovered_project`. Install the
 pinned dependencies there and run `python management.py migrate`. Never restore
 over an existing project or database.
+
+## Course release target
+
+The planned recording version is `flaxon[standard,admin]==3.0.0`. `requirements-release.txt` supplies that post-publication installation path; it is not claimed to be published or release-verified yet. Preview wheels remain available for rehearsal. Follow chapter 1 to choose one path. The course teaches `flaxon.db.Model`, `fields`, async queries, transaction helpers, explicit Python migrations, `settings.py`, module mounts and `management.py`.

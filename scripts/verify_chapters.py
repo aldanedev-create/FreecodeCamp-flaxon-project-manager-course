@@ -56,7 +56,17 @@ def main():
             for entry in step["files"]:
                 target = project / entry["path"]
                 target.parent.mkdir(parents=True, exist_ok=True)
-                target.write_text(entry["content"])
+                if entry.get("edits"):
+                    current = target.read_text()
+                    for edit in entry["edits"]:
+                        if current.count(edit["before"]) != 1:
+                            raise ValueError(f"Chapter {chapter}: ambiguous edit in {entry['path']}")
+                        current = current.replace(edit["before"], edit["after"], 1)
+                    if current != entry["content"]:
+                        raise ValueError(f"Chapter {chapter}: edit differs from recovery file")
+                    target.write_text(current)
+                else:
+                    target.write_text(entry["content"])
             for path in step.get("delete", []):
                 (project / path).unlink(missing_ok=True)
             if chapter == 3:
