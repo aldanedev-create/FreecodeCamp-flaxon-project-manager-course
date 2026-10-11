@@ -16,4 +16,5 @@ jobs:
       - run: python scripts/browser_smoke.py
       - run: python scripts/browser_smoke.py --production
       - run: python scripts/verify_chapters.py
+      - run: python scripts/pwa_smoke.py
       - run: python scripts/build_ui.py

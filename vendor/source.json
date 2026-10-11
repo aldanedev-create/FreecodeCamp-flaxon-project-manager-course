@@ -1,7 +1,8 @@
 {
   "framework_repository": "aldanedev-create/flaxon",
-  "framework_commit": "70fe276efcb75a3729535c65abd9e75e0bde57b3",
+  "framework_commit": "0cb7852e426f712b79311dd0f70935c9d9126915",
   "framework_version": "0.2.7",
-  "release_status": "unreleased repository build",
-  "teloce_version": "0.2.6"
+  "release_status": "unreleased repository builds with optional PWA support",
+  "teloce_version": "0.2.6",
+  "teloce_commit": "dbba8d10ffad26dce76ab02c6b3c6713e6eecf7b"
 }

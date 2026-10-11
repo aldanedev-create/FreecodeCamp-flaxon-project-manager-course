@@ -73,6 +73,9 @@ def main():
                 run(project, "management.py", "makemigrations", "--name", "initial")
                 run(project, "management.py", "migrate")
                 run(project, "management.py", "migrate", "--status")
+            if chapter == 16:
+                run(project, "scripts/create_pwa_icons.py")
+                run(project, "-m", "pytest", "-q", "tests/test_pwa.py")
             run(project, "management.py", "check")
             # Import the actual runtime factory as well as the cheaper management factory.
             run(
@@ -89,6 +92,7 @@ def main():
                 p.relative_to(project).as_posix(): p.read_text()
                 for p in project.rglob("*")
                 if p.is_file()
+                and p.suffix != ".png"
                 and not any(
                     part in {".flaxon", "__pycache__", ".pytest_cache", "data", ".venv"}
                     for part in p.relative_to(project).parts

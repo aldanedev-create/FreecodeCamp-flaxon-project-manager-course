@@ -1,0 +1,54 @@
+<template>
+  <aside v-if="offline || updateAvailable || message" class="pwa-status" aria-label="Application status">
+    <p v-if="offline" role="status">You are offline. Reconnect before saving changes.</p>
+    <p v-if="updateAvailable" role="status">A new version is ready.</p>
+    <button v-if="updateAvailable" type="button" :disabled="!applyUpdate" @click="applyUpdate()">Update and reload</button>
+    <p v-if="message" role="status">{{ message }}</p>
+  </aside>
+</template>
+<script lang="ts">
+export default {
+  data() {
+    return { offline: !navigator.onLine, updateAvailable: false, message: "", cleanup: null, applyUpdate: null };
+  },
+  mounted() {
+    let active = true;
+    let reloadListener = null;
+    const networkChanged = () => { this.offline = !navigator.onLine; };
+    const updateReady = () => { this.updateAvailable = true; };
+    const registrationFailed = () => { this.message = "Offline support could not start. You can still use the online app."; };
+    window.addEventListener("online", networkChanged);
+    window.addEventListener("offline", networkChanged);
+    document.addEventListener("teloce:pwa-update", updateReady);
+    document.addEventListener("teloce:pwa-error", registrationFailed);
+
+    Promise.resolve(globalThis.telocePlugins?.pwa).then(controller => {
+      if (!active || !controller) return;
+      this.updateAvailable = controller.updateAvailable;
+      this.applyUpdate = () => {
+        if (!window.confirm("Save unfinished work first. Reload the application now?")) return;
+        reloadListener = () => window.location.reload();
+        navigator.serviceWorker.addEventListener("controllerchange", reloadListener, { once: true });
+        controller.activateUpdate();
+      };
+    });
+    this.cleanup = () => {
+      active = false;
+      window.removeEventListener("online", networkChanged);
+      window.removeEventListener("offline", networkChanged);
+      document.removeEventListener("teloce:pwa-update", updateReady);
+      document.removeEventListener("teloce:pwa-error", registrationFailed);
+      if (reloadListener) navigator.serviceWorker.removeEventListener("controllerchange", reloadListener);
+    };
+  },
+  unmounted() {
+    this.cleanup?.();
+  },
+};
+</script>
+<style scoped>
+.pwa-status { padding: 1rem; background: #dbeafe; color: #17243a; border-bottom: 1px solid #93c5fd; }
+p { margin: 0.25rem 0; }
+button { margin-top: 0.5rem; padding: 0.6rem 1rem; border: 0; border-radius: 0.4rem; background: #1464aa; color: white; cursor: pointer; }
+button:focus-visible { outline: 3px solid #f59e0b; outline-offset: 3px; }
+</style>

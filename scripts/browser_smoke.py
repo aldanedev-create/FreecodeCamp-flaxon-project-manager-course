@@ -15,6 +15,8 @@ BASE = "http://127.0.0.1:8123"
 
 
 def main():
+    from create_pwa_icons import main as create_icons
+    create_icons()
     with tempfile.TemporaryDirectory() as directory:
         production = "--production" in sys.argv
         env = {

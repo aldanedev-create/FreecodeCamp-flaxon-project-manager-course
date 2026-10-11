@@ -27,4 +27,4 @@ for chapter in steps:
         if name in snapshot:
             assert snapshot[name] == content, (chapter['chapter'], name)
     print(f"Chapter {chapter['chapter']:02d}: exact edits match recovery files")
-print(f"Verified {edits} anchored edits across 14 chapter transitions")
+print(f"Verified {edits} anchored edits across 15 chapter transitions")

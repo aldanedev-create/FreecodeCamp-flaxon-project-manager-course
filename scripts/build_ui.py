@@ -12,6 +12,9 @@ with tempfile.TemporaryDirectory() as build_data:
     os.environ["DATA_DIR"] = build_data
     os.environ["FLAXON_DEBUG"] = "0"
     os.environ.setdefault("FLAXON_SECRET_KEY", secrets.token_urlsafe(48))
+    from create_pwa_icons import main as create_icons
+
+    create_icons()
     from app import app
 
     result = app.teloce.build()

@@ -81,9 +81,18 @@ LESSONS = [
      "After deployment, /health/course returns ok. Create a project/task, publish an article, refresh a nested route, sign out and restart the service. Customer and staff data survive; cookies use Secure and HttpOnly.",
      "Free Render services cannot attach this persistent disk. Do not generate new migration files during deployment: commit them beforehand. An incorrect PUBLIC_ORIGIN causes CSRF failures. An ephemeral database loses records on restart. Production deployment must be verified in your account; local smoke is not proof of a live deployment.",
      "Back up both SQLite files safely, restore them into a test environment and verify a project plus one published help article."),
+    ("PWA: installation, offline fallback and updates", "Turn the completed SPA into an optional installable application without caching private data.",
+     "Enable Teloce's first-party PWA plugin through Flaxon. Mount generated icons, add a scoped status component and rebuild production assets. The browser receives a manifest and a same-origin service worker. It caches emitted JS/CSS and a generic offline page, not API or Admin responses. Offline means the app can explain a lost connection; it does not save tasks offline. Registration is disabled in development, so check a production build over localhost or HTTPS. This is an optional final lesson, after the existing deployment chapter.",
+     "The manifest has two valid icons and starts at /projects. The production browser registers /teloce-sw.js. An offline navigation displays You are offline; reconnect restores the login page. A waiting update shows a button, and reload happens only after the user confirms.",
+     "Use the refreshed preview wheels: older Teloce builds do not implement this plugin. HTTPS or localhost is required. Generate icons before starting the app. Debug mode intentionally registers no worker. Browser installation eligibility varies. The service worker does not provide offline writes. Check DevTools Application and use Unregister/Clear storage when switching between production and development; do not clear real user data without their consent.",
+     "Deploy a second version to a disposable HTTPS site. Leave the first version open, request an update in DevTools, and show that the confirmation protects unfinished work."),
 ]
 
 NOTES = {
+ "scripts/create_pwa_icons.py": "Create the icon generator. It writes two PNG files using the standard library. Run it before the development server; production builds invoke it automatically.",
+ "ui/components/PwaStatus.html": "Create the optional PWA status component with scoped CSS. Explain online/offline events, the waiting worker and cleanup before wiring the update button.",
+ "scripts/pwa_smoke.py": "Create the disposable production browser check. It uses a temporary database, verifies cache exclusions, goes offline and reconnects.",
+ "tests/test_pwa.py": "Verify the manifest, actual PNG responses, worker scope and development registration policy before recording installation.",
  "modules/projects/module.py": "Create the projects module, then implement owned_project before the handlers that use it. The mount adds /api/projects once. Every ORM query for an existing project includes the signed-in customer's owner ID.",
  "modules/auth/module.py": "Create the auth module with session, registration, login and logout routes. Start with the anonymous CSRF handshake; registration rotates the cookie and token.",
  "modules/tasks/module.py": "Create the tasks module. Require ownership of the parent project before listing, creating, editing or deleting tasks. Validate status and due dates before saving.",
@@ -120,7 +129,7 @@ Flaxon + Teloce HTML SPA + signals + scoped CSS + Admin/CMS + MinifyJS
 
 Author: Aldane Hutchinson
 
-Learner ebook and recording companion - revision 5 - October 2026
+Learner ebook and recording companion - revision 6 - October 2026
 
 ![Flaxon logo](assets/flaxon.png)
 
@@ -135,6 +144,8 @@ The recording target is Flaxon 3.0.0. Its release installation commands become u
 Each lesson gives a goal, an explanation, exact files, commands, expected results, common errors and a short exercise. For recording, demonstrate the expected result, explain the boundary being changed, type the important behavior and run its check. The final recording appendix is optional; you can learn the application directly from the chapters.
 
 ## Finished application
+
+Chapter 16 adds optional PWA installation, a connection-status banner, an offline fallback and explicit updates. It never queues private task changes offline.
 
 Customer pages: /login, /projects, /projects/ID, /help and /help/SLUG. Customers register, manage their own projects and tasks, filter status and see progress. Staff pages: /admin/login, /admin/project, /admin/task and /admin/cms/. Staff permission checks run on the server. Each Teloce component has scoped CSS. Internal SPA anchors use data-teloce-link; staff navigation remains ordinary page navigation.
 
@@ -237,7 +248,7 @@ Rehearse the complete build once before recording. Keep this ebook beside the ed
 
 Record a short sample using chapter 5's owned project endpoint, its HTTP demo, and chapter 9's ProjectList form. Tell viewers which earlier chapters supply sessions and validation. Gather feedback on pacing and error explanations before recording all chapters.
 
-The repository contains the completed application, generated learner starter, chapter files and verification script. `course/checkpoints/chapter-NN.json` supplies the exact complete files for chapters 2-15. Run `python scripts/restore_chapter.py 5 ../chapter-05-recovery` from course_reference to recover chapter 5 into a new folder. Existing work is never overwritten. Use the revision-5 chapter snapshots rather than the earlier SQL-course tags. A snapshot is for recovery, not a replacement for teaching the file changes.
+The repository contains the completed application, generated learner starter, chapter files and verification script. `course/checkpoints/chapter-NN.json` supplies the exact complete files for chapters 2-16. Run `python scripts/restore_chapter.py 5 ../chapter-05-recovery` from course_reference to recover chapter 5 into a new folder. Existing work is never overwritten. Use the revision-6 chapter snapshots rather than the earlier SQL-course tags. A snapshot is for recovery, not a replacement for teaching the file changes.
 '''
 (ROOT / "book/companion.md").write_text(intro + "\n\n".join(chapters) + "\n\n" + appendix)
 print(f"Wrote {len(chapters)} complete learner chapters")
