@@ -298,5 +298,28 @@
     ],
     "cut": "Record the cloud verification after it actually works; do not splice a local test into a claim of live HTTPS verification.",
     "finish": "End with the completed application, source/checkpoint links, and one extension exercise. Thank viewers in your own voice."
+  },
+  {
+    "minutes": "20-30",
+    "before": "Finish chapter 15 and verify production dependencies. Generate icons and use a disposable localhost/HTTPS production deployment.",
+    "scenes": [
+      {
+        "say": "A PWA can be installed, but this app never caches private APIs or queues offline edits.",
+        "type": "Chapter 16: generate icons, enable plugins.pwa in app.py and mount /course-assets.",
+        "show": "Open the manifest and actual icon URLs in DevTools."
+      },
+      {
+        "say": "Offline support here means a clear fallback. The server still owns authentication and persistence.",
+        "type": "Add PwaStatus.html, its scoped CSS and event cleanup.",
+        "show": "Run pwa_smoke.py, disconnect, navigate, then reconnect."
+      },
+      {
+        "say": "Do not reload over unfinished work. A waiting update needs an explicit choice.",
+        "type": "Explain controllerchange and the confirmation before activateUpdate.",
+        "show": "On a disposable deployed site, install a second build and demonstrate a waiting update."
+      }
+    ],
+    "cut": "Do not claim an installation prompt or live deployment until demonstrated in that browser/account.",
+    "finish": "Show cache exclusions, the passing browser test and the PWA recovery checkpoint."
   }
 ]

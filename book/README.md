@@ -22,11 +22,11 @@ The exporter preserves exact source in Markdown and wraps long lines only in PDF
 for print legibility. The PDF includes a linked contents page and bookmarks.
 See `course/checkpoints.md` and `course/sample-lesson.md` for recording preparation.
 
-Revision 5 begins with `flaxon new project_manager`. `course/build-steps.json`
-contains the ordered CREATE, complete replacement, and exact anchored block edits for chapters 2-15.
+Revision 6 begins with `flaxon new project_manager`. `course/build-steps.json`
+contains the ordered CREATE, complete replacement, and exact anchored block edits for chapters 2-16.
 Chapter 1 bootstrap instructions are maintained in `course/lesson-01-setup.md`.
 
-The chapter 2-15 file sequence was verified against a fresh generated starter:
+The chapter 2-16 file sequence was verified against a fresh generated starter:
 application imports/HTML compilation, database migrations, API tests, all 43
 backend/Admin/CMS tests, and the production UI build passed.
 

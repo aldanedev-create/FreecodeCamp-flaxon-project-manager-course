@@ -1,5 +1,7 @@
 """Staff model adapters reuse the domain database; CMS owns only editorial content."""
 
+from pathlib import Path
+
 from models import Project, Task
 from flaxon.admin import AdminDashboard, AdminConfig
 from flaxon.admin.registry import Registry
@@ -9,6 +11,7 @@ from validation import text, task_fields
 
 
 def configure_backoffice(app, admin_path, uploads_path):
+    Path(admin_path).parent.mkdir(parents=True, exist_ok=True)
     admin = AdminDashboard(
         app,
         registry=Registry(),

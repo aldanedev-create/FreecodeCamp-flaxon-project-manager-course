@@ -57,11 +57,25 @@ def create_app(database_path=None, admin_path=None, debug=None):
         admin_path or ADMIN_DATABASE_PATH,
         Path(admin_path or ADMIN_DATABASE_PATH).parent / "uploads",
     )
+    app.mount_static("/course-assets", str(ROOT / "public"), cache_control="no-cache")
     app.use_teloce(
         project_root=ROOT,
         ui_dir="ui",
         title="Project Manager",
         options={"minifier": "minifyjs"},
+        plugins={
+            "pwa": {
+                "name": "Flaxon Project Manager",
+                "short_name": "Projects",
+                "start_url": "/projects",
+                "scope": "/",
+                "theme_color": "#17243a",
+                "icons": [
+                    {"src": "/course-assets/pwa-icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any maskable"},
+                    {"src": "/course-assets/pwa-icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any maskable"},
+                ],
+            },
+        },
     )
 
     @app.get("/health/course")

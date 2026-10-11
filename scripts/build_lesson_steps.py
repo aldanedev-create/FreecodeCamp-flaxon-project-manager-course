@@ -5,9 +5,12 @@ ROOT=Path(__file__).resolve().parents[1]
 FINAL=(ROOT/'app.py').read_text()
 
 def factory(stage):
-    if stage >= 13:
-        return FINAL
     text=FINAL
+    if stage < 16:
+        text=text.replace('    app.mount_static("/course-assets", str(ROOT / "public"), cache_control="no-cache")\n', '')
+        text=re.sub(r'        plugins=\{.*?\n        \},\n', '', text, flags=re.S)
+    if stage >= 13:
+        return text
     for name,path,level in [('auth','auth',4),('projects','projects',5),('tasks','tasks',6),('content','content',13)]:
         if stage < level:
             text=text.replace(f'from modules.{path}.module import {name}\n','')
@@ -36,7 +39,8 @@ def factory(stage):
             text=text.replace('    @app.get("/projects/<int:project_id>")\n','')
     return text
 
-shell = re.sub(r"\s*<a href=\"/help\" data-teloce-link>Help</a>", "", (ROOT/'ui/app.html').read_text())
+legacy_shell=json.loads((ROOT/'course/checkpoints/chapter-15.json').read_text())['ui/app.html']
+shell = re.sub(r"\s*<a href=\"/help\" data-teloce-link>Help</a>", "", legacy_shell)
 
 def placeholder(title,props=''):
     return f'''<template><section><h1>{title}</h1><p>This screen is built in the next UI lesson.</p></section></template>
@@ -61,7 +65,8 @@ files={
 12:['admin.py','backoffice.py','app.py'],
 13:['flaxon_cli.py','modules/content/__init__.py','modules/content/module.py','modules/content/ui/pages/Help.html','modules/content/ui/pages/Article/[slug].html','seed.py','ui/app.html','app.py'],
 14:['tests/test_backoffice.py','tests/test_cms_security.py','scripts/browser_smoke.py'],
-15:['.env.example','scripts/build_ui.py','render.yaml']}
+15:['.env.example','scripts/build_ui.py','render.yaml'],
+16:['scripts/create_pwa_icons.py','ui/components/PwaStatus.html','app.py','ui/app.html','scripts/build_ui.py','scripts/browser_smoke.py','tests/test_pwa.py','scripts/pwa_smoke.py']}
 commands={
 2:'python management.py runserver\n# In a second terminal:\ncurl http://127.0.0.1:8000/api/welcome/status',
 3:'python management.py check\npython management.py makemigrations --name initial\npython management.py migrate --plan\npython management.py migrate\npython management.py migrate --status\npython management.py runserver',
@@ -76,7 +81,8 @@ commands={
 12:'python management.py setup-admin\npython management.py runserver\n# Open /admin/login with the staff account you just created.',
 13:'python management.py seed\n# Stop/restart the running server after seeding:\npython management.py runserver\n# Open /help and /admin/cms/.',
 14:'python -m playwright install chromium\npython -m pytest -q\npython scripts/browser_smoke.py\npython scripts/browser_smoke.py --production',
-15:'python scripts/build_ui.py\npython -m pip check'}
+15:'python scripts/build_ui.py\npython -m pip check',
+16:'python scripts/create_pwa_icons.py\npython scripts/build_ui.py\npython -m pytest -q tests/test_pwa.py\npython scripts/pwa_smoke.py'}
 existing={'app.py','settings.py','management.py','admin.py','ui/app.html'}
 steps=[]
 previous = {p.relative_to(ROOT/'course/starter').as_posix(): p.read_text() for p in (ROOT/'course/starter').rglob('*') if p.is_file()}
@@ -103,10 +109,15 @@ def edits(before, after):
         result = result.replace(operation['before'], operation['after'], 1)
     return operations if result == after else []
 
-for stage in range(2,16):
+for stage in range(2,17):
     entries=[]
     for path in files[stage]:
         content=factory(stage) if path=='app.py' else (ROOT/path).read_text()
+        if stage < 16 and path=='ui/app.html':content=legacy_shell
+        if stage < 16 and path=='scripts/browser_smoke.py':
+            content=content.replace('    from create_pwa_icons import main as create_icons\n    create_icons()\n', '')
+        if stage==15 and path=='scripts/build_ui.py':
+            content=content.replace('    from create_pwa_icons import main as create_icons\n\n    create_icons()\n','')
         if stage==3 and path=='admin.py':
             content='"""Staff model registration is added in chapter 12."""\ndef register(admin):\n    pass\n'
         if stage==8:
@@ -123,4 +134,4 @@ for stage in range(2,16):
         existing.add(path)
     steps.append({'chapter':stage,'files':entries,'commands':commands[stage],'delete':['public/app.css'] if stage==8 else []})
 (ROOT/'course/build-steps.json').write_text(json.dumps(steps,indent=2)+'\n')
-print('Generated exact build steps for chapters 2-15')
+print('Generated exact build steps for chapters 2-16')

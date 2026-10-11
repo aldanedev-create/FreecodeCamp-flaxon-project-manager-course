@@ -1,6 +1,6 @@
 # Current ebook checkpoints
 
-Revision 5 builds from `flaxon new project_manager`. Its complete chapter 2-15 snapshots live in `course/checkpoints/chapter-NN.json`; the generated beginning is `course/starter/`. These match the ordered edits in `course/build-steps.json`. Historical SQL-course Git tags and branches below belong to an older edition and must not be used as recovery for this book.
+Revision 6 builds from `flaxon new project_manager`. Its complete chapter 2-16 snapshots live in `course/checkpoints/chapter-NN.json`; the generated beginning is `course/starter/`. These match the ordered edits in `course/build-steps.json`. Historical SQL-course Git tags and branches below belong to an older edition and must not be used as recovery for this book.
 
 Recover into a new directory from course_reference:
 

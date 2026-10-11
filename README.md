@@ -144,3 +144,7 @@ over an existing project or database.
 ## Course release target
 
 The planned recording version is `flaxon[standard,admin]==3.0.0`. `requirements-release.txt` supplies that post-publication installation path; it is not claimed to be published or release-verified yet. Preview wheels remain available for rehearsal. Follow chapter 1 to choose one path. The course teaches `flaxon.db.Model`, `fields`, async queries, transaction helpers, explicit Python migrations, `settings.py`, module mounts and `management.py`.
+
+## Optional PWA lesson
+
+Chapter 16 adds the first-party PWA plugin, generated icons, scoped update/connection UI and production registration checks. Run `python scripts/create_pwa_icons.py` before starting locally, and `python scripts/pwa_smoke.py` after installing Chromium. See [the complete lesson](book/chapters/16.md). The refreshed preview wheels include this integration; it is not yet a claim of a PyPI 3.0 release.
