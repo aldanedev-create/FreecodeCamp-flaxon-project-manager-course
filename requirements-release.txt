@@ -1,5 +1,6 @@
-# Planned course target. Install only after Flaxon 3.0.0 is published and rehearsed.
-flaxon[standard,admin]==3.0.0
+# Published packages used for this course.
+flaxon[standard,admin]==0.3.0
+teloce-py==0.3.0
 minifyjs==0.1.3
 uvicorn==0.38.0
 httpx==0.28.1

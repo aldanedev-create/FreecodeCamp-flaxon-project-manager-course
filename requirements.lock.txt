@@ -1,4 +1,4 @@
-# Resolved in a fresh Python 3.12 environment. Local framework wheels are pinned separately.
+# Resolved in a fresh Python 3.12 environment. Framework packages are pinned in requirements.txt.
 aiosqlite==0.22.1
 anyio==4.15.1
 argon2-cffi==25.1.0
