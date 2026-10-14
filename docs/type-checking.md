@@ -31,3 +31,16 @@ There are two classes of findings:
 - Adapter limitations: Teloce's runtime/compiler supports `$emit`, `beforeUnmount`, and automatically imported signal helpers, but the 0.3.0 type adapter does not fully model them. Some missing-method errors cascade from its incomplete component contract. Generated router globals and template conditional narrowing also need better typing support.
 
 The native TypeScript compiler is checking the generated representation it receives. This evidence identifies limitations in that representation and course annotations; it does not establish a native compiler bug. The runtime and type adapter need separate validation. Keep API tests and production builds, and use the manual checker when reviewing these issues.
+
+## Expanded checker validation
+
+The revised course annotations pass with [Teloce checker PR #18](https://github.com/aldanedev-create/teloce-py/pull/18), which supplies the missing runtime contracts and conditional narrowing. It produces zero findings for this project, with 45 API/security tests passing, 14 production components built, and development and production browser workflows passing at desktop/mobile sizes. This does not make Teloce universally type-safe; unsupported dynamic/slot/import cases remain documented in its checker guide.
+
+The checker improvements are not yet a published PyPI release. To reproduce in a separate test environment using the exact tested source:
+
+```bash
+python -m pip install "teloce-py[typecheck] @ git+https://github.com/aldanedev-create/teloce-py.git@32d8ee5340f540a3996d21efae9f7c82fcd3657f"
+python management.py typecheck
+```
+
+The normal course requirements remain on published 0.3.0 packages for runtime use. Their older checker may still report adapter errors; do not claim that the unpublished fixes are included in 0.3.0. The course corrections annotate nullable state, arrays and method parameters, narrow caught errors and event targets, and declare host-owned router/PWA globals. No blanket `any` or diagnostic suppression was added.

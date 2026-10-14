@@ -1,6 +1,6 @@
 # Python Full-Stack Course: Project Manager
 
-> **Flaxon 0.3.0 update:** install the published requirements in this repository. The server uses `typecheck=False`; run `python management.py typecheck` explicitly. The advanced components still have course typing issues and adapter limitations. Read [type-checking and reproduction notes](docs/type-checking.md), including guidance for historical chapter snapshots.
+> **Flaxon 0.3.0 update:** install the published requirements in this repository. The server uses `typecheck=False`; run `python management.py typecheck` explicitly. The components now have explicit TypeScript annotations; zero-diagnostic checking requires the expanded Teloce checker linked in the validation notes. Read [type-checking and reproduction notes](docs/type-checking.md), including guidance for historical chapter snapshots.
 
 Build a project manager with **Flaxon modules**, a **Teloce HTML SPA**, **signals**,
 **staff Admin**, **CMS help articles**, and **MinifyJS production builds**.

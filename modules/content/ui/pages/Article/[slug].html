@@ -12,18 +12,19 @@
 </template>
 <script lang="ts">
 import { api } from "../../../../../ui/api.ts";
+import type { Article } from "../../../../../ui/types.ts";
 export default {
   props: ["slug"],
   data() {
-    return { article: null, loading: true, message: "" };
+    return { article: null as Article | null, loading: true, message: "" };
   },
   async mounted() {
     try {
-      this.article = await api(
+      this.article = await api<Article>(
         "/api/content/articles/" + encodeURIComponent(this.slug),
       );
     } catch (error) {
-      this.message = error.message;
+      this.message = error instanceof Error ? error.message : String(error);
     } finally {
       this.loading = false;
     }

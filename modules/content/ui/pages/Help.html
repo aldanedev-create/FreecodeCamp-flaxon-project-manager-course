@@ -19,15 +19,16 @@
 </template>
 <script lang="ts">
 import { api } from "../../../../ui/api.ts";
+import type { Article } from "../../../../ui/types.ts";
 export default {
   data() {
-    return { articles: [], loading: true, message: "" };
+    return { articles: [] as Article[], loading: true, message: "" };
   },
   async mounted() {
     try {
-      this.articles = await api("/api/content/articles");
+      this.articles = await api<Article[]>("/api/content/articles");
     } catch (error) {
-      this.message = error.message;
+      this.message = error instanceof Error ? error.message : String(error);
     } finally {
       this.loading = false;
     }

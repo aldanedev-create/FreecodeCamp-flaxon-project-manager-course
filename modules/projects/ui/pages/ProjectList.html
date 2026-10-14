@@ -39,7 +39,7 @@ import type { Project } from "../../../../ui/types.ts";
 export default {
   data() {
     return {
-      projects: [],
+      projects: [] as Project[],
       name: "",
       description: "",
       message: "",
@@ -51,7 +51,7 @@ export default {
     try {
       this.projects = await api<Project[]>("/api/projects/");
     } catch (error) {
-      this.message = error.message;
+      this.message = error instanceof Error ? error.message : String(error);
     } finally {
       this.loading = false;
     }
@@ -70,7 +70,7 @@ export default {
         this.name = "";
         this.description = "";
       } catch (error) {
-        this.message = error.message;
+        this.message = error instanceof Error ? error.message : String(error);
       } finally {
         this.busy = false;
       }

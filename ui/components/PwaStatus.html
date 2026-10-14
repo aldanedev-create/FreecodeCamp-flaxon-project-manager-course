@@ -2,18 +2,18 @@
   <aside v-if="offline || updateAvailable || message" class="pwa-status" aria-label="Application status">
     <p v-if="offline" role="status">You are offline. Reconnect before saving changes.</p>
     <p v-if="updateAvailable" role="status">A new version is ready.</p>
-    <button v-if="updateAvailable" type="button" :disabled="!applyUpdate" @click="applyUpdate()">Update and reload</button>
+    <button v-if="updateAvailable" type="button" :disabled="!applyUpdate" @click="applyUpdate?.()">Update and reload</button>
     <p v-if="message" role="status">{{ message }}</p>
   </aside>
 </template>
 <script lang="ts">
 export default {
   data() {
-    return { offline: !navigator.onLine, updateAvailable: false, message: "", cleanup: null, applyUpdate: null };
+    return { offline: !navigator.onLine, updateAvailable: false, message: "", cleanup: null as (() => void) | null, applyUpdate: null as (() => void) | null };
   },
   mounted() {
     let active = true;
-    let reloadListener = null;
+    let reloadListener: (() => void) | null = null;
     const networkChanged = () => { this.offline = !navigator.onLine; };
     const updateReady = () => { this.updateAvailable = true; };
     const registrationFailed = () => { this.message = "Offline support could not start. You can still use the online app."; };

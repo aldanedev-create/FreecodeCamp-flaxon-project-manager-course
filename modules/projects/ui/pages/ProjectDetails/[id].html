@@ -41,10 +41,10 @@
 import TaskForm from "../../components/TaskForm.html";
 import TaskList from "../../components/TaskList.html";
 import { api } from "../../../../../ui/api.ts";
-import type { Project, Task } from "../../../../../ui/types.ts";
+import type { Project, Task, TaskStatus } from "../../../../../ui/types.ts";
 
 // The compiler imports these signal helpers automatically for this .html component.
-const taskState = signal([]);
+const taskState = signal([] as Task[]);
 const completion = computed(() => {
   const tasks = taskState();
   return tasks.length
@@ -58,8 +58,9 @@ export default {
   components: { TaskForm, TaskList },
   data() {
     return {
-      project: null,
-      tasks: [],
+      project: null as Project | null,
+      tasks: [] as Task[],
+      progressEffect: null as { stop(): void } | null,
       name: "",
       description: "",
       filter: "all",
@@ -91,7 +92,7 @@ export default {
       this.description = project.description;
       this.setTasks(tasks);
     } catch (error) {
-      this.message = error.message;
+      this.message = error instanceof Error ? error.message : String(error);
     } finally {
       this.loading = false;
     }
@@ -100,18 +101,18 @@ export default {
     this.progressEffect?.stop();
   },
   methods: {
-    setTasks(tasks) {
+    setTasks(tasks: Task[]) {
       this.tasks = tasks;
       taskState.set(tasks);
     },
-    async mutate(operation) {
+    async mutate(operation: () => Promise<void>) {
       if (this.busy) return;
       this.busy = true;
       this.message = "";
       try {
         await operation();
       } catch (error) {
-        this.message = error.message;
+        this.message = error instanceof Error ? error.message : String(error);
       } finally {
         this.busy = false;
       }
@@ -131,13 +132,13 @@ export default {
         window.__TELOCE_ROUTER__.navigate("/projects");
       });
     },
-    async createTask(data) {
+    async createTask(data: { title: string; due_date: string | null }) {
       await this.mutate(async () => {
         const task = await api<Task>("/api/tasks/project/" + this.id, "POST", data);
         this.setTasks([task, ...this.tasks]);
       });
     },
-    async changeStatus(data) {
+    async changeStatus(data: { id: number; status: TaskStatus }) {
       await this.mutate(async () => {
         const updated = await api<Task>("/api/tasks/" + data.id, "PATCH", {
           status: data.status,
@@ -147,7 +148,7 @@ export default {
         );
       });
     },
-    async removeTask(id) {
+    async removeTask(id: number) {
       if (!window.confirm("Delete this task?")) return;
       await this.mutate(async () => {
         await api("/api/tasks/" + id, "DELETE", {});
