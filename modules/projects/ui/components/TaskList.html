@@ -9,7 +9,7 @@
           >Status<select
             aria-label="Task status"
             :value="task.status"
-            @change="$emit('status', { id: task.id, status: $event.target.value })"
+            @change="changeStatus(task.id, $event)"
             :disabled="busy"
           >
             <option value="todo">To do</option>
@@ -30,7 +30,16 @@
   </div>
 </template>
 <script lang="ts">
-export default { props: ["tasks", "busy"], emits: ["status", "remove"] };
+export default {
+  props: ["tasks", "busy"], emits: ["status", "remove"],
+  methods: {
+    changeStatus(id: number, event: Event) {
+      if (event.target instanceof HTMLSelectElement) {
+        this.$emit('status', { id, status: event.target.value });
+      }
+    },
+  },
+};
 </script>
 <style scoped>
 * {

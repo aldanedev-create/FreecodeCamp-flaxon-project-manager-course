@@ -53,7 +53,7 @@ import type { Session } from "../../../../ui/types.ts";
 export default {
   data() {
     return {
-      user: null,
+      user: null as Session["user"],
       registering: false,
       name: "",
       email: "",
@@ -66,7 +66,7 @@ export default {
     try {
       this.user = (await loadSession()).user;
     } catch (error) {
-      this.message = error.message;
+      this.message = error instanceof Error ? error.message : String(error);
     }
   },
   methods: {
@@ -85,7 +85,7 @@ export default {
         this.password = "";
         window.__TELOCE_ROUTER__.navigate("/projects");
       } catch (error) {
-        this.message = error.message;
+        this.message = error instanceof Error ? error.message : String(error);
       } finally {
         this.busy = false;
       }
@@ -97,7 +97,7 @@ export default {
         this.user = null;
         this.message = "Signed out.";
       } catch (error) {
-        this.message = error.message;
+        this.message = error instanceof Error ? error.message : String(error);
       } finally {
         this.busy = false;
       }

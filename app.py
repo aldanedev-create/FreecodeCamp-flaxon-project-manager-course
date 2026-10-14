@@ -49,17 +49,9 @@ def create_app(database_path=None, admin_path=None, debug=None):
         (welcome, "/api/welcome"),
     ]:
         app.mount_module(module, prefix=prefix)
-    if app.is_management:
-        return app
-
-    configure_backoffice(
-        app,
-        admin_path or ADMIN_DATABASE_PATH,
-        Path(admin_path or ADMIN_DATABASE_PATH).parent / "uploads",
-    )
-    app.mount_static("/course-assets", str(ROOT / "public"), cache_control="no-cache")
     app.use_teloce(
         project_root=ROOT,
+        typecheck=False,
         ui_dir="ui",
         title="Project Manager",
         options={"minifier": "minifyjs"},
@@ -77,6 +69,16 @@ def create_app(database_path=None, admin_path=None, debug=None):
             },
         },
     )
+    if app.is_management:
+        return app
+
+    configure_backoffice(
+        app,
+        admin_path or ADMIN_DATABASE_PATH,
+        Path(admin_path or ADMIN_DATABASE_PATH).parent / "uploads",
+    )
+    app.mount_static("/course-assets", str(ROOT / "public"), cache_control="no-cache")
+
 
     @app.get("/health/course")
     async def health():
